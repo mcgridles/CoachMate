@@ -1,0 +1,22 @@
+How to Get Up and Running:
+
+> install Python 2.7.XX (not Python3)
+> install pip
+> install virtualenv and virtualenvwrapper
+
+> clone the git repo into a directory on your computer
+> create a virtualenv using virtualenvwrapper and set the project folder to that directory
+  > (http://virtualenvwrapper.readthedocs.io/en/latest/command_ref.html)
+
+> activate the virtualenv
+> install requirements
+  > 'pip install -r /path/to/requirements.txt'
+
+> open the 'postactivate' file for your virtualenv
+  > 'vi /Users/<USERNAME>/.virtualenvs/<VENVNAME>/bin/postactivate' for Mac
+> add the following line to the end of the file:
+  > 'export DJANGO_SETTINGS_MODULE=CoachMate.settings.base'
+  > this may need to be changed later to 'dev' or 'prod'
+
+> send me an email and I'll send you the local.py file
+> put it in the 'settings' directory
