@@ -2,7 +2,7 @@ How to Get Up and Running:
 
 > install Python 2.7.XX (not Python3)
 > install pip
-> install virtualenv and virtualenvwrapper
+> install Django, virtualenv, and virtualenvwrapper
 
 > clone the git repo into a directory on your computer
 > create a virtualenv using virtualenvwrapper and set the project folder to that directory
