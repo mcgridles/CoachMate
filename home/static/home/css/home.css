@@ -1,0 +1,69 @@
+.navbar-default {
+  background-color: #337ab7;
+  border: none;
+}
+
+.navbar {
+  margin-bottom: 0;
+}
+
+.navbar-default .navbar-brand {
+  color: white;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+  background-color: white;
+}
+
+.navbar-default .navbar-nav>li>a {
+  color: white;
+}
+
+.navbar-default .navbar-nav>.active>a,
+.navbar-default .navbar-nav>.active>a:focus,
+.navbar-default .navbar-nav>.active>a:hover {
+  color: #337ab7;
+}
+
+.sign-up {
+  background: white;
+  border: none;
+  color: #337ab7;
+  margin: 9px auto;
+}
+
+.jumbotron {
+  background-color: #333;
+}
+
+.jumbotron .container {
+  height: 531px;
+  text-align: center;
+}
+
+.jumbo-text {
+  color: white;
+  margin-top: 165px;
+}
+
+.featurette-divider {
+  margin-top: 30px;
+  max-width: 400px;
+}
+
+.featurette{
+  text-align: center;
+}
+
+.featurette-heading {
+  margin-top: 130px;
+}
+
+.lead {
+  margin: 30px auto 0;
+  max-width: 75%;
+}
+
+footer {
+  margin-top: 130px;
+}
