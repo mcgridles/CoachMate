@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="Henry Gridley">
+
+    <title>CoachMate</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../static/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../static/home/css/home.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../static/bootstrap-3.3.7/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <script src="../../static/bootstrap-3.3.7/js/ie-emulation-modes-warning.js"></script>
+    <script src="../../static/home/js/smoothScroll.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">CoachMate</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Action</a></li>
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+          <div class="nav navbar-nav navbar-right">
+            <button type="button" class="sign-up btn btn-primary btn-md">Sign Up</button>
+          </div>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="./">Log in<span class="sr-only">(current)</span></a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <script>
+      document.getElementById("scroll").addEventListener("click", doScrolling.bind("#first-featurette", 1000))
+    </script>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+
+    <!-- Jumbotron background will be image or gallery of images - swimming and product related -->
+    <div class="jumbotron">
+      <div class="container">
+        <div class="jumbo-text">
+          <h1>Welcome to CoachMate</h1>
+          <p>
+            News flash: managing your team just got easier. With CoachMate, you can
+            keep track of teams and swimmers, write workouts, plan your season, and much more.
+            CoachMate is the tool for swim coaches looking to get the most out of each season.
+          </p>
+          <p><a id="scroll" class="btn btn-primary btn-lg" href="#first-featurette" role="button">Learn more</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container marketing">
+
+      <!-- START THE FEATURETTES -->
+      <div id="first-featurette" class="row featurette">
+          <h2 class="featurette-heading">First featurette heading. <span class="text-muted">It'll blow your mind.</span></h2>
+          <hr class="featurette-divider">
+          <p class="lead">
+            Here we can talk about managing all teams and swimmers in one place using
+            one account. Each team will get their own dashboard that will make organizing
+            and planning simple.
+          </p>
+      </div>
+      <div class="row featurette">
+          <h2 class="featurette-heading">Oh yeah, it's that good. <span class="text-muted">See for yourself.</span></h2>
+          <hr class="featurette-divider">
+          <p class="lead">
+            We should also say how easy it will be to write sets, set up a practice,
+            and plan your season week by week on our website. It will be clear what
+            the focus is for each week and what needs some more attention.
+          </p>
+      </div>
+      <div class="row featurette">
+          <h2 class="featurette-heading">And lastly, this one. <span class="text-muted">Checkmate.</span></h2>
+          <hr class="featurette-divider">
+          <p class="lead">
+            Finally, we can mention how we plan to track data over every swimmer and
+            provide analysis that makes it easy to see progress and what needs to be worked on.
+            Plus it is all in one place so there's no more need for thousands of spreadsheets
+            that take hours to make.
+          </p>
+      </div>
+
+      <!-- /END THE FEATURETTES -->
+
+
+      <!-- FOOTER -->
+      <footer>
+        <p class="pull-right"><a href="#">Back to top</a></p>
+        <p>&copy; 2017 Henry Griley · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
+      </footer>
+
+    </div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../static/bootstrap-3.3.7/js/jquery.min.js"><\/script>')</script>
+    <script src="../../static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../static/bootstrap-3.3.7/js/ie10-viewport-bug-workaround.js"></script>
+
+
+  </body>
+</html>
