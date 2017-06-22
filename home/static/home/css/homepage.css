@@ -25,6 +25,14 @@
   color: #337ab7;
 }
 
+.navbar-default .navbar-nav .open .dropdown-menu>li>a {
+  color: white;
+}
+
+.dropdown-header {
+  color: white;
+}
+
 .sign-up {
   background: white;
   border: none;
@@ -37,17 +45,16 @@
 }
 
 .jumbotron .container {
-  height: 531px;
+  color: white;
   text-align: center;
 }
 
-.jumbo-text {
-  color: white;
-  margin-top: 165px;
+.featurette-heading {
+  margin-top: 50px;
 }
 
 .featurette-divider {
-  margin-top: 30px;
+  margin-top: 15px;
   max-width: 400px;
 }
 
@@ -55,15 +62,44 @@
   text-align: center;
 }
 
-.featurette-heading {
-  margin-top: 130px;
-}
-
 .lead {
-  margin: 30px auto 0;
+  margin: 15px auto 0;
   max-width: 75%;
 }
 
 footer {
-  margin-top: 130px;
+  margin-top: 50px;
+}
+
+/* Desktops and large screens */
+@media screen and (min-width: 768px) {
+  .navbar-default .navbar-nav .open .dropdown-menu>li>a {
+    color: #333;
+  }
+
+  .dropdown-header {
+    color: #777;
+  }
+
+  .jumbotron {
+    padding-top: 200px;
+    padding-bottom: 200px;
+  }
+
+  .featurette-heading {
+    margin-top: 130px;
+  }
+
+  .featurette-divider {
+    margin-top: 30px;
+    max-width: 400px;
+  }
+
+  .lead {
+    margin: 30px auto 0;
+  }
+
+  footer {
+    margin-top: 130px;
+  }
 }
