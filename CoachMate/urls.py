@@ -19,8 +19,9 @@ from django.contrib import admin
 from home.views import home
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
     url(r'^$', home, name='home'),
-    url(r'^home/', include('home.urls')),
+    url(r'^admin/', admin.site.urls),
+    #url(r'^home/', include('home.urls')),
     url(r'^accounts/', include('accounts.urls')),
+    url(r'^teams/', include('teams.urls')),
 ]
