@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static from staticfiles %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -11,14 +12,16 @@
     <title>CoachMate</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="../../static/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../../static/home/css/homepage.css" rel="stylesheet">
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <link href="../../static/bootstrap-3.3.7/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <link href="{% static 'bootstrap/css/ie10-viewport-bug-workaround.css' %}" rel="stylesheet">
 
-    <script src="../../static/bootstrap-3.3.7/js/ie-emulation-modes-warning.js"></script>
-    <script src="../../static/home/js/smoothScroll.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="{% static 'home/css/homepage.css' %}" rel="stylesheet">
+
+    <script src="{% static 'bootstrap/js/ie-emulation-modes-warning.js' %}"></script>
+    <script src="{% static 'home/js/smoothScroll.js' %}"></script>
   </head>
 
   <body>
@@ -36,7 +39,7 @@
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
+            <li><a href="{% url 'teams:dashboard' %}">Teams</a></li>
             <li><a href="#contact">Support</a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown<span class="caret"></span></a>
@@ -52,12 +55,12 @@
             </li>
           </ul>
           <div class="nav navbar-nav navbar-right">
-            <button type="button" class="sign-up btn navbar-btn">
+            <a class="sign-up btn navbar-btn" href="{% url 'accounts:signup' %}">
               <span class="glyphicon glyphicon-user"></span> Sign Up<span class="sr-only">(current)</span>
-            </button>
+            </a>
           </div>
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="./">Login</a></li>
+            <li><a href="{% url 'accounts:login' %}">Login</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -132,9 +135,9 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../static/bootstrap-3.3.7/js/jquery.min.js"><\/script>')</script>
-    <script src="../../static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../static/bootstrap-3.3.7/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="{% static 'bootstrap/js/ie10-viewport-bug-workaround.js' %}"></script>
 
 
   </body>
