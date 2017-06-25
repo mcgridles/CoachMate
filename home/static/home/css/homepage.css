@@ -11,6 +11,11 @@
   color: white;
 }
 
+.navbar-default .navbar-brand:focus,
+.navbar-default .navbar-brand:hover {
+  color: black;
+}
+
 .navbar-default .navbar-toggle .icon-bar {
   background-color: white;
 }
@@ -35,9 +40,7 @@
 
 .sign-up {
   background: white;
-  border: none;
   color: #337ab7;
-  margin: 9px auto;
 }
 
 .jumbotron {
