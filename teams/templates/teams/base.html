@@ -25,6 +25,10 @@
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <script src="{% static 'bootstrap/js/ie-emulation-modes-warning.js' %}"></script>
 
+    <!-- DataTables CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/media/css/dataTables.bootstrap.css' %}">
+    <script type="text/javascript" charset="utf8" src="{% static 'Datatables/media/js/dataTables.bootstrap.js' %}"></script>
+
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -32,6 +36,7 @@
     <![endif]-->
   </head>
   <body>
+    {% block scripts %}{% endblock %}
 
     <nav class="navbar navbar-fixed-top">
       <div class="container-fluid">

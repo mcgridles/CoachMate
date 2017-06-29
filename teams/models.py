@@ -11,6 +11,7 @@ from django.db import models
 
 class Team(models.Model):
     name = models.CharField(max_length=50)
+    abbr = models.CharField(max_length=5)
     num_swimmers = models.IntegerField()
     region = models.CharField(max_length=25)
 

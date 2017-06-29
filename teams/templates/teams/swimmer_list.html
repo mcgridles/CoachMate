@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+<html lang="en">
+  <head>
+    <!-- This needs to be team abbreviation or name -->
+    {% block title %}Swimmers{% endblock %}
+  </head>
+
+  <body>
+    <!-- This needs to be <Team Name> Dashboard -->
+    {% block page-title %}Swimmer Dashboard{% endblock %}
+    {% block table-title %}Swimmers{% endblock %}
+
+    {% block scripts %}
+      <script>
+        $(document).ready( function () {
+          $('#swimmers').DataTable();
+        } );
+      </script>
+    {% endblock %}
+
+    {% block table-content %}
+      <table id="swimmers">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Last</th>
+            <th>First</th>
+            <th>Age</th>
+            <th>M/F</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for swimmer in swimmer_list %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ swimmer.l_name }}</td>
+              <td>{{ swimmer.f_name }}</td>
+              <td>{{ swimmer.age }}</td>
+              <td>{{ swimmer.gender }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endblock %}
+
+  </body>
+</html>

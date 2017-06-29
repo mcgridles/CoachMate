@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+<html lang="en">
+  <head>
+    {% block title %}Teams{% endblock %}
+  </head>
+
+  <body>
+    {% block page-title %}Teams Dashboard{% endblock %}
+    {% block table-title %}Teams{% endblock %}
+
+    {% block scripts %}
+      <script>
+        $(document).ready( function () {
+          $('#teams').DataTable();
+        } );
+      </script>
+    {% endblock %}
+
+    {% block table-content %}
+      <table id="teams">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Abbr</th>
+            <th>Region</th>
+            <th>Swimmers</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for team in team_list %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ team.name }}</td>
+              <td>{{ team.abbr }}</td>
+              <td>{{ team.region }}</td>
+              <td>{{ team.num_swimmers }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endblock %}
+    
+  </body>
+</html>
