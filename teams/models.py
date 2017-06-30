@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import User
 
 # Not sure how to associate things with a user but we may need to give the
 # Team and Week classes a ForeignKey field for a user
@@ -10,30 +11,49 @@ from django.db import models
 # Swimmers & Teams
 
 class Team(models.Model):
-    name = models.CharField(max_length=50)
-    abbr = models.CharField(max_length=5)
-    num_swimmers = models.IntegerField()
-    region = models.CharField(max_length=25)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, required=True)
+    abbr = models.CharField(max_length=5, required=True)
+    region = models.CharField(max_length=25, required=True)
+
+    def __str__(self):
+        return self.name
 
 class Swimmer(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    GENDER_CHOICE = (
+        ('F', 'female'),
+        ('M', 'male'),
+    )
 
-    f_name = models.CharField(max_length=25)
-    l_name = models.CharField(max_length=25)
-    gender = models.CharField(max_length=10)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, required=True)
+    f_name = models.CharField(max_length=25, required=True)
+    l_name = models.CharField(max_length=25, required=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICE, required=True)
     age = models.IntegerField()
     bio = models.TextField()
+
+    def __str__(self):
+        return self.l_name
 
 
 # Workout
 
 class Rep(models.Model):
-    set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
+    STROKE_CHOICE = (
+        ('fly', 'Butterfly'),
+        ('back', 'Backstroke'),
+        ('breast', 'Breaststroke'),
+        ('free', 'Freestyle'),
+    )
 
-    num = models.IntegerField()
-    distance = models.IntegerField()
-    stroke = models.CharField(max_length=10)
-    comments = models.CharField(max_length=100) # switch to TextField?
+    set_id = models.ForeignKey(Set, on_delete=models.CASCADE, required=True)
+    num = models.IntegerField(required=True)
+    distance = models.IntegerField(required=True)
+    stroke = models.CharField(max_length=6, choices = STROKE_CHOICE, required=True)
+    comments = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.stroke
 
 class Set(models.Model):
     practice = models.ForeignKey(Practice, on_delete=models.CASCADE)
@@ -43,6 +63,9 @@ class Practice(models.Model):
     week = models.ForeignKey(Week, on_delete=models.CASCADE)
     weekday = models.CharField(max_length=10)
     description = models.TextField()
+
+    def __str__(self):
+        return self.weekday
 
 
 # Calendar
@@ -54,63 +77,19 @@ class Week(models.Model):
     start = models.DateField()
     end = models.DateField()
 
+    def __str__(self):
+        return self.start
+
 
 # Events
 
 # Many-to-one -> many times can be created and associated with one swimmer
 # Makes it easy to sort and query for fastest time
-class Free_50(models.Model):
+class Event(models.Model):
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
+
+    event = models.CharField(max_length=20)
     time = models.DurationField()
 
-class Free_100(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Free_200(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Free_500(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Free_1000(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Fly_50(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Fly_100(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Fly_200(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Back_50(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Back_100(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Back_200(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Breast_50(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Breast_100(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
-
-class Breast_200(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    time = models.DurationField()
+    def __str__(self):
+        return self.event
