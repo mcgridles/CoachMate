@@ -5,26 +5,28 @@ from django.shortcuts import render
 from django.views import generic
 from teams.models import Team, Swimmer
 
-def TeamListView(generic.ListView):
+class TeamListView(generic.ListView):
     model = Team
-    template_name = teams/team_list.html
+    template_name = 'teams/team_list.html'
 
     def get_queryset(self):
         return Team.objects.order_by('name')
 
-def SwimmerListView(generic.ListView):
+class SwimmerListView(generic.ListView):
     model = Swimmer
-    template_name = teams/swimmer_list.html
+    template_name = 'teams/swimmer_list.html'
 
-    team = Team.objects.filter(pk=self.kwargs['abbr'])
-    team_name = team.name
+    def get_team_name(self):
+        team = Team.objects.filter(pk=self.kwargs['abbr'])
+        return team.name
 
     def get_queryset(self):
+        team_name = get_team_name()
         return Swimmer.objects.filter(team=team_name)
 
-def SwimmerDetailView(generic.DetailView):
+class SwimmerDetailView(generic.DetailView):
     model = Swimmer
-    template_name = teams/swimmer.html
+    template_name = 'teams/swimmer.html'
 
     def get_object(self):
         return Swimmer.objects.get(pk=self.kwargs['id'])

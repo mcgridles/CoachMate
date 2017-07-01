@@ -12,9 +12,9 @@ from django.contrib.auth.models import User
 
 class Team(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, required=True)
-    abbr = models.CharField(max_length=5, required=True)
-    region = models.CharField(max_length=25, required=True)
+    name = models.CharField(max_length=50)
+    abbr = models.CharField(max_length=5)
+    region = models.CharField(max_length=25, blank=True)
 
     def __str__(self):
         return self.name
@@ -25,47 +25,15 @@ class Swimmer(models.Model):
         ('M', 'male'),
     )
 
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, required=True)
-    f_name = models.CharField(max_length=25, required=True)
-    l_name = models.CharField(max_length=25, required=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICE, required=True)
-    age = models.IntegerField()
-    bio = models.TextField()
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    f_name = models.CharField(max_length=25)
+    l_name = models.CharField(max_length=25)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICE)
+    age = models.IntegerField(blank=True)
+    bio = models.TextField(blank=True)
 
     def __str__(self):
         return self.l_name
-
-
-# Workout
-
-class Rep(models.Model):
-    STROKE_CHOICE = (
-        ('fly', 'Butterfly'),
-        ('back', 'Backstroke'),
-        ('breast', 'Breaststroke'),
-        ('free', 'Freestyle'),
-    )
-
-    set_id = models.ForeignKey(Set, on_delete=models.CASCADE, required=True)
-    num = models.IntegerField(required=True)
-    distance = models.IntegerField(required=True)
-    stroke = models.CharField(max_length=6, choices = STROKE_CHOICE, required=True)
-    comments = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.stroke
-
-class Set(models.Model):
-    practice = models.ForeignKey(Practice, on_delete=models.CASCADE)
-    repeats = models.IntegerField()
-
-class Practice(models.Model):
-    week = models.ForeignKey(Week, on_delete=models.CASCADE)
-    weekday = models.CharField(max_length=10)
-    description = models.TextField()
-
-    def __str__(self):
-        return self.weekday
 
 
 # Calendar
@@ -81,13 +49,44 @@ class Week(models.Model):
         return self.start
 
 
+# Workout
+
+class Practice(models.Model):
+    week = models.ForeignKey(Week, on_delete=models.CASCADE)
+    weekday = models.CharField(max_length=10)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.weekday
+
+class Set(models.Model):
+    practice = models.ForeignKey(Practice, on_delete=models.CASCADE)
+    repeats = models.IntegerField(blank=True)
+
+class Rep(models.Model):
+    STROKE_CHOICE = (
+        ('fly', 'Butterfly'),
+        ('back', 'Backstroke'),
+        ('breast', 'Breaststroke'),
+        ('free', 'Freestyle'),
+    )
+
+    set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
+    num = models.IntegerField()
+    distance = models.IntegerField()
+    stroke = models.CharField(max_length=6, choices = STROKE_CHOICE)
+    comments = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.stroke
+
+
 # Events
 
 # Many-to-one -> many times can be created and associated with one swimmer
 # Makes it easy to sort and query for fastest time
 class Event(models.Model):
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-
     event = models.CharField(max_length=20)
     time = models.DurationField()
 

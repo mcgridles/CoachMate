@@ -21,7 +21,7 @@
       <table id="teams">
         <thead>
           <tr>
-            <th>#</th>
+            <th></th>
             <th>Name</th>
             <th>Abbr</th>
             <th>Region</th>
@@ -35,6 +35,7 @@
               <td>{{ team.name }}</td>
               <td>{{ team.abbr }}</td>
               <td>{{ team.region }}</td>
+              <td>{{ team.swimmer_set.all|length }}</td>
             </tr>
           {% endfor %}
         </tbody>
