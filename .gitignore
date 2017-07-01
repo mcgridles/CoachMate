@@ -43,4 +43,4 @@ Thumbs.db
 ############################
 /static/
 /media/
-/CoachMate/Settings/local.py
+/CoachMate/settings/local.py
