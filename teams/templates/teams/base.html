@@ -20,14 +20,14 @@
 
     <!-- Custom styles for this template -->
     <link href="{% static 'teams/css/base.css' %}" rel="stylesheet">
+    {% block stylesheets %}{% endblock %}
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <script src="{% static 'bootstrap/js/ie-emulation-modes-warning.js' %}"></script>
 
-    <!-- DataTables CSS and JS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/media/css/dataTables.bootstrap.css' %}">
-    <script type="text/javascript" charset="utf8" src="{% static 'Datatables/media/js/dataTables.bootstrap.js' %}"></script>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -36,10 +36,9 @@
     <![endif]-->
   </head>
   <body>
-    {% block scripts %}{% endblock %}
-
     <nav class="navbar navbar-fixed-top">
       <div class="container-fluid">
+
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
@@ -49,6 +48,7 @@
           </button>
           <a class="navbar-brand" href="#">CoachMate</a>
         </div>
+
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Dashboard</a></li>
@@ -56,9 +56,12 @@
             <li><a href="#">Profile</a></li>
             <li><a href="#">Help</a></li>
           </ul>
+
+          <!-- May remove -->
           <form class="navbar-form navbar-right">
             <input type="text" class="form-control" placeholder="Search...">
           </form>
+
         </div>
       </div>
     </nav>
@@ -66,12 +69,14 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
+
           <ul class="nav nav-sidebar">
             <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
             <li><a href="#">Reports</a></li>
             <li><a href="#">Analytics</a></li>
             <li><a href="#">Export</a></li>
           </ul>
+
           <ul class="nav nav-sidebar">
             <li><a href="">Nav item</a></li>
             <li><a href="">Nav item again</a></li>
@@ -79,16 +84,51 @@
             <li><a href="">Another nav item</a></li>
             <li><a href="">More navigation</a></li>
           </ul>
+
           <ul class="nav nav-sidebar">
             <li><a href="">Nav item again</a></li>
             <li><a href="">One more nav</a></li>
             <li><a href="">Another nav item</a></li>
           </ul>
         </div>
+
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">{% block page-title %}{% endblock %}</h1>
 
-          <h2 class="sub-header">{% block table-title %}{% endblock %}</h2>
+          <h2 class="sub-header">{% block table-title %}{% endblock %}
+
+            <!-- Trigger the modal with a button -->
+            <button type="button" class="btn btn-primary btn-md pull-right" data-toggle="modal" data-target="#myModal">
+              {% block modal-button %}+ Add{% endblock %}
+            </button>
+          </h2>
+
+          <!-- Modal -->
+          <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">
+                    {% block modal-title %}Add Model Instance{% endblock %}
+                  </h4>
+                </div>
+
+                <div class="modal-body">
+                  {% block modal-body %}Put a form here{% endblock %}
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
           <div class="table-responsive">
             {% block table-content %}
             <table class="table table-striped">
@@ -229,9 +269,12 @@
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 
+    <!-- DataTables core JavaScript -->
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
+
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{% static 'bootstrap/js/ie10-viewport-bug-workaround.js' %}"></script>
 
-
+    {% block scripts %}{% endblock %}
   </body>
 </html>

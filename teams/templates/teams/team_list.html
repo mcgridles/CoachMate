@@ -1,24 +1,34 @@
 <!DOCTYPE html>
 {% extends "teams/base.html" %}
+{% load static from staticfiles %}
 <html lang="en">
   <head>
     {% block title %}Teams{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" type="text/css" href="{% static 'teams/css/team_list.css' %}">
+    {% endblock %}
   </head>
 
   <body>
     {% block page-title %}Teams Dashboard{% endblock %}
     {% block table-title %}Teams{% endblock %}
 
-    {% block scripts %}
-      <script>
-        $(document).ready( function () {
-          $('#teams').DataTable();
-        } );
-      </script>
+    {% block modal-button %}{{ block.super }}{% endblock %}
+    {% block modal-title %}Add a Team{% endblock %}
+    {% block modal-body %}
+      <form action="{% url 'teams:team_list' %}" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <li>{{ field.label_tag }} {{ field }}</li><br>
+        {% endfor %}
+        <div class="wrapper">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
     {% endblock %}
 
     {% block table-content %}
-      <table id="teams">
+      <table id="teams" class="table table-striped">
         <thead>
           <tr>
             <th></th>
@@ -32,7 +42,7 @@
           {% for team in team_list %}
             <tr>
               <td>{{ forloop.counter }}</td>
-              <td>{{ team.name }}</td>
+              <td><a href="{% url 'teams:swimmer_list' team.abbr %}">{{ team.name }}</a></td>
               <td>{{ team.abbr }}</td>
               <td>{{ team.region }}</td>
               <td>{{ team.swimmer_set.all|length }}</td>
@@ -42,5 +52,25 @@
       </table>
     {% endblock %}
 
+    {% block scripts %}
+    <!--
+      <script>
+        $(document).ready( function () {
+          $('#teams').DataTable();
+        } );
+      </script>
+
+      <script>
+        $(document).ready( function () {
+          var inputs = document.getElementsByTagName("input");
+          for (i=0; i<inputs.length; i++) {
+            if (inputs[i].type == "search") {
+              inputs[i].id += "table-search";
+            }
+          }
+        } );
+      </script>
+    -->
+    {% endblock %}
   </body>
 </html>

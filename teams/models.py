@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.forms import ModelForm
 from django.contrib.auth.models import User
 
 # Not sure how to associate things with a user but we may need to give the
@@ -21,8 +22,8 @@ class Team(models.Model):
 
 class Swimmer(models.Model):
     GENDER_CHOICE = (
-        ('F', 'female'),
-        ('M', 'male'),
+        ('M', 'Male'),
+        ('F', 'Fale'),
     )
 
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -92,3 +93,28 @@ class Event(models.Model):
 
     def __str__(self):
         return self.event
+
+
+# Model forms
+
+class TeamForm(ModelForm):
+    class Meta:
+        model = Team
+        exclude = ['user']
+        labels = {
+            'name': 'Team Name',
+            'abbr': 'Team Abbreviation',
+            'region': 'Team Region',
+        }
+
+class SwimmerForm(ModelForm):
+    class Meta:
+        model = Swimmer
+        exclude = ['team']
+        labels = {
+            'f_name': 'First Name',
+            'l_name': 'Last Name',
+            'gender': 'M/F',
+            'age': 'Age',
+            'bio': 'Bio',
+        }

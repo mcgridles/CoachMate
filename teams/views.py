@@ -3,26 +3,53 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.views import generic
-from teams.models import Team, Swimmer
+from teams.models import Team, Swimmer, TeamForm, SwimmerForm
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.models import User
 
-class TeamListView(generic.ListView):
-    model = Team
-    template_name = 'teams/team_list.html'
+@csrf_protect
+def teamList(request):
+    if request.method == 'POST':
+        form = TeamForm(data=request.POST)
 
-    def get_queryset(self):
-        return Team.objects.order_by('name')
+        if form.is_valid():
+            new_team = form.save(commit=False)
+            if not User.objects.get(name='John'):
+                user = User.objects.create_user('John', 'johndoe@example.com', 'johndoepassword')
+            else:
+                user = User.objects.get(name='John')
+            new_team.user = user
+            new_team.save()
+    else:
+        form = TeamForm()
 
-class SwimmerListView(generic.ListView):
-    model = Swimmer
-    template_name = 'teams/swimmer_list.html'
+    team_list = Team.objects.all()
+    context = {
+        'form': form,
+        'team_list': team_list,
+    }
+    return render(request, 'teams/team_list.html', context)
 
-    def get_team_name(self):
-        team = Team.objects.filter(pk=self.kwargs['abbr'])
-        return team.name
+@csrf_protect
+def swimmerList(request, abbr):
+    team = Team.objects.get(abbr=abbr)
+    if request.method == 'POST':
+        form = SwimmerForm(data=request.POST)
 
-    def get_queryset(self):
-        team_name = get_team_name()
-        return Swimmer.objects.filter(team=team_name)
+        if form.is_valid():
+            new_swimmer = form.save(commit=False)
+            new_swimmer.team = team
+            new_swimmer.save()
+    else:
+        form = SwimmerForm()
+
+    swimmer_list  = team.swimmer_set.all()
+    context = {
+        'form': form,
+        'swimmer_list': swimmer_list,
+        'team': team,
+    }
+    return render(request, 'teams/swimmer_list.html', context)
 
 class SwimmerDetailView(generic.DetailView):
     model = Swimmer

@@ -11,19 +11,25 @@
     {% block page-title %}Swimmer Dashboard{% endblock %}
     {% block table-title %}Swimmers{% endblock %}
 
-    {% block scripts %}
-      <script>
-        $(document).ready( function () {
-          $('#swimmers').DataTable();
-        } );
-      </script>
+    {% block modal-button %}{{ block.super }}{% endblock %}
+    {% block modal-title %}Add a Swimmer{% endblock %}
+    {% block modal-body %}
+      <form action="{% url 'teams:swimmer_list' team.abbr %}" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <li>{{ field.label_tag }} {{ field }}</li><br>
+        {% endfor %}
+        <div class="wrapper">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
     {% endblock %}
 
     {% block table-content %}
-      <table id="swimmers">
+      <table id="swimmers" class="table table-striped">
         <thead>
           <tr>
-            <th>#</th>
+            <th></th>
             <th>Last</th>
             <th>First</th>
             <th>Age</th>
@@ -44,5 +50,24 @@
       </table>
     {% endblock %}
 
+    {% block scripts %}
+    <!--
+      <script>
+        $(document).ready( function () {
+          $('#swimmers').DataTable();
+        } );
+      </script>
+      <script>
+        $(document).ready( function () {
+          var inputs = document.getElementsByTagName("input");
+          for (i=0; i<inputs.length; i++) {
+            if (inputs[i].type == "search") {
+              inputs[i].id += "table-search";
+            }
+          }
+        } );
+      </script>
+    -->
+    {% endblock %}
   </body>
 </html>
