@@ -34,23 +34,23 @@
 
   <body>
       <div class="container">
-        <form class="form-signin">
-          <h2 class="form-signin-heading">Sign Up</h2>
-          <label for="inputFName" class="sr-only">First name</label>
-          <input type="email" id="inputEmail" class="form-control" placeholder="First name" required="" autofocus="" style="background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%; cursor: auto;" autocomplete="off">
-          <label for="inputLName" class="sr-only">Last name</label>
-          <input type="email" id="inputEmail" class="form-control" placeholder="Last name" required="" autofocus="" style="background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%; cursor: auto;" autocomplete="off">
-          <label for="inputEmail" class="sr-only">Email address</label>
-          <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" style="background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%; cursor: auto;" autocomplete="off">
-          <label for="inputPassword" class="sr-only">Password</label>
-          <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" style="background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%; cursor: auto;" autocomplete="off">
-
-          <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
-        </form>
+        <div id="form">
+          <form method="post" class="form-signin">
+            {% csrf_token %}
+            <h2 class="form-signin-heading">Sign Up</h2>
+            {% for field in form %}
+              {{ field }}
+              {% for erro in field.errors %}
+                <p style="color: red">{{ error }}</p>
+              {% endfor %}
+            {% endfor %}
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
+          </form>
+        </div>
       </div> <!-- /container -->
 
       <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-      <script src="../../static/bootstrap-3.3.7/js/ie10-viewport-bug-workaround.js"></script>
+      <script src="../../static/bootstrap/js/ie10-viewport-bug-workaround.js"></script>
   </body>
 
 </html>

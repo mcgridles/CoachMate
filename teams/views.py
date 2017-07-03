@@ -3,9 +3,10 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.views import generic
-from teams.models import Team, Swimmer, TeamForm, SwimmerForm
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
+
+from teams.models import Team, Swimmer, TeamForm, SwimmerForm
 
 @csrf_protect
 def teamList(request):
@@ -14,16 +15,13 @@ def teamList(request):
 
         if form.is_valid():
             new_team = form.save(commit=False)
-            if not User.objects.get(name='John'):
-                user = User.objects.create_user('John', 'johndoe@example.com', 'johndoepassword')
-            else:
-                user = User.objects.get(name='John')
-            new_team.user = user
+            new_team.user = request.user
             new_team.save()
+            form = TeamForm()
     else:
         form = TeamForm()
 
-    team_list = Team.objects.all()
+    team_list = Team.objects.filter(user=request.user)
     context = {
         'form': form,
         'team_list': team_list,
