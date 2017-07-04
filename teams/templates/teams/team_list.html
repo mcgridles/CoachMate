@@ -3,7 +3,7 @@
 {% load static from staticfiles %}
 <html lang="en">
   <head>
-    {% block title %}Teams{% endblock %}
+    {% block title %}Dashboard{% endblock %}
     {% block stylesheets %}
       <link rel="stylesheet" type="text/css" href="{% static 'teams/css/team_list.css' %}">
     {% endblock %}
@@ -34,13 +34,11 @@
                 {% for field in form %}
                   {{ field.label_tag }} {{ field }}<br>
                 {% endfor %}
-                <div class="wrapper">
-                  <button type="submit" class="btn btn-md btn-primary">Submit</button>
-                </div>
               </form>
             </div>
 
             <div class="modal-footer">
+              <button type="submit" class="btn btn-md btn-primary">Submit</button>
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
 

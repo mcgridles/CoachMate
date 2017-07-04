@@ -32,7 +32,133 @@
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}Schedule{% endblock %}
 
+    {% block action-buttons %}
+      <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
+        <span class="glyphicon glyphicon-plus-sign"></span> Add Practice
+      </button>
+    {% endblock %}
+
+    {% block content %}
+      <div class="panel-group" id="accordion">
+
+        <div class="panel panel-info">
+          <div class="panel-heading">
+             <h4 class="panel-title">
+               <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                 Monday
+              </a>
+            </h4>
+          </div>
+          <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                Tuesday
+              </a>
+            </h4>
+          </div>
+          <div id="collapseTwo" class="panel-collapse collapse">
+            <div class="panel-body">
+              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                Wednesday
+              </a>
+            </h4>
+          </div>
+          <div id="collapseThree" class="panel-collapse collapse">
+            <div class="panel-body">
+              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+                Thursday
+              </a>
+            </h4>
+          </div>
+          <div id="collapseFour" class="panel-collapse collapse">
+            <div class="panel-body">
+              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
+                Friday
+              </a>
+            </h4>
+          </div>
+          <div id="collapseFive" class="panel-collapse collapse">
+            <div class="panel-body">
+              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
+                Saturday
+              </a>
+            </h4>
+          </div>
+          <div id="collapseSix" class="panel-collapse collapse">
+            <div class="panel-body">
+              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
+                Sunday
+              </a>
+            </h4>
+          </div>
+          <div id="collapseSeven" class="panel-collapse collapse">
+            <div class="panel-body">
+              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    {% endblock %}
+
     {% block scripts %}
+      <script type="text/javascript">
+        $(function () { $('#collapseOne').collapse(toggle: false)});
+        $(function () { $('#collapseTwo').collapse('hide')});
+        $(function () { $('#collapseThree').collapse('hide')});
+        $(function () { $('#collapseFour').collapse({'hide'})});
+        $(function () { $('#collapseFive').collapse({'hide'})});
+        $(function () { $('#collapseSix').collapse({'hide'})});
+        $(function () { $('#collapseSeven').collapse({'hide'})});
+      </script>
       <script>
         $(function() {
           var loc = window.location.pathname;
