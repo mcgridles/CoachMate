@@ -10,67 +10,102 @@
   </head>
 
   <body>
-    {% block page-title %}Teams Dashboard{% endblock %}
+    {% block page-title %}Dashboard{% endblock %}
     {% block table-title %}Teams{% endblock %}
 
-    {% block modal-button %}{{ block.super }}{% endblock %}
-    {% block modal-title %}Add a Team{% endblock %}
-    {% block modal-body %}
-      <form action="{% url 'teams:team_list' %}" method="post">
-        {% csrf_token %}
-        {% for field in form %}
-          <li>{{ field.label_tag }} {{ field }}</li><br>
-        {% endfor %}
-        <div class="wrapper">
-          <button type="submit" class="btn btn-primary">Submit</button>
+    {% block action-buttons %}{{ block.super }}{% endblock %}
+
+    {% block modal %}
+      <div id="baseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Add a Team
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:team_list' %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% for field in form %}
+                  {{ field.label_tag }} {{ field }}<br>
+                {% endfor %}
+                <div class="wrapper">
+                  <button type="submit" class="btn btn-md btn-primary">Submit</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+          </div>
+
         </div>
-      </form>
+      </div>
     {% endblock %}
 
-    {% block table-content %}
-      <table id="teams" class="table table-striped">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Name</th>
-            <th>Abbr</th>
-            <th>Region</th>
-            <th>Swimmers</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for team in team_list %}
+    {% block content %}
+      <div class="table-responsive">
+        <table id="teams" class="table table-striped">
+          <thead>
             <tr>
-              <td>{{ forloop.counter }}</td>
-              <td><a href="{% url 'teams:swimmer_list' team.abbr %}">{{ team.name }}</a></td>
-              <td>{{ team.abbr }}</td>
-              <td>{{ team.region }}</td>
-              <td>{{ team.swimmer_set.all|length }}</td>
+              <th></th>
+              <th>Name</th>
+              <th>Abbr</th>
+              <th>Region</th>
+              <th>Swimmers</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for team in team_list %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><a href="{% url 'teams:swimmer_list' team.abbr %}">{{ team.name }}</a></td>
+                <td>{{ team.abbr }}</td>
+                <td>{{ team.region }}</td>
+                <td>{{ team.swimmer_set.all|length }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% endblock %}
 
     {% block scripts %}
-    <!--
       <script>
-        $(document).ready( function () {
-          $('#teams').DataTable();
-        } );
-      </script>
-
-      <script>
-        $(document).ready( function () {
-          var inputs = document.getElementsByTagName("input");
-          for (i=0; i<inputs.length; i++) {
-            if (inputs[i].type == "search") {
-              inputs[i].id += "table-search";
-            }
+        $(function() {
+          var loc = window.location.pathname;
+          if(/report/.test(loc)) {
+            $('.report').addClass('active');
+          } else {
+            $('.dashboard').addClass('active');
           }
-        } );
+        });
       </script>
-    -->
+      <!--
+        <script>
+          $(document).ready( function () {
+            $('#teams').DataTable();
+          } );
+        </script>
+
+        <script>
+          $(document).ready( function () {
+            var inputs = document.getElementsByTagName("input");
+            for (i=0; i<inputs.length; i++) {
+              if (inputs[i].type == "search") {
+                inputs[i].id += "table-search";
+              }
+            }
+          } );
+        </script>
+      -->
     {% endblock %}
   </body>
 </html>

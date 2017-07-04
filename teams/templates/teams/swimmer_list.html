@@ -7,67 +7,188 @@
   </head>
 
   <body>
+    {% block sidebar %}
+      <ul class="nav nav-sidebar">
+        <li class="dashboard"><a href="{% url 'teams:team_list' %}">Overview <span class="sr-only">(current)</span></a></li>
+        <li class="practice"><a href="{% url 'teams:practice' team.abbr %}">Practice</a></li>
+        <li><a href="#">Analytics</a></li>
+        <li><a href="#">Export</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item</a></li>
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="">Another nav item</a></li>
+        <li><a href="">More navigation</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="">Another nav item</a></li>
+      </ul>
+    {% endblock %}
     <!-- This needs to be <Team Name> Dashboard -->
-    {% block page-title %}Swimmer Dashboard{% endblock %}
+    {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}Swimmers{% endblock %}
 
-    {% block modal-button %}{{ block.super }}{% endblock %}
-    {% block modal-title %}Add a Swimmer{% endblock %}
-    {% block modal-body %}
-      <form action="{% url 'teams:swimmer_list' team.abbr %}" method="post">
-        {% csrf_token %}
-        {% for field in form %}
-          <li>{{ field.label_tag }} {{ field }}</li><br>
-        {% endfor %}
-        <div class="wrapper">
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-      </form>
+    {% block action-buttons %}
+      <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#downloadModal">
+        <span class="glyphicon glyphicon-download"></span> Download
+      </button>
+      <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#uploadModal">
+        <span class="glyphicon glyphicon-upload"></span> Upload
+      </button>
+      {{ block.super }}
     {% endblock %}
 
-    {% block table-content %}
-      <table id="swimmers" class="table table-striped">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Last</th>
-            <th>First</th>
-            <th>Age</th>
-            <th>M/F</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for swimmer in swimmer_list %}
+    {% block modal %}
+      <div id="baseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Add a Team
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:team_list' %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% for field in form %}
+                  {{ field.label_tag }} {{ field }}<br>
+                {% endfor %}
+                <div class="wrapper">
+                  <button type="submit" class="btn btn-md btn-primary">Submit</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Possibly get rid of in favor of single download button -->
+      <div id="downloadModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Download Database
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              Download option
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <div id="uploadModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Upload from Team Manager
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              Upload form
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block content %}
+      <div class="table-responsive">
+        <table id="swimmers" class="table table-striped">
+          <thead>
             <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ swimmer.l_name }}</td>
-              <td>{{ swimmer.f_name }}</td>
-              <td>{{ swimmer.age }}</td>
-              <td>{{ swimmer.gender }}</td>
+              <th></th>
+              <th>Last</th>
+              <th>First</th>
+              <th>Age</th>
+              <th>M/F</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for swimmer in swimmer_list %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ swimmer.l_name }}</td>
+                <td>{{ swimmer.f_name }}</td>
+                <td>{{ swimmer.age }}</td>
+                <td>{{ swimmer.gender }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+
+      <a type="button" class="btn btn-danger btn-md pull-right" href="{% url 'teams:deleteTeam' team.abbr %}">
+        Delete Team
+      </a>
     {% endblock %}
 
     {% block scripts %}
-    <!--
       <script>
-        $(document).ready( function () {
-          $('#swimmers').DataTable();
-        } );
-      </script>
-      <script>
-        $(document).ready( function () {
-          var inputs = document.getElementsByTagName("input");
-          for (i=0; i<inputs.length; i++) {
-            if (inputs[i].type == "search") {
-              inputs[i].id += "table-search";
-            }
+        $(function() {
+          var loc = window.location.pathname;
+          if(/practice/.test(loc)) {
+            $('.practice').addClass('active');
+          } else {
+            $('.dashboard').addClass('active');
           }
-        } );
+        });
       </script>
-    -->
+      <!--
+        <script>
+          $(document).ready( function () {
+            $('#swimmers').DataTable();
+          } );
+        </script>
+        <script>
+          $(document).ready( function () {
+            var inputs = document.getElementsByTagName("input");
+            for (i=0; i<inputs.length; i++) {
+              if (inputs[i].type == "search") {
+                inputs[i].id += "table-search";
+              }
+            }
+          } );
+        </script>
+      -->
     {% endblock %}
   </body>
 </html>

@@ -23,7 +23,7 @@ class Team(models.Model):
 class Swimmer(models.Model):
     GENDER_CHOICE = (
         ('M', 'Male'),
-        ('F', 'Fale'),
+        ('F', 'Female'),
     )
 
     team = models.ForeignKey(Team, on_delete=models.CASCADE)

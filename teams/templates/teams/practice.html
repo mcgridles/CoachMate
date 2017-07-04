@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+<html lang="en">
+  <head>
+    {% block title %}Practice - {{ team.abbr }}{% endblock %}
+  </head>
+
+  <body>
+    {% block sidebar %}
+      <ul class="nav nav-sidebar">
+        <li class="dashboard"><a href="{% url 'teams:team_list' %}">Overview <span class="sr-only">(current)</span></a></li>
+        <li class="practice"><a href="{% url 'teams:practice' team.abbr %}">Practice</a></li>
+        <li><a href="#">Analytics</a></li>
+        <li><a href="#">Export</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item</a></li>
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="">Another nav item</a></li>
+        <li><a href="">More navigation</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="">Another nav item</a></li>
+      </ul>
+    {% endblock %}
+
+    {% block page-title %}{{ team.name }}{% endblock %}
+    {% block table-title %}Schedule{% endblock %}
+
+    {% block scripts %}
+      <script>
+        $(function() {
+          var loc = window.location.pathname;
+          if(/practice/.test(loc)) {
+            $('.practice').addClass('active');
+          } else {
+            $('.dashboard').addClass('active');
+          }
+        });
+      </script>
+    {% endblock %}
+  </body>
+
+</html>
