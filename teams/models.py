@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.forms import ModelForm
 from django.contrib.auth.models import User
 
 # Not sure how to associate things with a user but we may need to give the
@@ -53,16 +52,34 @@ class Week(models.Model):
 # Workout
 
 class Practice(models.Model):
-    week = models.ForeignKey(Week, on_delete=models.CASCADE)
-    weekday = models.CharField(max_length=10)
-    description = models.TextField(blank=True)
+    DAY_CHOICE = (
+        ('monday', 'Monday'),
+        ('tuesday', 'Tuesday'),
+        ('wednesday', 'Wednesday'),
+        ('thursday', 'Thursday'),
+        ('friday', 'Friday'),
+        ('saturday', 'Saturday'),
+        ('sunday', 'Sunday'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    #week_id = models.ForeignKey(Week, on_delete=models.CASCADE)
+    weekday = models.CharField(max_length=10, choices=DAY_CHOICE)
 
     def __str__(self):
         return self.weekday
 
 class Set(models.Model):
-    practice = models.ForeignKey(Practice, on_delete=models.CASCADE)
+    FOCUS_CHOICE = (
+        ('sprint', 'Sprint'),
+        ('mid-distance', 'Mid Distance'),
+        ('distance', 'Distance'),
+    )
+
+    practice_id = models.ForeignKey(Practice, on_delete=models.CASCADE)
     repeats = models.IntegerField(blank=True)
+    focus = models.CharField(max_length=10, choices=FOCUS_CHOICE, blank=True)
+    order = models.IntegerField(null=True)
 
 class Rep(models.Model):
     STROKE_CHOICE = (
@@ -75,8 +92,9 @@ class Rep(models.Model):
     set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
     num = models.IntegerField()
     distance = models.IntegerField()
-    stroke = models.CharField(max_length=6, choices = STROKE_CHOICE)
-    comments = models.CharField(max_length=100, blank=True)
+    stroke = models.CharField(max_length=6, choices=STROKE_CHOICE)
+    rest = models.IntegerField(blank=True, null=True)
+    comments = models.CharField(max_length=254, blank=True)
 
     def __str__(self):
         return self.stroke
@@ -93,28 +111,3 @@ class Event(models.Model):
 
     def __str__(self):
         return self.event
-
-
-# Model forms
-
-class TeamForm(ModelForm):
-    class Meta:
-        model = Team
-        exclude = ['user']
-        labels = {
-            'name': 'Team Name',
-            'abbr': 'Team Abbreviation',
-            'region': 'Team Region',
-        }
-
-class SwimmerForm(ModelForm):
-    class Meta:
-        model = Swimmer
-        exclude = ['team']
-        labels = {
-            'f_name': 'First Name',
-            'l_name': 'Last Name',
-            'gender': 'M/F',
-            'age': 'Age',
-            'bio': 'Bio',
-        }

@@ -10,7 +10,7 @@
     {% block sidebar %}
       <ul class="nav nav-sidebar">
         <li class="dashboard"><a href="{% url 'teams:team_list' %}">Overview <span class="sr-only">(current)</span></a></li>
-        <li class="practice"><a href="{% url 'teams:practice' team.abbr %}">Practice</a></li>
+        <li class="practice"><a href="{% url 'teams:schedule' team.abbr %}">Practice</a></li>
         <li><a href="#">Analytics</a></li>
         <li><a href="#">Export</a></li>
       </ul>
@@ -57,21 +57,20 @@
             </div>
 
             <div class="modal-body">
-              <form action="{% url 'teams:team_list' %}" method="post" class="form-signin">
+              <form action="{% url 'teams:swimmer_list' team.abbr %}" method="post" class="form-signin">
                 {% csrf_token %}
                 {% for field in form %}
                   {{ field.label_tag }} {{ field }}<br>
                 {% endfor %}
+
+                <br>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-md btn-primary">Submit</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
               </form>
             </div>
-
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-md btn-primary">Submit</button>
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-
           </div>
-
         </div>
       </div>
 
