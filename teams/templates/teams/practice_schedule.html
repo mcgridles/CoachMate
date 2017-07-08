@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 {% extends "teams/base.html" %}
+{% load static from staticfiles %}
 <html lang="en">
   <head>
     {% block title %}Practice - {{ team.abbr }}{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/practice_schedule.css' %}">
+    {% endblock %}
   </head>
 
   <body>
@@ -33,9 +37,9 @@
     {% block table-title %}Schedule{% endblock %}
 
     {% block action-buttons %}
-    <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
-      <span class="glyphicon glyphicon-plus-sign"></span> Add Practice
-    </button>
+      <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
+        <span class="glyphicon glyphicon-plus-sign"></span> Add Practice
+      </button>
     {% endblock %}
 
     {% block modal %}
@@ -75,7 +79,6 @@
 
     {% block content %}
       <div class="panel-group" id="accordion">
-
         <div class="panel panel-info">
           <div class="panel-heading">
              <h4 class="panel-title">
@@ -86,7 +89,37 @@
           </div>
           <div id="collapseOne" class="panel-collapse collapse in">
             <div class="panel-body">
-              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+              {% if practice_monday %}
+                {% for set in practice_monday.set_set.all %}
+                  <h3>
+                    {{ set.order }})
+                    {{ set.focus|title }}
+                    {% if set.repeats %}
+                       - {{ set.repeats }}x
+                    {% endif %}
+                  </h3>
+
+                  <div class="reps">
+                    {% for rep in set.rep_set.all reversed %}
+                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                      {% if rep.rest %}
+                        @ {{ rep.rest }} rest
+                      {% endif %}
+                      {% if rep.comments %}
+                        - {{ rep.comments }}
+                      {% endif %}
+                      <br>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+
+                <a href="{% url 'teams:deletePractice' team.abbr practice_monday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
+                  <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                </a>
+                <a href="{% url 'teams:practice' team.abbr practice_monday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
+                  Edit
+                </a>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -101,7 +134,32 @@
           </div>
           <div id="collapseTwo" class="panel-collapse collapse">
             <div class="panel-body">
-              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+              {% if practice_tuesday %}
+
+                {% for set in practice_tuesday.set_set.all %}
+                  <h3>
+                    {{ set.order }})
+                    {{ set.focus|title }}
+                    {% if set.repeats %}
+                       - {{ set.repeats }}x
+                    {% endif %}
+                  </h3>
+
+                  <div class="reps">
+                    {% for rep in set.rep_set.all reversed %}
+                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                      {% if rep.rest %}
+                        @ {{ rep.rest }} rest
+                      {% endif %}
+                      {% if rep.comments %}
+                        - {{ rep.comments }}
+                      {% endif %}
+                      <br>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+
+              {% endif %}
             </div>
           </div>
         </div>
@@ -116,7 +174,32 @@
           </div>
           <div id="collapseThree" class="panel-collapse collapse">
             <div class="panel-body">
-              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+              {% if practice_wednesday %}
+
+                {% for set in practice_wednesday.set_set.all %}
+                  <h3>
+                    {{ set.order }})
+                    {{ set.focus|title }}
+                    {% if set.repeats %}
+                       - {{ set.repeats }}x
+                    {% endif %}
+                  </h3>
+
+                  <div class="reps">
+                    {% for rep in set.rep_set.all reversed %}
+                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                      {% if rep.rest %}
+                        @ {{ rep.rest }} rest
+                      {% endif %}
+                      {% if rep.comments %}
+                        - {{ rep.comments }}
+                      {% endif %}
+                      <br>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+
+              {% endif %}
             </div>
           </div>
         </div>
@@ -131,7 +214,32 @@
           </div>
           <div id="collapseFour" class="panel-collapse collapse">
             <div class="panel-body">
-              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+              {% if practice_thursday %}
+
+                {% for set in practice_thursday.set_set.all %}
+                  <h3>
+                    {{ set.order }})
+                    {{ set.focus|title }}
+                    {% if set.repeats %}
+                       - {{ set.repeats }}x
+                    {% endif %}
+                  </h3>
+
+                  <div class="reps">
+                    {% for rep in set.rep_set.all reversed %}
+                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                      {% if rep.rest %}
+                        @ {{ rep.rest }} rest
+                      {% endif %}
+                      {% if rep.comments %}
+                        - {{ rep.comments }}
+                      {% endif %}
+                      <br>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+
+              {% endif %}
             </div>
           </div>
         </div>
@@ -146,7 +254,32 @@
           </div>
           <div id="collapseFive" class="panel-collapse collapse">
             <div class="panel-body">
-              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+              {% if practice_friday %}
+
+                {% for set in practice_friday.set_set.all %}
+                  <h3>
+                    {{ set.order }})
+                    {{ set.focus|title }}
+                    {% if set.repeats %}
+                       - {{ set.repeats }}x
+                    {% endif %}
+                  </h3>
+
+                  <div class="reps">
+                    {% for rep in set.rep_set.all reversed %}
+                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                      {% if rep.rest %}
+                        @ {{ rep.rest }} rest
+                      {% endif %}
+                      {% if rep.comments %}
+                        - {{ rep.comments }}
+                      {% endif %}
+                      <br>
+                    {% endfor %}
+                  </div>
+              {% endfor %}
+
+            {% endif %}
             </div>
           </div>
         </div>
@@ -161,7 +294,31 @@
           </div>
           <div id="collapseSix" class="panel-collapse collapse">
             <div class="panel-body">
-              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+              {% if practice_saturday %}
+
+                {% for set in practice_saturday.set_set.all %}
+                  <h3>
+                    {{ set.order }})
+                    {{ set.focus|title }}
+                    {% if set.repeats %}
+                       - {{ set.repeats }}x
+                    {% endif %}
+                  </h3>
+                  <div class="reps">
+                    {% for rep in set.rep_set.all reversed %}
+                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                      {% if rep.rest %}
+                        @ {{ rep.rest }} rest
+                      {% endif %}
+                      {% if rep.comments %}
+                        - {{ rep.comments }}
+                      {% endif %}
+                      <br>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+
+              {% endif %}
             </div>
           </div>
         </div>
@@ -176,7 +333,31 @@
           </div>
           <div id="collapseSeven" class="panel-collapse collapse">
             <div class="panel-body">
-              Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+              {% if practice_sunday %}
+
+                {% for set in practice_sunday.set_set.all %}
+                  <h3>
+                    {{ set.order }})
+                    {{ set.focus|title }}
+                    {% if set.repeats %}
+                       - {{ set.repeats }}x
+                    {% endif %}
+                  </h3>
+                  <div class="reps">
+                    {% for rep in set.rep_set.all reversed %}
+                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                      {% if rep.rest %}
+                        @ {{ rep.rest }} rest
+                      {% endif %}
+                      {% if rep.comments %}
+                        - {{ rep.comments }}
+                      {% endif %}
+                      <br>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+
+              {% endif %}
             </div>
           </div>
         </div>
@@ -185,15 +366,6 @@
     {% endblock %}
 
     {% block scripts %}
-      <script type="text/javascript">
-        $(function () { $('#collapseOne').collapse(toggle: false)});
-        $(function () { $('#collapseTwo').collapse('hide')});
-        $(function () { $('#collapseThree').collapse('hide')});
-        $(function () { $('#collapseFour').collapse({'hide'})});
-        $(function () { $('#collapseFive').collapse({'hide'})});
-        $(function () { $('#collapseSix').collapse({'hide'})});
-        $(function () { $('#collapseSeven').collapse({'hide'})});
-      </script>
       <script>
         $(function() {
           var loc = window.location.pathname;

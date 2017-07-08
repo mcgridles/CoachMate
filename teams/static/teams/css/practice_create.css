@@ -1,0 +1,23 @@
+.delete-row {
+  margin-left: 10px;
+}
+
+.dynamic-form-add>td {
+  padding-top: 5px;
+}
+
+.empty-set {
+  display: table;
+  height: 200px;
+  width: 100%;
+}
+
+.empty-dialogue {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.reps {
+  margin-left: 2em;
+}

@@ -126,3 +126,7 @@ body {
   display: inline-block;
   border-radius: 50%;
 }
+
+.modal-footer {
+  padding-bottom: 0;
+}

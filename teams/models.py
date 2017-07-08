@@ -61,7 +61,7 @@ class Practice(models.Model):
         ('saturday', 'Saturday'),
         ('sunday', 'Sunday'),
     )
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     #week_id = models.ForeignKey(Week, on_delete=models.CASCADE)
     weekday = models.CharField(max_length=10, choices=DAY_CHOICE)
@@ -69,17 +69,32 @@ class Practice(models.Model):
     def __str__(self):
         return self.weekday
 
+    def safe_get(self, weekday):
+        try:
+            practice = self.objects.get(weekday=weekday)
+        except:
+            practice = None
+        return practice
+
 class Set(models.Model):
     FOCUS_CHOICE = (
+        ('warmup', 'Warmup'),
+        ('technique', 'Technique'),
+        ('kick', 'Kick'),
         ('sprint', 'Sprint'),
         ('mid-distance', 'Mid Distance'),
         ('distance', 'Distance'),
+        ('race', 'Race'),
+        ('cooldown', 'Cooldown'),
     )
 
     practice_id = models.ForeignKey(Practice, on_delete=models.CASCADE)
-    repeats = models.IntegerField(blank=True)
-    focus = models.CharField(max_length=10, choices=FOCUS_CHOICE, blank=True)
+    focus = models.CharField(max_length=15, choices=FOCUS_CHOICE, blank=True)
+    repeats = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(null=True)
+
+    def __str__(self):
+        return self.focus
 
 class Rep(models.Model):
     STROKE_CHOICE = (
@@ -87,6 +102,8 @@ class Rep(models.Model):
         ('back', 'Backstroke'),
         ('breast', 'Breaststroke'),
         ('free', 'Freestyle'),
+        ('im', 'IM'),
+        ('kick', 'Kick'),
     )
 
     set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
