@@ -12,6 +12,7 @@ from teams.models import Team, Swimmer, Week, Practice, Set, Rep
 from teams.forms import TeamForm, SwimmerForm, SetForm, PracticeForm, RepFormSet, RepInlineFormSet
 
 @csrf_protect
+@login_required
 def teamList(request):
     if request.method == 'POST':
         form = TeamForm(request.POST)
@@ -36,6 +37,7 @@ def teamList(request):
     return render(request, 'teams/team_list.html', context)
 
 
+@login_required
 def deleteTeam(request, abbr):
     team = Team.objects.filter(user=request.user).get(abbr=abbr)
     team.delete()
@@ -43,6 +45,7 @@ def deleteTeam(request, abbr):
 
 
 @csrf_protect
+@login_required
 def swimmerList(request, abbr):
     team = Team.objects.filter(user=request.user).get(abbr=abbr)
     if request.method == 'POST':
@@ -70,6 +73,7 @@ def swimmerList(request, abbr):
     return render(request, 'teams/swimmer_list.html', context)
 
 
+@login_required
 def deleteSwimmer(request, abbr, pk):
     team = Team.objects.filter(user=request.user).get(abbr=abbr)
     swimmer = Swimmer.objects.filter(team=team).get(pk=pk)
@@ -78,6 +82,7 @@ def deleteSwimmer(request, abbr, pk):
 
 
 @csrf_protect
+@login_required
 def writePractice(request, abbr, p_id):
     team = Team.objects.filter(user=request.user).get(abbr=abbr)
     practice = Practice.objects.get(pk=p_id)
@@ -121,6 +126,7 @@ def writePractice(request, abbr, p_id):
     return render(request, 'teams/practice_create.html', context)
 
 
+@login_required
 def deletePractice(request, abbr, p_id):
     practice = Practice.objects.get(pk=p_id)
     practice.delete()
@@ -128,6 +134,7 @@ def deletePractice(request, abbr, p_id):
 
 
 @csrf_protect
+@login_required
 def practiceSchedule(request, abbr):
     team = Team.objects.filter(user=request.user).get(abbr=abbr)
     if request.method == 'POST':
