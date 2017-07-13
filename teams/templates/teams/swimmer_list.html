@@ -34,6 +34,9 @@
     {% block table-title %}Swimmers{% endblock %}
 
     {% block action-buttons %}
+      <a type="button" class="btn btn-danger btn-md pull-right" href="{% url 'teams:deleteTeam' team.abbr %}">
+        Delete Team
+      </a>
       <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#downloadModal">
         <span class="glyphicon glyphicon-download"></span> Download
       </button>
@@ -127,35 +130,49 @@
     {% endblock %}
 
     {% block content %}
-      <div class="table-responsive">
-        <table id="swimmers" class="table table-striped">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Last</th>
-              <th>First</th>
-              <th>Age</th>
-              <th>M/F</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for swimmer in swimmer_list %}
+      {% if swimmer_list %}
+        <div class="table-responsive">
+          <table id="swimmers" class="table table-striped">
+            <thead>
               <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ swimmer.l_name }}</td>
-                <td>{{ swimmer.f_name }}</td>
-                <td>{{ swimmer.age }}</td>
-                <td>{{ swimmer.gender }}</td>
+                <th></th>
+                <th>Last</th>
+                <th>First</th>
+                <th>Age</th>
+                <th>M/F</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {% for swimmer in swimmer_list %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ swimmer.l_name }}</td>
+                  <td>{{ swimmer.f_name }}</td>
+                  <td>{{ swimmer.age }}</td>
+                  <td>{{ swimmer.gender }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
+      {% else %}
 
-      <a type="button" class="btn btn-danger btn-md pull-right" href="{% url 'teams:deleteTeam' team.abbr %}">
-        Delete Team
-      </a>
+        <div id="first-featurette" class="row featurette empty-set">
+            <h2 class="featurette-heading empty-dialogue">
+              No swimmers yet.
+              <button type="button" class="btn btn-primary btn-sm" style="margin-bottom: 3px" data-toggle="modal" data-target="#baseModal">
+                <span class="glyphicon glyphicon-plus-sign"></span> Add
+              </button>
+              a swimmer or
+              <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#uploadModal">
+                <span class="glyphicon glyphicon-upload"></span> Upload
+              </button>
+              swimmers to get started.
+            </h2>
+        </div>
+
+      {% endif %}
     {% endblock %}
 
     {% block scripts %}

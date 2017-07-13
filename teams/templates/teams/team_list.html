@@ -50,30 +50,42 @@
     {% endblock %}
 
     {% block content %}
-      <div class="table-responsive">
-        <table id="teams" class="table table-striped">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Abbr</th>
-              <th>Region</th>
-              <th>Swimmers</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for team in team_list %}
+      {% if team_list %}
+        <div class="table-responsive">
+          <table id="teams" class="table table-striped">
+            <thead>
               <tr>
-                <td>{{ forloop.counter }}</td>
-                <td><a href="{% url 'teams:swimmer_list' team.abbr %}">{{ team.name }}</a></td>
-                <td>{{ team.abbr }}</td>
-                <td>{{ team.region }}</td>
-                <td>{{ team.swimmer_set.all|length }}</td>
+                <th></th>
+                <th>Name</th>
+                <th>Abbr</th>
+                <th>Region</th>
+                <th>Swimmers</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {% for team in team_list %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td><a href="{% url 'teams:swimmer_list' team.abbr %}">{{ team.name }}</a></td>
+                  <td>{{ team.abbr }}</td>
+                  <td>{{ team.region }}</td>
+                  <td>{{ team.swimmer_set.all|length }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div id="first-featurette" class="row featurette empty-set">
+            <h2 class="featurette-heading empty-dialogue">
+              No teams yet.
+              <button type="button" class="btn btn-primary btn-sm" style="margin-bottom: 3px" data-toggle="modal" data-target="#baseModal">
+                <span class="glyphicon glyphicon-plus-sign"></span> Add
+              </button>
+              a team to get started.
+            </h2>
+        </div>
+      {% endif %}
     {% endblock %}
 
     {% block scripts %}
