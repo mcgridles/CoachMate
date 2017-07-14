@@ -33,13 +33,15 @@ class Swimmer(models.Model):
     l_name = models.CharField(max_length=25)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICE)
     birth_date = models.DateField(blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True)
     bio = models.TextField(blank=True)
 
     def __str__(self):
         return self.l_name
 
-    def get_age(self):
-        return int((date.today() - self.birth_date).days / 365.2425)
+    def set_age(self):
+        self.age = int((date.today() - self.birth_date).days / 365.2425)
+        self.save()
 
     def get_best_time(self, event):
         return self.event_set.filter(event=event).order_by('time')[0]
@@ -100,30 +102,15 @@ class Week(models.Model):
         self.friday = self.monday + timedelta(days=4)
         self.saturday = self.monday + timedelta(days=5)
         self.sunday = self.monday + timedelta(days=6)
-
-    def date_range(self):
-        for n in range(int((self.sunday - self.monday).days)):
-            yield self.monday + timedelta(n)
-
-    # make standalone function
-    def check_current(self):
-        for date in self.date_range():
-            if date == date.today():
-                previous_week = Week.objects.exclude(monday=self.monday).update(current=False)
-
-                self.current = True
-                self.save()
-                return self.current
-
-        self.current = False
         self.save()
-        return self.current
 
-    def get_prev_week(self):
-        return Week.objects.filter(monday__lt=self.monday).order_by('-monday')[0]
+    def get_week(self, n):
+        if n is 1:
+            monday = self.monday + timedelta(days=7)
+        else:
+            monday = self.monday - timedelta(days=7)
 
-    def get_next_week(self):
-        return Week.objects.filter(monday__gt=self.monday).order_by('monday')[0]
+        return Week.objects.get(monday=monday)
 
 
 # Workout

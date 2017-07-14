@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% extends "teams/base.html" %}
 {% load static from staticfiles %}
+{% load datetime_filter %}
 <html lang="en">
   <head>
     {% block title %}Practice - {{ team.abbr }}{% endblock %}
@@ -56,7 +57,7 @@
             </div>
 
             <div class="modal-body">
-              <form action="{% url 'teams:schedule' team.abbr %}" method="post" class="form-signin">
+              <form action="{% url 'teams:schedule' team.abbr current_week.id %}" method="post" class="form-signin">
                 {% csrf_token %}
                 {% for field in form %}
                   {{ field.label }}<br><br>
@@ -79,311 +80,58 @@
 
     {% block content %}
       <div class="panel-group" id="accordion">
-        <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              Monday
-            </h4>
-          </div>
-          <div id="collapseOne" class="panel-collapse collapse">
-            <div class="panel-body">
-              {% if practice_monday %}
-                {% for set in practice_monday.set_set.all %}
-                  <h3>
-                    {{ set.order }})
-                    {{ set.focus|title }}
-                    {% if set.repeats %}
-                       - {{ set.repeats }}x
-                    {% endif %}
-                  </h3>
+        {% for practice, day in practices %}
 
-                  <div class="reps">
-                    {% for rep in set.rep_set.all reversed %}
-                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
-                      {% if rep.rest %}
-                        @ {{ rep.rest }} rest
-                      {% endif %}
-                      {% if rep.comments %}
-                        - {{ rep.comments }}
-                      {% endif %}
-                      <br>
-                    {% endfor %}
-                  </div>
-                {% endfor %}
+          <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter }}">
 
-                <a href="{% url 'teams:deletePractice' team.abbr practice_monday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-                  <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                </a>
-                <a href="{% url 'teams:practice' team.abbr practice_monday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                  Edit
-                </a>
-              {% endif %}
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                {{ day|title }}
+              </h4>
             </div>
-          </div>
-        </div>
 
-        <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              Tuesday
-            </h4>
-          </div>
-          <div id="collapseTwo" class="panel-collapse collapse">
-            <div class="panel-body">
-              {% if practice_tuesday %}
+            <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse">
+              <div class="panel-body">
+                {% if practice %}
+                  {% for set in practice.set_set.all %}
 
-                {% for set in practice_tuesday.set_set.all %}
-                  <h3>
-                    {{ set.order }})
-                    {{ set.focus|title }}
-                    {% if set.repeats %}
-                       - {{ set.repeats }}x
-                    {% endif %}
-                  </h3>
-
-                  <div class="reps">
-                    {% for rep in set.rep_set.all reversed %}
-                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
-                      {% if rep.rest %}
-                        @ {{ rep.rest }} rest
+                    <h3>
+                      {{ set.order }})
+                      {{ set.focus|title }}
+                      {% if set.repeats %}
+                         - {{ set.repeats }}x
                       {% endif %}
-                      {% if rep.comments %}
-                        - {{ rep.comments }}
-                      {% endif %}
-                      <br>
-                    {% endfor %}
-                  </div>
-                {% endfor %}
+                    </h3>
 
-                <a href="{% url 'teams:deletePractice' team.abbr practice_tuesday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-                  <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                </a>
-                <a href="{% url 'teams:practice' team.abbr practice_tuesday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                  Edit
-                </a>
-              {% endif %}
+                    <div class="reps">
+                      {% for rep in set.rep_set.all reversed %}
+                        {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                        {% if rep.rest %}
+                          @ {{ rep.rest|format_duration }} rest
+                        {% endif %}
+                        {% if rep.comments %}
+                          - {{ rep.comments }}
+                        {% endif %}
+                        <br>
+                      {% endfor %}
+                    </div>
+
+                  {% endfor %}
+
+                  <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
+                    <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                  </a>
+                  <a href="{% url 'teams:practice' team.abbr practice.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
+                    Edit
+                  </a>
+
+                {% endif %}
+              </div>
             </div>
+
           </div>
-        </div>
 
-        <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              Wednesday
-            </h4>
-          </div>
-          <div id="collapseThree" class="panel-collapse collapse">
-            <div class="panel-body">
-              {% if practice_wednesday %}
-
-                {% for set in practice_wednesday.set_set.all %}
-                  <h3>
-                    {{ set.order }})
-                    {{ set.focus|title }}
-                    {% if set.repeats %}
-                       - {{ set.repeats }}x
-                    {% endif %}
-                  </h3>
-
-                  <div class="reps">
-                    {% for rep in set.rep_set.all reversed %}
-                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
-                      {% if rep.rest %}
-                        @ {{ rep.rest }} rest
-                      {% endif %}
-                      {% if rep.comments %}
-                        - {{ rep.comments }}
-                      {% endif %}
-                      <br>
-                    {% endfor %}
-                  </div>
-                {% endfor %}
-
-                <a href="{% url 'teams:deletePractice' team.abbr practice_wednesday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-                  <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                </a>
-                <a href="{% url 'teams:practice' team.abbr practice_wednesday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                  Edit
-                </a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              Thursday
-            </h4>
-          </div>
-          <div id="collapseFour" class="panel-collapse collapse">
-            <div class="panel-body">
-              {% if practice_thursday %}
-
-                {% for set in practice_thursday.set_set.all %}
-                  <h3>
-                    {{ set.order }})
-                    {{ set.focus|title }}
-                    {% if set.repeats %}
-                       - {{ set.repeats }}x
-                    {% endif %}
-                  </h3>
-
-                  <div class="reps">
-                    {% for rep in set.rep_set.all reversed %}
-                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
-                      {% if rep.rest %}
-                        @ {{ rep.rest }} rest
-                      {% endif %}
-                      {% if rep.comments %}
-                        - {{ rep.comments }}
-                      {% endif %}
-                      <br>
-                    {% endfor %}
-                  </div>
-                {% endfor %}
-
-                <a href="{% url 'teams:deletePractice' team.abbr practice_thursday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-                  <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                </a>
-                <a href="{% url 'teams:practice' team.abbr practice_thursday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                  Edit
-                </a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              Friday
-            </h4>
-          </div>
-          <div id="collapseFive" class="panel-collapse collapse">
-            <div class="panel-body">
-              {% if practice_friday %}
-
-                {% for set in practice_friday.set_set.all %}
-                  <h3>
-                    {{ set.order }})
-                    {{ set.focus|title }}
-                    {% if set.repeats %}
-                       - {{ set.repeats }}x
-                    {% endif %}
-                  </h3>
-
-                  <div class="reps">
-                    {% for rep in set.rep_set.all reversed %}
-                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
-                      {% if rep.rest %}
-                        @ {{ rep.rest }} rest
-                      {% endif %}
-                      {% if rep.comments %}
-                        - {{ rep.comments }}
-                      {% endif %}
-                      <br>
-                    {% endfor %}
-                  </div>
-              {% endfor %}
-
-              <a href="{% url 'teams:deletePractice' team.abbr practice_friday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-                <span class="glyphicon glyphicon-remove-circle"></span> Delete
-              </a>
-              <a href="{% url 'teams:practice' team.abbr practice_friday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                Edit
-              </a>
-            {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              Saturday
-            </h4>
-          </div>
-          <div id="collapseSix" class="panel-collapse collapse">
-            <div class="panel-body">
-              {% if practice_saturday %}
-
-                {% for set in practice_saturday.set_set.all %}
-                  <h3>
-                    {{ set.order }})
-                    {{ set.focus|title }}
-                    {% if set.repeats %}
-                       - {{ set.repeats }}x
-                    {% endif %}
-                  </h3>
-                  <div class="reps">
-                    {% for rep in set.rep_set.all reversed %}
-                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
-                      {% if rep.rest %}
-                        @ {{ rep.rest }} rest
-                      {% endif %}
-                      {% if rep.comments %}
-                        - {{ rep.comments }}
-                      {% endif %}
-                      <br>
-                    {% endfor %}
-                  </div>
-                {% endfor %}
-
-                <a href="{% url 'teams:deletePractice' team.abbr practice_saturday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-                  <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                </a>
-                <a href="{% url 'teams:practice' team.abbr practice_saturday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                  Edit
-                </a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              Sunday
-            </h4>
-          </div>
-          <div id="collapseSeven" class="panel-collapse collapse">
-            <div class="panel-body">
-              {% if practice_sunday %}
-
-                {% for set in practice_sunday.set_set.all %}
-                  <h3>
-                    {{ set.order }})
-                    {{ set.focus|title }}
-                    {% if set.repeats %}
-                       - {{ set.repeats }}x
-                    {% endif %}
-                  </h3>
-                  <div class="reps">
-                    {% for rep in set.rep_set.all reversed %}
-                      {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
-                      {% if rep.rest %}
-                        @ {{ rep.rest }} rest
-                      {% endif %}
-                      {% if rep.comments %}
-                        - {{ rep.comments }}
-                      {% endif %}
-                      <br>
-                    {% endfor %}
-                  </div>
-                {% endfor %}
-
-                <a href="{% url 'teams:deletePractice' team.abbr practice_sunday.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-                  <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                </a>
-                <a href="{% url 'teams:practice' team.abbr practice_sunday.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                  Edit
-                </a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
+        {% endfor %}
       </div>
     {% endblock %}
 

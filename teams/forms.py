@@ -23,7 +23,7 @@ class SwimmerForm(ModelForm):
             'f_name': 'First Name',
             'l_name': 'Last Name',
             'gender': 'M/F',
-            'age': 'Age',
+            'birth_date': 'DOB',
             'bio': 'Bio',
         }
 

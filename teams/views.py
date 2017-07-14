@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import collections
 
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 from teams.models import Team, Swimmer, Week, Practice, Set, Rep
-from teams.forms import TeamForm, SwimmerForm, SetForm, PracticeForm, RepFormSet, RepInlineFormSet
+from teams.forms import TeamForm, SwimmerForm, SetForm, PracticeForm, RepFormSet
+import teams.functions as funct
 
 @csrf_protect
 @login_required
@@ -29,7 +30,7 @@ def teamList(request):
     else:
         form = TeamForm()
 
-    team_list = Team.objects.filter(user=request.user)
+    team_list = Team.objects.filter(user=request.user).order_by('name')
     context = {
         'form': form,
         'team_list': team_list,
@@ -57,14 +58,14 @@ def swimmerList(request, abbr):
             except:
                 new_swimmer = form.save(commit=False)
                 new_swimmer.team = team
-                new_swimmer.save()
+                new_swimmer.set_age
 
                 form = SwimmerForm()
                 return redirect('teams:swimmer_list', abbr=team.abbr)
     else:
         form = SwimmerForm()
 
-    swimmer_list  = team.swimmer_set.all()
+    swimmer_list  = Swimmer.objects.filter(team=team).order_by('l_name')
     context = {
         'team': team,
         'form': form,
@@ -74,9 +75,9 @@ def swimmerList(request, abbr):
 
 
 @login_required
-def deleteSwimmer(request, abbr, pk):
+def deleteSwimmer(request, abbr, s_id):
     team = Team.objects.filter(user=request.user).get(abbr=abbr)
-    swimmer = Swimmer.objects.filter(team=team).get(pk=pk)
+    swimmer = Swimmer.objects.filter(team=team).get(pk=s_id)
     swimmer.delete()
     return redirect('teams:swimmer_list', abbr=abbr)
 
@@ -119,6 +120,7 @@ def writePractice(request, abbr, p_id):
     context = {
         'team': team,
         'practice': practice,
+        'week': practice.week_id.id,
         'setForm': setForm,
         'rep_formset': rep_formset,
         'set_list': set_list,
@@ -129,73 +131,76 @@ def writePractice(request, abbr, p_id):
 @login_required
 def deletePractice(request, abbr, p_id):
     practice = Practice.objects.get(pk=p_id)
+    w_id = practice.week_id.id
     practice.delete()
-    return redirect('teams:schedule', abbr=abbr)
+    return redirect('teams:schedule', abbr=abbr, w_id=w_id)
 
 
 @csrf_protect
 @login_required
-def practiceSchedule(request, abbr):
+def practiceSchedule(request, abbr, w_id):
     team = Team.objects.filter(user=request.user).get(abbr=abbr)
+
+    # TEST
+    weeks = {
+        'current_week': None,
+        'previous_week': 0,
+        'next_week': 1,
+    }
+    for key in sorted(weeks):
+        flag = False
+        try:
+            if not w_id and key is 'current_week':
+                flag = True
+                funct.check_current()
+                weeks[key] = Week.objects.get(current=True)
+            elif key is 'current_week':
+                weeks[key] = Week.objects.get(id=w_id)
+            else:
+                weeks[key] = weeks['current_week'].get_week(weeks[key])
+        except Week.DoesNotExist:
+            monday = funct.get_monday(weeks[key])
+            current = True if key is 'current_week' else False
+            weeks[key] = Week.objects.create(monday=monday, current=current)
+            weeks[key].populate()
+
     if request.method == 'POST':
         form = PracticeForm(request.POST)
         if form.is_valid():
             weekday = form.cleaned_data['weekday']
             if Practice.objects.filter(weekday=weekday):
-                practices = Practice.objects.filter(weekday=weekday)
-                practices.delete()
+                practice_list = Practice.objects.filter(weekday=weekday)
+                practice_list.delete()
 
-            instance = form.save(commit=False)
-            instance.user = request.user
-            instance.save()
+            practice = form.save(commit=False)
+            practice.team = team
+            practice.week_id = weeks['current_week']
+            practice.save()
 
             context = {
                 'team': team,
-                'practice': instance
+                'practice': practice,
             }
-            return redirect('teams:practice', abbr=team.abbr, p_id=instance.id)
+            return redirect('teams:practice', abbr=team.abbr, p_id=practice.id)
     else:
         form = PracticeForm()
 
-    try:
-        practice_monday = Practice.objects.get(weekday='monday')
-    except Practice.DoesNotExist:
-        practice_monday = None
-    try:
-        practice_tuesday = Practice.objects.get(weekday='tuesday')
-    except Practice.DoesNotExist:
-        practice_tuesday = None
-    try:
-        practice_wednesday = Practice.objects.get(weekday='wednesday')
-    except Practice.DoesNotExist:
-        practice_wednesday = None
-    try:
-        practice_thursday = Practice.objects.get(weekday='thursday')
-    except Practice.DoesNotExist:
-        practice_thursday = None
-    try:
-        practice_friday = Practice.objects.get(weekday='friday')
-    except Practice.DoesNotExist:
-        practice_friday = None
-    try:
-        practice_saturday = Practice.objects.get(weekday='saturday')
-    except Practice.DoesNotExist:
-        practice_saturday = None
-    try:
-        practice_sunday = Practice.objects.get(weekday='sunday')
-    except Practice.DoesNotExist:
-        practice_sunday = None
+    practices = []
+    weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ,'sunday']
+    for day in weekdays:
+        try:
+            practices.append(Practice.objects.get(weekday=day))
+        except Practice.DoesNotExist:
+            practices.append(None)
+
+    practices = zip(practices, weekdays)
 
     context = {
         'team': team,
         'form': form,
-        'practice_monday': practice_monday,
-        'practice_tuesday': practice_tuesday,
-        'practice_wednesday': practice_wednesday,
-        'practice_thursday': practice_thursday,
-        'practice_friday': practice_friday,
-        'practice_saturday': practice_saturday,
-        'practice_sunday': practice_sunday,
+        'practices': practices,
+        'days': weekdays,
     }
+    context.update(weeks)
 
     return render(request, 'teams/practice_schedule.html', context)

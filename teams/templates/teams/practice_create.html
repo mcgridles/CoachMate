@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% extends "teams/base.html" %}
 {% load static from staticfiles %}
+{% load datetime_filter %}
 <html lang="en">
   <head>
     {% block title %}Practice - {{ team.abbr }}{% endblock %}
@@ -40,7 +41,7 @@
       <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-remove-circle"></span> Delete
       </a>
-      <a href="{% url 'teams:schedule' team.abbr %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
+      <a href="{% url 'teams:schedule' team.abbr week %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-ok-circle"></span> Finish
       </a>
       <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
@@ -133,7 +134,7 @@
             {% for rep in set.rep_set.all reversed %}
               {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
               {% if rep.rest %}
-                @ {{ rep.rest }} rest
+                @ {{ rep.rest|format_duration }} rest
               {% endif %}
               {% if rep.comments %}
                 - {{ rep.comments }}
@@ -144,7 +145,7 @@
         </div>
 
       {% empty %}
-      
+
         <div id="first-featurette" class="row featurette empty-set">
             <h2 class="featurette-heading empty-dialogue">
               No sets yet.

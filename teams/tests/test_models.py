@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 import teams.tests.test_setup as test
+from teams.models import Week
 
 class SwimmerModelTests(TestCase):
     def setUp(self):
@@ -48,15 +49,17 @@ class WeekModelTests(TestCase):
         self.assertEqual(week.tuesday, tuesday)
         self.assertEqual(week.sunday, sunday)
 
-    def test_check_current(self):
+    def test_get_week_with_no_weeks(self):
         """
-        If the current week is found, the current boolean value will be set to
-        True and the boolean value of the previous week will be set to False.
+        Raises a DoesNotExist error if either week has not been created.
         """
-        current_week = test.create_week()
-        previous_week = test.create_week(date(2017,7,3), True)
-        current_week.populate()
-        current_week.check_current()
-        previous_week.refresh_from_db()
-        self.assertEqual(current_week.current, True)
-        self.assertEqual(previous_week.current, False)
+        week = test.create_week()
+        self.assertRaises(Week.DoesNotExist, week.get_week, n=1)
+
+    def test_get_week_with_weeks(self):
+        """
+        Returns the corresponding week, either next or previous.
+        """
+        week = test.create_week()
+        previous = test.create_week(monday=date(2017,7,3))
+        self.assertEqual(week.get_week(-1), previous)

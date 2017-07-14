@@ -182,7 +182,7 @@ class TestDeleteModelsViews(TestCase):
         swimmer = test.create_swimmer(team=team)
         response = self.client.get(reverse(
                 'teams:deleteSwimmer',
-                kwargs={'abbr': team.abbr, 'pk': swimmer.id}),
+                kwargs={'abbr': team.abbr, 's_id': swimmer.id}),
             follow=True)
         self.assertQuerysetEqual(response.context['swimmer_list'], [])
 
@@ -193,9 +193,10 @@ class TestDeleteModelsViews(TestCase):
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
         week = test.create_week()
+        week.populate()
         practice = test.create_practice(team=team, week=week)
         response = self.client.get(reverse(
                 'teams:deletePractice',
                 kwargs={'abbr': team.abbr, 'p_id': practice.id}),
             follow=True)
-        self.assertEqual(response.context['practice_monday'], None)
+        self.assertEqual(response.context['practices'][0], None)
