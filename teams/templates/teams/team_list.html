@@ -13,6 +13,7 @@
     {% block page-title %}Dashboard{% endblock %}
     {% block table-title %}Teams{% endblock %}
 
+    <!-- Add a team -->
     {% block action-buttons %}{{ block.super }}{% endblock %}
 
     {% block modal %}
@@ -31,6 +32,7 @@
             <div class="modal-body">
               <form action="{% url 'teams:team_list' %}" method="post" class="form-signin">
                 {% csrf_token %}
+                <!-- Team form -->
                 {% for field in form %}
                   {{ field.label_tag }} {{ field }}<br>
                 {% endfor %}
@@ -51,6 +53,7 @@
 
     {% block content %}
       {% if team_list %}
+        <!-- Display team in table -->
         <div class="table-responsive">
           <table id="teams" class="table table-striped">
             <thead>
@@ -75,7 +78,10 @@
             </tbody>
           </table>
         </div>
+
       {% else %}
+
+      <!-- Display prompts if no teams -->
         <div id="first-featurette" class="row featurette empty-set">
             <h2 class="featurette-heading empty-dialogue">
               No teams yet.
@@ -89,6 +95,7 @@
     {% endblock %}
 
     {% block scripts %}
+      <!-- Highlights sidebar links according to page -->
       <script>
         $(function() {
           var loc = window.location.pathname;
@@ -99,23 +106,29 @@
           }
         });
       </script>
-      <!--
-        <script>
-          $(document).ready( function () {
-            $('#teams').DataTable();
-          } );
-        </script>
 
-        <script>
-          $(document).ready( function () {
-            var inputs = document.getElementsByTagName("input");
-            for (i=0; i<inputs.length; i++) {
-              if (inputs[i].type == "search") {
-                inputs[i].id += "table-search";
-              }
+      <!-- Create DataTable from team table -->
+      <!-- Need to figure out how to make each entry a link -->
+      <!--
+      <script>
+        $(document).ready( function () {
+          $('#teams').DataTable();
+        } );
+      </script>
+      -->
+
+      <!-- Format DataTable search box to fit style -->
+      <!--
+      <script>
+        $(document).ready( function () {
+          var inputs = document.getElementsByTagName("input");
+          for (i=0; i<inputs.length; i++) {
+            if (inputs[i].type == "search") {
+              inputs[i].id += "table-search";
             }
-          } );
-        </script>
+          }
+        } );
+      </script>
       -->
     {% endblock %}
   </body>

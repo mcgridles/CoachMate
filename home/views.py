@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 
+# Homepage
+
 def home(request):
     name = 'CoachMate'
     context = {'name': name}

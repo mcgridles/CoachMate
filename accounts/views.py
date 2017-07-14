@@ -14,9 +14,10 @@ def login(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
+            # authenticate user
             user = auth.authenticate(username=username, password=password)
             if user is not None and user.is_active:
-                auth.login(request, user)
+                auth.login(request, user) # log in user
                 return redirect('teams:team_list')
             else:
                 form = LogInForm()
@@ -37,8 +38,9 @@ def signup(request):
             form.save()
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
+            # authenticate user
             user = auth.authenticate(username=username, password=password)
-            auth.login(request, user)
+            auth.login(request, user) # log in user
             return redirect('teams:team_list')
     else:
         form = SignUpForm()

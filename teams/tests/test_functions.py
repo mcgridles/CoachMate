@@ -104,9 +104,3 @@ class FunctionTests(TestCase):
         #monday = funct.get_monday(1)
         #next_mon = date(2017,7,17)
         #self.assertEqual(monday, next_mon)
-
-    def test_week_shit_no_weeks(self):
-        pass
-        funct.week_shit(0)
-        week = Week.objects.get(current=True)
-        self.assertEqual(week.monday, date(2017,7,10))

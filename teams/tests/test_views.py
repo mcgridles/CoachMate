@@ -199,4 +199,4 @@ class TestDeleteModelsViews(TestCase):
                 'teams:deletePractice',
                 kwargs={'abbr': team.abbr, 'p_id': practice.id}),
             follow=True)
-        self.assertEqual(response.context['practices'][0], None)
+        self.assertEqual(response.context['practices'][0], (None, 'monday'))

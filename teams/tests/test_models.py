@@ -15,7 +15,7 @@ class SwimmerModelTests(TestCase):
     def tearDown(self):
         self.user.delete()
 
-    def test_age(self):
+    def test_set_age(self):
         """
         Age function should return current age of swimmer.
         """
@@ -23,7 +23,7 @@ class SwimmerModelTests(TestCase):
         swimmer = test.create_swimmer(team, 'Henry', 'Gridley', 'M')
         birth_date = date(1996,9,21)
         age = int((date.today() - birth_date).days / 365.2425)
-        self.assertEqual(swimmer.get_age(), age)
+        self.assertEqual(swimmer.set_age(), age)
 
     def test_best_time(self):
         """

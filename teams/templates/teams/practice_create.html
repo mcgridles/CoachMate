@@ -12,41 +12,24 @@
 
   <body>
     {% block sidebar %}
-      <ul class="nav nav-sidebar">
-        <li class="dashboard"><a href="{% url 'teams:team_list' %}">Overview <span class="sr-only">(current)</span></a></li>
-        <li class="practice"><a href="#">Practice</a></li>
-        <li><a href="#">Analytics</a></li>
-        <li><a href="#">Export</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
-        <li><a href="">Nav item</a></li>
-        <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
-        <li><a href="">More navigation</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
-        <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
-      </ul>
+      {{ block.super }}
     {% endblock %}
 
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}Practice{% endblock %}
 
     {% block action-buttons %}
+      <!-- Delete current practice -->
       <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-remove-circle"></span> Delete
       </a>
+      <!-- Finish writing practice -->
       <a href="{% url 'teams:schedule' team.abbr week %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-ok-circle"></span> Finish
       </a>
-      <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
-        <span class="glyphicon glyphicon-plus-sign"></span> Add
-      </button>
+      <!-- Add a set to the practice -->
+      {{ block.super }}
+      <!-- Open a modal containing info about writing a practice -->
       <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#infoModal">
         <span class="glyphicon glyphicon-info-sign"></span> Info
       </button>
@@ -68,6 +51,8 @@
             <div class="modal-body">
               <form id="setForm" action="#" method="post">
                 {% csrf_token %}
+
+                <!-- Set form errors -->
                 {% if setForm.errors %}
                   {% for field in setForm %}
                     {% for error in field.errors %}
@@ -76,18 +61,20 @@
                       </div>
                     {% endfor %}
                   {% endfor %}
-                  {% for error in form.non_field_errors %}
+                  {% for error in setForm.non_field_errors %}
                     <div class="alert alert-danger" style="text-align: center">
                         <strong>{{ error|escape }}</strong>
                     </div>
                   {% endfor %}
                 {% endif %}
 
+                <!-- Set form -->
                 {% for field in setForm %}
                   {{ field }}
                 {% endfor %}
                 <hr>
 
+                <!-- Rep form -->
                 <table id="reps" border="0" cellpadding="0" cellspacing="0">
                     <tbody>
                         {% for form in rep_formset.forms %}
@@ -103,8 +90,8 @@
                     </tbody>
                 </table>
                 {{ rep_formset.management_form }}
-
                 <br>
+
                 <div class="modal-footer">
                   <button type="submit" class="btn btn-md btn-primary">Submit</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -121,7 +108,7 @@
 
     {% block content %}
       {% for set in set_list %}
-
+        <!-- Display sets & reps -->
         <div class="set">
           <h3>
             {{ set.order }})
@@ -130,6 +117,7 @@
                - {{ set.repeats }}x
             {% endif %}
           </h3>
+
           <div class="reps">
             {% for rep in set.rep_set.all reversed %}
               {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
@@ -142,10 +130,12 @@
               <br>
             {% endfor %}
           </div>
+
         </div>
 
       {% empty %}
 
+        <!-- Display prompt if no set_list is empty -->
         <div id="first-featurette" class="row featurette empty-set">
             <h2 class="featurette-heading empty-dialogue">
               No sets yet.
@@ -160,6 +150,7 @@
     {% endblock %}
 
     {% block scripts %}
+      <!-- Allow reps to be added or removed from set form -->
       <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
       <script>
         $(function() {
@@ -168,6 +159,8 @@
             });
         })
       </script>
+
+      <!-- Disables 'remove' function when there is only one rep -->
       <script>
         $(function() {
           document.getElementsByClassName("remove")[0].style.display = "none";

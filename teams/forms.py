@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django.forms import ModelForm, BaseFormSet, ValidationError
 from django.forms import formset_factory, inlineformset_factory
 

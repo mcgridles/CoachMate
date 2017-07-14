@@ -7,10 +7,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-# Not sure how to associate things with a user but we may need to give the
-# Team and Week classes a ForeignKey field for a user
-
-
 # Swimmers & Teams
 
 class Team(models.Model):
@@ -40,10 +36,17 @@ class Swimmer(models.Model):
         return self.l_name
 
     def set_age(self):
+        """
+        Calculate and set age field based on birth date.
+        """
         self.age = int((date.today() - self.birth_date).days / 365.2425)
         self.save()
+        return self.age
 
     def get_best_time(self, event):
+        """
+        Return best time in given event.
+        """
         return self.event_set.filter(event=event).order_by('time')[0]
 
 
@@ -79,8 +82,8 @@ class Event(models.Model):
 
 # Calendar
 
-# Need to be able to associate practice with a day of the week
-# Could add more class to organize weeks like a calendar or could do it in views
+# Could add more classes to organize weeks like a calendar or could do it in views
+# Need to figure out how to navigate weeks
 class Week(models.Model):
     monday = models.DateField(null=True)
     tuesday = models.DateField(null=True)
@@ -95,6 +98,9 @@ class Week(models.Model):
         return self.monday.isoformat()
 
     def populate(self):
+        """
+        Fill in date information for all days based on initial Monday.
+        """
         # use relativedelta
         self.tuesday = self.monday + timedelta(days=1)
         self.wednesday = self.monday + timedelta(days=2)
@@ -105,6 +111,9 @@ class Week(models.Model):
         self.save()
 
     def get_week(self, n):
+        """
+        Return previous or next Monday.
+        """
         if n is 1:
             monday = self.monday + timedelta(days=7)
         else:
@@ -115,6 +124,7 @@ class Week(models.Model):
 
 # Workout
 
+# Sets day, week, and team for each group of sets
 class Practice(models.Model):
     DAY_CHOICE = (
         ('monday', 'Monday'),
@@ -133,6 +143,7 @@ class Practice(models.Model):
     def __str__(self):
         return self.weekday
 
+# Overall focus and repeats
 class Set(models.Model):
     FOCUS_CHOICE = (
         ('warmup', 'Warmup'),
@@ -148,11 +159,12 @@ class Set(models.Model):
     practice_id = models.ForeignKey(Practice, on_delete=models.CASCADE)
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE, blank=True)
     repeats = models.IntegerField(blank=True, null=True)
-    order = models.IntegerField(null=True)
+    order = models.IntegerField(null=True) # creates order within a practice
 
     def __str__(self):
         return self.focus
 
+# Individual items in a set
 class Rep(models.Model):
     STROKE_CHOICE = (
         ('fly', 'Butterfly'),

@@ -14,7 +14,7 @@
     {% block sidebar %}
       <ul class="nav nav-sidebar">
         <li class="dashboard"><a href="{% url 'teams:team_list' %}">Overview <span class="sr-only">(current)</span></a></li>
-        <li class="practice"><a href="#">Practice</a></li>
+        <li class="practice"><a href="{% url 'teams:schedule' team.abbr 0 %}">Practice</a></li>
         <li><a href="#">Analytics</a></li>
         <li><a href="#">Export</a></li>
       </ul>
@@ -38,9 +38,8 @@
     {% block table-title %}Schedule{% endblock %}
 
     {% block action-buttons %}
-      <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
-        <span class="glyphicon glyphicon-plus-sign"></span> Add Practice
-      </button>
+      <!-- Add a practice -->
+      {{ block.super }}
     {% endblock %}
 
     {% block modal %}
@@ -59,6 +58,7 @@
             <div class="modal-body">
               <form action="{% url 'teams:schedule' team.abbr current_week.id %}" method="post" class="form-signin">
                 {% csrf_token %}
+                <!-- Practice form: sets weekday -->
                 {% for field in form %}
                   {{ field.label }}<br><br>
                   {{ field }}
@@ -80,8 +80,9 @@
 
     {% block content %}
       <div class="panel-group" id="accordion">
+        <!-- Loop through each practice and display them on each day -->
+        <!-- 'Day' sets panel headings even if there is no practice that day -->
         {% for practice, day in practices %}
-
           <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter }}">
 
             <div class="panel-heading">
@@ -92,6 +93,7 @@
 
             <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse">
               <div class="panel-body">
+                <!-- Display practice: same format as when writing -->
                 {% if practice %}
                   {% for set in practice.set_set.all %}
 
@@ -118,6 +120,7 @@
 
                   {% endfor %}
 
+                  <!-- Delete or edit the practice -->
                   <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
                     <span class="glyphicon glyphicon-remove-circle"></span> Delete
                   </a>
@@ -130,12 +133,12 @@
             </div>
 
           </div>
-
         {% endfor %}
       </div>
     {% endblock %}
 
     {% block scripts %}
+      <!-- Highlights sidebar links according to page -->
       <script>
         $(function() {
           var loc = window.location.pathname;
