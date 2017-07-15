@@ -51,20 +51,20 @@ def create_event(swimmer, event='50 free', time=timedelta(seconds=22, millisecon
         time=time,
     )
 
-def create_week(monday=date(2017,7,10), current=False):
+def create_week(monday=date(2017,7,10), present=False):
     """
     Create a test week.
     """
-    return Week.objects.create(monday=monday, current=current)
+    return Week.objects.create(monday=monday, present=present)
 
-def create_practice(team, week):
+def create_practice(team, week, weekday='monday'):
     """
     Create a test practice.
     """
     return Practice.objects.create(
         team=team,
         week_id=week,
-        weekday='monday',
+        weekday=weekday,
     )
 
 def create_set(practice, focus='warmup', repeats=1, order=1):
@@ -78,7 +78,7 @@ def create_set(practice, focus='warmup', repeats=1, order=1):
         order=order,
     )
 
-def create_rep(_set, num=10, distance=100, stroke='freestyle'):
+def create_rep(_set, num=10, distance=100, stroke='free'):
     """
     Create a test rep.
     """
