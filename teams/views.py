@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.core import serializers
 
 from teams.models import Team, Swimmer, Week, Practice, Set, Rep
 from teams.forms import TeamForm, SwimmerForm, SetForm, PracticeForm, RepFormSet
@@ -51,7 +53,7 @@ def deleteTeam(request, abbr):
 @csrf_protect
 @login_required
 def swimmerList(request, abbr):
-    team = Team.objects.filter(user=request.user).get(abbr=abbr)
+    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     if request.method == 'POST':
         form = SwimmerForm(request.POST)
         if form.is_valid():
@@ -83,8 +85,7 @@ def swimmerList(request, abbr):
 # Delete a swimmer
 @login_required
 def deleteSwimmer(request, abbr, s_id):
-    team = Team.objects.filter(user=request.user).get(abbr=abbr)
-    swimmer = Swimmer.objects.filter(team=team).get(pk=s_id)
+    swimmer = get_object_or_404(Swimmer, pk=s_id)
     swimmer.delete()
     return redirect('teams:swimmer_list', abbr=abbr)
 
@@ -92,8 +93,8 @@ def deleteSwimmer(request, abbr, s_id):
 @csrf_protect
 @login_required
 def writePractice(request, abbr, p_id):
-    team = Team.objects.filter(user=request.user).get(abbr=abbr)
-    practice = Practice.objects.get(pk=p_id)
+    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
+    practice = get_object_or_404(Practice, Q(team=team), pk=p_id)
     if request.method == 'POST':
         setForm = SetForm(data=request.POST, p_id=p_id)
         rep_formset = RepFormSet(request.POST)
@@ -101,7 +102,7 @@ def writePractice(request, abbr, p_id):
         if setForm.is_valid() and rep_formset.is_valid():
             # get set form instance
             setInstance = setForm.save(commit=False)
-            setInstance.practice_id = Practice.objects.get(id=p_id) # set practice id
+            setInstance.practice_id = practice # set practice id
             setInstance.save()
 
             rep_formset.save_formset(setInstance.id) # set set ids
@@ -142,7 +143,7 @@ def writePractice(request, abbr, p_id):
 # Delete a practice
 @login_required
 def deletePractice(request, abbr, p_id):
-    practice = Practice.objects.get(pk=p_id)
+    practice = get_object_or_404(Practice, pk=p_id)
     w_id = practice.week_id.id
     practice.delete()
     return redirect('teams:schedule', abbr=abbr, w_id=w_id)
@@ -151,7 +152,7 @@ def deletePractice(request, abbr, p_id):
 @csrf_protect
 @login_required
 def practiceSchedule(request, abbr, w_id):
-    team = Team.objects.filter(user=request.user).get(abbr=abbr)
+    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     weeks = {
         'current_week': None,
         'previous_week': 0,
@@ -162,12 +163,12 @@ def practiceSchedule(request, abbr, w_id):
         flag = False
         try:
             # try database queries
-            if not w_id and key is 'current_week':
+            if int(w_id) is 0 and 'current_week' in key:
                 # w_id = 0 if requesting the current week
                 flag = True
-                funct.check_current() # check weeks for current
-                weeks[key] = Week.objects.get(current=True)
-            elif key is 'current_week':
+                funct.check_present() # check weeks for current
+                weeks[key] = Week.objects.get(present=True)
+            elif int(w_id) is not 0 and 'current_week' in key:
                 # get week with id w_id as 'current week'
                 weeks[key] = Week.objects.get(id=w_id)
             else:
@@ -175,9 +176,11 @@ def practiceSchedule(request, abbr, w_id):
                 weeks[key] = weeks['current_week'].get_week(weeks[key])
         except Week.DoesNotExist:
             # else create week
-            monday = funct.get_monday(weeks[key]) # return date of necessary Monday
-            current = True if key is 'current_week' else False
-            weeks[key] = Week.objects.create(monday=monday, current=current)
+            if not flag: # return date of necessary Monday
+                monday = funct.get_monday(weeks['current_week'], weeks[key])
+            else:
+                monday = funct.get_monday(weeks[key])
+            weeks[key] = Week.objects.create(monday=monday, present=flag)
             weeks[key].populate() # populate dates for rest of week
 
     if request.method == 'POST':
@@ -211,18 +214,28 @@ def practiceSchedule(request, abbr, w_id):
     for day in weekdays:
         # create list of practices
         try:
-            practices.append(Practice.objects.get(weekday=day))
+            practices.append(Practice.objects.filter(team=team).order_by('order').get(weekday=day))
         except Practice.DoesNotExist:
             practices.append(None)
 
     practices = zip(practices, weekdays) # add weekdays
+    dates = Week.objects.filter(pk=weeks['current_week'].id).values(
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday',
+    )[0] # unpack dates from current week
+    dates = zip(dates.keys(), dates.values()) # zip into tuples
 
     context = {
         'team': team,
         'form': form,
         'practices': practices,
-        'days': weekdays,
+        'dates': dates,
     }
-    context.update(weeks) # include 'weeks' dict
+    context.update(weeks) # include 'weeks' dict in context
 
     return render(request, 'teams/practice_schedule.html', context)

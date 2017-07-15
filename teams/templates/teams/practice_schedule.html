@@ -35,7 +35,9 @@
     {% endblock %}
 
     {% block page-title %}{{ team.name }}{% endblock %}
-    {% block table-title %}Schedule{% endblock %}
+    {% block table-title %}
+      Schedule ({{ current_week.monday|date:"m/d/y" }} - {{ current_week.sunday|date:"m/d/y" }})
+    {% endblock %}
 
     {% block action-buttons %}
       <!-- Add a practice -->
@@ -88,6 +90,11 @@
             <div class="panel-heading">
               <h4 class="panel-title">
                 {{ day|title }}
+                {% for field, value in dates %}
+                  {% if field == day %}
+                    - {{ value|date:"m/d" }}
+                  {% endif %}
+                {% endfor %}
               </h4>
             </div>
 
@@ -135,6 +142,12 @@
           </div>
         {% endfor %}
       </div>
+      <a href="{% url 'teams:schedule' team.abbr previous_week.id %}" type="button" class="btn btn-primary btn-md pull-left" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-circle-arrow-left"></span> Previous
+      </a>
+      <a href="{% url 'teams:schedule' team.abbr next_week.id %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-circle-arrow-right"></span> Next
+      </a>
     {% endblock %}
 
     {% block scripts %}

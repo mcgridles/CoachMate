@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from datetime import date, timedelta
-#from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -92,7 +92,7 @@ class Week(models.Model):
     friday = models.DateField(null=True)
     saturday = models.DateField(null=True)
     sunday = models.DateField(null=True)
-    current = models.BooleanField()
+    present = models.BooleanField()
 
     def __str__(self):
         return self.monday.isoformat()
@@ -101,13 +101,12 @@ class Week(models.Model):
         """
         Fill in date information for all days based on initial Monday.
         """
-        # use relativedelta
-        self.tuesday = self.monday + timedelta(days=1)
-        self.wednesday = self.monday + timedelta(days=2)
-        self.thursday = self.monday + timedelta(days=3)
-        self.friday = self.monday + timedelta(days=4)
-        self.saturday = self.monday + timedelta(days=5)
-        self.sunday = self.monday + timedelta(days=6)
+        self.tuesday = self.monday + relativedelta(days=1)
+        self.wednesday = self.monday + relativedelta(days=2)
+        self.thursday = self.monday + relativedelta(days=3)
+        self.friday = self.monday + relativedelta(days=4)
+        self.saturday = self.monday + relativedelta(days=5)
+        self.sunday = self.monday + relativedelta(days=6)
         self.save()
 
     def get_week(self, n):
