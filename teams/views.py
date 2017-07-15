@@ -9,15 +9,15 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.core import serializers
 
-from teams.models import Team, Swimmer, Week, Practice, Set, Rep
-from teams.forms import TeamForm, SwimmerForm, SetForm, PracticeForm, RepFormSet
+from teams.models import *
+from teams.forms import *
 import teams.functions as funct
 
 @csrf_protect
 @login_required
 def teamList(request):
     if request.method == 'POST':
-        form = TeamForm(request.POST)
+        form = TeamForm(request.POST, user=request.user)
 
         if form.is_valid():
             try:
@@ -26,13 +26,11 @@ def teamList(request):
                 team = Team.objects.filter(user=request.user).get(name=team_name)
             except:
                 # else create new team
-                new_team = form.save(commit=False)
-                new_team.user = request.user
-                new_team.save()
-                form = TeamForm()
+                form.save()
+                form = TeamForm(user=request.user)
                 return redirect('teams:team_list')
     else:
-        form = TeamForm()
+        form = TeamForm(user=request.user)
 
     team_list = Team.objects.filter(user=request.user).order_by('name')
     context = {
@@ -55,7 +53,7 @@ def deleteTeam(request, abbr):
 def swimmerList(request, abbr):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     if request.method == 'POST':
-        form = SwimmerForm(request.POST)
+        form = SwimmerForm(request.POST, team=team)
         if form.is_valid():
             last_name = form.cleaned_data['l_name']
             first_name = form.cleaned_data['f_name']
@@ -66,12 +64,11 @@ def swimmerList(request, abbr):
             except:
                 # else create new swimmer
                 new_swimmer = form.save(commit=False)
-                new_swimmer.team = team
                 new_swimmer.set_age
-                form = SwimmerForm()
+                form = SwimmerForm(team=team)
                 return redirect('teams:swimmer_list', abbr=team.abbr)
     else:
-        form = SwimmerForm()
+        form = SwimmerForm(team=team)
 
     swimmer_list  = Swimmer.objects.filter(team=team).order_by('l_name')
     context = {
@@ -96,18 +93,15 @@ def writePractice(request, abbr, p_id):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     practice = get_object_or_404(Practice, Q(team=team), pk=p_id)
     if request.method == 'POST':
-        setForm = SetForm(data=request.POST, p_id=p_id)
+        setForm = SetForm(data=request.POST, practice=p_id)
         rep_formset = RepFormSet(request.POST)
 
         if setForm.is_valid() and rep_formset.is_valid():
             # get set form instance
-            setInstance = setForm.save(commit=False)
-            setInstance.practice_id = practice # set practice id
-            setInstance.save()
-
+            setInstance = setForm.save()
             rep_formset.save_formset(setInstance.id) # set set ids
 
-            setform = SetForm()
+            setform = SetForm(practice=p_id)
             rep_formset = RepFormSet()
             return redirect('teams:practice', abbr=team.abbr, p_id=p_id)
 
@@ -125,7 +119,7 @@ def writePractice(request, abbr, p_id):
             return render(request, 'teams/practice_create.html', context)
 
     else:
-        setForm = SetForm()
+        setForm = SetForm(practice=p_id)
         rep_formset = RepFormSet()
 
     set_list = Set.objects.filter(practice_id=p_id).order_by('order')
@@ -184,7 +178,7 @@ def practiceSchedule(request, abbr, w_id):
             weeks[key].populate() # populate dates for rest of week
 
     if request.method == 'POST':
-        form = PracticeForm(request.POST)
+        form = PracticeForm(request.POST, team=team, week=weeks['current_week'])
         if form.is_valid():
             weekday = form.cleaned_data['weekday']
             if Practice.objects.filter(team=team).filter(
@@ -196,10 +190,7 @@ def practiceSchedule(request, abbr, w_id):
 
             # create new practice with no sets
             # allows new sets to be associated with a practice
-            practice = form.save(commit=False)
-            practice.team = team
-            practice.week_id = weeks['current_week']
-            practice.save()
+            practice = form.save()
 
             context = {
                 'team': team,
@@ -207,7 +198,7 @@ def practiceSchedule(request, abbr, w_id):
             }
             return redirect('teams:practice', abbr=team.abbr, p_id=practice.id)
     else:
-        form = PracticeForm()
+        form = PracticeForm(team=team, week=weeks['current_week'])
 
     practices = []
     weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ,'sunday']

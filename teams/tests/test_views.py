@@ -136,8 +136,8 @@ class TestSwimmerListView(TestCase):
         self.client.login(username='user1', password='password')
         team1 = test.create_team(user=self.user1)
         test.create_swimmer(team=team1)
-        team2 = test.create_team(user=self.user2, name='University of Kansas')
-        test.create_swimmer(team=team2, last='Vu')
+        team2 = test.create_team(user=self.user2)
+        test.create_swimmer(team=team2, last='Thornton')
         response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team1.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
@@ -145,20 +145,18 @@ class TestSwimmerListView(TestCase):
         )
         self.assertContains(response, 'Northeastern University')
         self.assertContains(response, 'Gridley')
-        self.assertNotContains(response, 'University of Kansas')
-        self.assertNotContains(response, 'Vu')
+        self.assertNotContains(response, 'Thornton')
 
 
         self.client.login(username='user2', password='password')
         response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team2.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
-            ['<Swimmer: Vu>'],
+            ['<Swimmer: Thornton>'],
         )
-        self.assertNotContains(response, 'Northeastern University')
+        self.assertContains(response, 'Northeastern University')
+        self.assertContains(response, 'Thornton')
         self.assertNotContains(response, 'Gridley')
-        self.assertContains(response, 'University of Kansas')
-        self.assertContains(response, 'Vu')
 
 
 # Write practices

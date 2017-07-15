@@ -44,3 +44,4 @@ Thumbs.db
 /static/
 /media/
 /CoachMate/settings/local.py
+.coverage

@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from unittest import skip, skipIf, skipUnless
-from datetime import date, timedelta
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 from django.test import TestCase
 
@@ -32,8 +33,8 @@ class FunctionTests(TestCase):
         """
         Returns None.
         """
-        x = funct.check_present()
-        self.assertEqual(x, False)
+        out = funct.check_present()
+        self.assertFalse(out)
 
     def test_check_present_with_present_week(self):
         """
@@ -42,38 +43,38 @@ class FunctionTests(TestCase):
         """
         week1 = test.create_week()
         week1.populate()
-        week2 = test.create_week(monday=(date.today() - timedelta(days=7)))
+        week2 = test.create_week(monday=(date.today() - relativedelta(days=7)))
         week2.populate()
-        week3 = test.create_week(monday=(date.today() + timedelta(days=7)), present=True)
+        week3 = test.create_week(monday=(date.today() + relativedelta(days=7)), present=True)
         week3.populate()
 
-        x = funct.check_present()
+        out = funct.check_present()
 
         for week in [week1, week2, week3]:
             week.refresh_from_db()
 
-        self.assertEqual(x, True)
-        self.assertEqual(week1.present, True)
-        self.assertEqual(week2.present, False)
-        self.assertEqual(week3.present, False)
+        self.assertTrue(out)
+        self.assertTrue(week1.present)
+        self.assertFalse(week2.present)
+        self.assertFalse(week3.present)
 
     def test_check_present_with_no_present_week(self):
         """
         Sets all current boolean values to False and returns False.
         """
-        week1 = test.create_week(monday=(date.today() - timedelta(days=7)))
+        week1 = test.create_week(monday=(date.today() - relativedelta(days=7)))
         week1.populate()
-        week2 = test.create_week(monday=(date.today() + timedelta(days=7)), present=True)
+        week2 = test.create_week(monday=(date.today() + relativedelta(days=7)), present=True)
         week2.populate()
 
-        x = funct.check_present()
+        out = funct.check_present()
 
         for week in [week1, week2]:
             week.refresh_from_db()
 
-        self.assertEqual(x, True)
-        self.assertEqual(week1.present, False)
-        self.assertEqual(week2.present, False)
+        self.assertTrue(out)
+        self.assertFalse(week1.present)
+        self.assertFalse(week2.present)
 
     def test_get_monday_present(self):
         """

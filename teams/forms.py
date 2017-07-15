@@ -17,6 +17,17 @@ class TeamForm(ModelForm):
             'region': 'Team Region',
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(TeamForm, self).__init__(*args, **kwargs)
+
+    def save(self):
+        team = super(TeamForm, self).save(commit=False)
+        team.user = self.user
+        team.save()
+        return team
+
+
 class SwimmerForm(ModelForm):
     class Meta:
         model = Swimmer
@@ -28,6 +39,17 @@ class SwimmerForm(ModelForm):
             'birth_date': 'DOB',
             'bio': 'Bio',
         }
+
+    def __init__(self, *args, **kwargs):
+        self.team = kwargs.pop('team')
+        super(SwimmerForm, self).__init__(*args, **kwargs)
+
+    def save(self):
+        swimmer = super(SwimmerForm, self).save(commit=False)
+        swimmer.team = self.team
+        swimmer.save()
+        return swimmer
+
 
 class RepForm(ModelForm):
     class Meta:
@@ -56,13 +78,14 @@ class RepForm(ModelForm):
                 'class': 'form-control'
             })
 
+
 class SetForm(ModelForm):
     class Meta:
         model = Set
         exclude = ['practice_id']
 
     def __init__(self, *args, **kwargs):
-        self.p_id = kwargs.pop('p_id', None)
+        self.practice_id = kwargs.pop('practice')
         super(SetForm, self).__init__(*args, **kwargs)
         self.fields['focus'].widget.attrs.update({
                 'class': 'form-control'
@@ -79,11 +102,17 @@ class SetForm(ModelForm):
     def clean(self):
         cleaned_data = super(SetForm, self).clean()
         order = cleaned_data.get('order')
-        if Set.objects.filter(practice_id=self.p_id).filter(order=order):
+        if Set.objects.filter(practice_id=self.practice_id).filter(order=order):
             msg = 'Error: Another set already given order #%d' % order
             self.add_error('order', msg)
-
         return cleaned_data
+
+    def save(self):
+        _set = super(SetForm, self).save(commit=False)
+        _set.practice_id = self.practice_id
+        _set.save()
+        return _set
+
 
 class PracticeForm(ModelForm):
     class Meta:
@@ -92,8 +121,18 @@ class PracticeForm(ModelForm):
         labels = {'weekday': 'Select Day'}
 
     def __init__(self, *args, **kwargs):
+        self.team = kwargs.pop('team')
+        self.week_id = kwargs.pop('week')
         super(PracticeForm, self).__init__(*args, **kwargs)
         self.fields['weekday'].widget.attrs.update({'class': 'form-control'})
+
+    def save(self):
+        practice = super(PracticeForm, self).save(commit=False)
+        practice.team = self.team
+        practice.week_id = self.week
+        practice.save()
+        return practice
+
 
 class BaseRepFormset(BaseFormSet):
     def save_formset(self, set_id):
@@ -103,5 +142,7 @@ class BaseRepFormset(BaseFormSet):
                 instance.set_id = Set.objects.get(id=set_id)
                 instance.save()
 
+
+# Formsets
+
 RepFormSet = formset_factory(RepForm, formset=BaseRepFormset)
-RepInlineFormSet = inlineformset_factory(Set, Rep, form=RepForm, extra=1)
