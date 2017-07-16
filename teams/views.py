@@ -18,7 +18,6 @@ import teams.functions as funct
 def teamList(request):
     if request.method == 'POST':
         form = TeamForm(request.POST, user=request.user)
-
         if form.is_valid():
             try:
                 # do nothing if team already exists
@@ -30,7 +29,7 @@ def teamList(request):
                 form = TeamForm(user=request.user)
                 return redirect('teams:team_list')
     else:
-        form = TeamForm(user=request.user)
+        form = TeamForm()
 
     team_list = Team.objects.filter(user=request.user).order_by('name')
     context = {
@@ -43,7 +42,7 @@ def teamList(request):
 # Delete a team
 @login_required
 def deleteTeam(request, abbr):
-    team = Team.objects.filter(user=request.user).get(abbr=abbr)
+    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     team.delete()
     return redirect('teams:team_list')
 
@@ -63,12 +62,11 @@ def swimmerList(request, abbr):
                     l_name=last_name).get(f_name=first_name)
             except:
                 # else create new swimmer
-                new_swimmer = form.save(commit=False)
-                new_swimmer.set_age
-                form = SwimmerForm(team=team)
+                new_swimmer = form.save()
+                form = SwimmerForm()
                 return redirect('teams:swimmer_list', abbr=team.abbr)
     else:
-        form = SwimmerForm(team=team)
+        form = SwimmerForm()
 
     swimmer_list  = Swimmer.objects.filter(team=team).order_by('l_name')
     context = {
@@ -93,15 +91,27 @@ def writePractice(request, abbr, p_id):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     practice = get_object_or_404(Practice, Q(team=team), pk=p_id)
     if request.method == 'POST':
-        setForm = SetForm(data=request.POST, practice=p_id)
+        setForm = SetForm(data=request.POST, practice=practice)
         rep_formset = RepFormSet(request.POST)
-
         if setForm.is_valid() and rep_formset.is_valid():
+            # delete any other practices created on weekday for given team/week
+            # currently there should never be more than one practice per day
+            # checking now instead of when the practice is created means the
+            # previous practice is not lost until this one is populated with sets
+            if Practice.objects.filter(team=team).filter(
+                week_id=practice.week_id).filter(
+                weekday=practice.weekday).exclude(pk=practice.id):
+                practice_list = Practice.objects.filter(team=team).filter(
+                    week_id=practice.week_id).filter(
+                    weekday=practice.weekday).exclude(pk=practice.id)
+                for p in practice_list:
+                    p.delete()
+
             # get set form instance
             setInstance = setForm.save()
-            rep_formset.save_formset(setInstance.id) # set set ids
+            rep_formset.save_formset(setInstance) # set set_id for each rep
 
-            setform = SetForm(practice=p_id)
+            setform = SetForm()
             rep_formset = RepFormSet()
             return redirect('teams:practice', abbr=team.abbr, p_id=p_id)
 
@@ -119,7 +129,7 @@ def writePractice(request, abbr, p_id):
             return render(request, 'teams/practice_create.html', context)
 
     else:
-        setForm = SetForm(practice=p_id)
+        setForm = SetForm()
         rep_formset = RepFormSet()
 
     set_list = Set.objects.filter(practice_id=p_id).order_by('order')
@@ -180,14 +190,6 @@ def practiceSchedule(request, abbr, w_id):
     if request.method == 'POST':
         form = PracticeForm(request.POST, team=team, week=weeks['current_week'])
         if form.is_valid():
-            weekday = form.cleaned_data['weekday']
-            if Practice.objects.filter(team=team).filter(
-                week=week['current_week']).filter(weekday=weekday):
-                # delete any other practices created on weekday for given team/week
-                # currently there should never be more than one practice per day
-                practice_list = Practice.objects.filter(weekday=weekday)
-                practice_list.delete()
-
             # create new practice with no sets
             # allows new sets to be associated with a practice
             practice = form.save()
@@ -198,14 +200,15 @@ def practiceSchedule(request, abbr, w_id):
             }
             return redirect('teams:practice', abbr=team.abbr, p_id=practice.id)
     else:
-        form = PracticeForm(team=team, week=weeks['current_week'])
+        form = PracticeForm()
 
     practices = []
     weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ,'sunday']
     for day in weekdays:
         # create list of practices
         try:
-            practices.append(Practice.objects.filter(team=team).order_by('order').get(weekday=day))
+            practices.append(Practice.objects.filter(team=team).filter(
+                week_id=weeks['current_week']).order_by('order').get(weekday=day))
         except Practice.DoesNotExist:
             practices.append(None)
 

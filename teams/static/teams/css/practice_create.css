@@ -7,6 +7,14 @@
   padding-top: 5px;
 }
 
+/* Info modal */
+.info {
+  display: inline;
+  margin-left: 5px;
+  margin-right: 5px;
+  max-width: 150px;
+}
+
 /* Set content */
 .empty-set {
   display: table;

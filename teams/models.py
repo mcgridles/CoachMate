@@ -40,7 +40,6 @@ class Swimmer(models.Model):
         Calculate and set age field based on birth date.
         """
         self.age = int((date.today() - self.birth_date).days / 365.2425)
-        self.save()
         return self.age
 
     def get_best_time(self, event):
@@ -156,7 +155,7 @@ class Set(models.Model):
     )
 
     practice_id = models.ForeignKey(Practice, on_delete=models.CASCADE)
-    focus = models.CharField(max_length=15, choices=FOCUS_CHOICE, blank=True)
+    focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
     repeats = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(null=True) # creates order within a practice
 

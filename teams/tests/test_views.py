@@ -78,6 +78,20 @@ class TestTeamListView(TestCase):
         self.assertNotContains(response, 'Northeastern University')
         self.assertContains(response, 'University of Kansas')
 
+    def test_team_form_input(self):
+        """
+        Team form validation requires a team name and abbreviation.
+        """
+        self.client.login(username='user1', password='password')
+        response = self.client.post(reverse('teams:team_list'), {
+                'name': 'Northeastern University Swim Club',
+                'abbr': 'NUSC',
+                'region': 'US-NE',
+            },
+            follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'NUSC')
+
 
 # Swimmer list
 
@@ -157,6 +171,44 @@ class TestSwimmerListView(TestCase):
         self.assertContains(response, 'Northeastern University')
         self.assertContains(response, 'Thornton')
         self.assertNotContains(response, 'Gridley')
+
+    def test_swimmer_form_input(self):
+        """
+        Swimmer form validation requires a first name, last name, and gender.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        response = self.client.post(reverse('teams:swimmer_list', kwargs={
+                'abbr': team.abbr
+            }),
+            {
+                'f_name': 'Henry',
+                'l_name': 'Gridley',
+                'gender': 'M',
+            },
+            follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Gridley')
+
+    def test_swimmer_form_input_include_birth_date(self):
+        """
+        Swimmer age can be calculated based on a birth date.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        response = self.client.post(reverse('teams:swimmer_list', kwargs={
+                'abbr': team.abbr
+            }),
+            {
+                'f_name': 'Henry',
+                'l_name': 'Gridley',
+                'gender': 'M',
+                'birth_date': '09/21/1996'
+            },
+            follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Gridley')
+        self.assertEqual(response.context['swimmer_list'].get(l_name='Gridley').age, 20)
 
 
 # Write practices
@@ -253,6 +305,31 @@ class TestWritePracticeView(TestCase):
             response.context['set_list'],
             ['<Set: sprint>']
         )
+
+    #def test_write_practice_set_form(self):
+    #    """
+    #    Set form data is cleaned and used to create a new Set instance.
+    #    """
+    #    self.client.login(username='user1', password='password')
+    #    week = test.create_week()
+    #    team = test.create_team(user=self.user1)
+    #    practice = test.create_practice(team, week)
+    #    response = self.client.post(reverse('teams:practice', kwargs={
+    #            'abbr': team.abbr,
+    #            'p_id': practice.id,
+    #        }),
+    #        {
+    #            'focus': 'warmup',
+    #            'repeats': 2,
+    #            'order': 1,
+    #            'num': 4,
+    #            'distance': 100,
+    #            'stroke': 'free',
+    #        },
+    #        follow=True
+    #    )
+    #    self.assertEqual(response.status_code, 200)
+    #    self.assertHTMLEqual(response, '<h3>1) Warmup - 2x</h3>')
 
 
 # Practice schedule
@@ -413,6 +490,25 @@ class TestPracticeScheduleView(TestCase):
         self.assertEqual(response.context['current_week'], next_week)
         self.assertEqual(response.context['previous_week'], current_week)
         self.assertEqual(response.context['next_week'].monday, date(2017,7,24))
+
+    def test_practice_form_input(self):
+        """
+        Practice form validation requires a weekday.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        week = test.create_week()
+        response = self.client.post(reverse('teams:schedule', kwargs={
+                'abbr': team.abbr,
+                'w_id': week.id,
+            }),
+            {
+                'weekday': 'monday',
+            },
+            follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'No sets yet')
+        self.assertTemplateUsed(response, 'teams/practice_create.html')
 
 
 # Delete models

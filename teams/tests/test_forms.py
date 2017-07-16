@@ -16,17 +16,12 @@ class TestTeamForm(TestCase):
     def tearDown(self):
         self.user.delete()
 
-    def test_team_form_init_with_no_user(self):
-        """
-        KeyError raised if no user is passed to the form.
-        """
-        self.assertRaises(KeyError, TeamForm, None)
-
     def test_team_form_init(self):
         """
-        TeamForm takes a user as an argument.
+        TeamForm can take a user as an argument.
         """
         TeamForm(user=self.user)
+        TeamForm()
 
     def test_team_form_valid_data(self):
         """
@@ -62,17 +57,12 @@ class TestSwimmerForm(TestCase):
     def tearDown(self):
         self.team.delete()
 
-    def test_swimmer_form_init_with_no_team(self):
-        """
-        KeyError raised if no team is passed to the form.
-        """
-        self.assertRaises(KeyError, SwimmerForm, None)
-
     def test_swimmer_form_init(self):
         """
-        SwimmerForm takes a team as an argument.
+        SwimmerForm can take a team as an argument.
         """
         SwimmerForm(team=self.team)
+        SwimmerForm()
 
     def test_swimmer_form_valid_data(self):
         """
@@ -103,7 +93,7 @@ class TestSwimmerForm(TestCase):
         })
 
 
-class TestSetForm(TestCase):
+class TestPracticeForm(TestCase):
     def setUp(self):
         user = test.create_user('user', 'password')
         self.team = test.create_team(user=user)
@@ -113,17 +103,12 @@ class TestSetForm(TestCase):
         self.team.delete()
         self.week.delete()
 
-    def test_practice_form_init_with_no_team(self):
-        """
-        KeyError raised if no week and team is passed to the form.
-        """
-        self.assertRaises(KeyError, PracticeForm, None)
-
     def test_practice_form_init(self):
         """
-        PracticeForm takes a week and team as an argument
+        PracticeForm can take a week and team as an argument
         """
         PracticeForm(team=self.team, week=self.week)
+        PracticeForm()
 
     def test_practice_form_valid_data(self):
         """
@@ -159,17 +144,12 @@ class TestSetForm(TestCase):
     def tearDown(self):
         self.practice.delete()
 
-    def test_set_form_init_with_no_team(self):
-        """
-        KeyError raised if no practice is passed to the form.
-        """
-        self.assertRaises(KeyError, SetForm, None)
-
     def test_set_form_init(self):
         """
-        SetForm takes a practice as an argument
+        SetForm can take a practice as an argument.
         """
         SetForm(practice=self.practice)
+        SetForm()
 
     def test_set_form_valid_data(self):
         """
@@ -180,10 +160,10 @@ class TestSetForm(TestCase):
             'order': 1,
         }, practice=self.practice)
         self.assertTrue(form.is_valid())
-        set = form.save()
-        self.assertEqual(set.focus, 'warmup')
-        self.assertEqual(set.order, 1)
-        self.assertEqual(set.practice_id, self.practice)
+        setInstance = form.save()
+        self.assertEqual(setInstance.focus, 'warmup')
+        self.assertEqual(setInstance.order, 1)
+        self.assertEqual(setInstance.practice_id, self.practice)
 
     def test_set_form_invalid_data(self):
         """

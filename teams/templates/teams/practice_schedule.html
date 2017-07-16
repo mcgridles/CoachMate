@@ -86,7 +86,6 @@
         <!-- 'Day' sets panel headings even if there is no practice that day -->
         {% for practice, day in practices %}
           <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter }}">
-
             <div class="panel-heading">
               <h4 class="panel-title">
                 {{ day|title }}
@@ -128,11 +127,11 @@
                   {% endfor %}
 
                   <!-- Delete or edit the practice -->
-                  <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
+                  <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right follow-link" style="margin-left: 5px">
                     <span class="glyphicon glyphicon-remove-circle"></span> Delete
                   </a>
-                  <a href="{% url 'teams:practice' team.abbr practice.id %}" type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px">
-                    Edit
+                  <a href="{% url 'teams:practice' team.abbr practice.id %}" type="button" class="btn btn-default btn-md pull-right follow-link" style="margin-left: 5px">
+                    <span class="glyphicon glyphicon-pencil"></span>Edit
                   </a>
 
                 {% endif %}
@@ -161,6 +160,13 @@
             $('.dashboard').addClass('active');
           }
         });
+      </script>
+
+      <!-- Fixes bug where links would collapse panels instead of follow link -->
+      <script>
+        $('.follow-link').click(function(e) {
+          e.stopPropagation();
+        })
       </script>
     {% endblock %}
   </body>

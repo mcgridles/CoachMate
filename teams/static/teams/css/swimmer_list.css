@@ -2,3 +2,16 @@
 #table-search {
   border-radius: 5px;
 }
+
+/* Set content */
+.empty-set {
+  display: table;
+  height: 200px;
+  width: 100%;
+}
+
+.empty-dialogue {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
