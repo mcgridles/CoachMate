@@ -45,3 +45,4 @@ Thumbs.db
 /media/
 /CoachMate/settings/local.py
 .coverage
+/teams/static/teams/img

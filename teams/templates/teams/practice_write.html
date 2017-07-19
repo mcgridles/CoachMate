@@ -4,9 +4,9 @@
 {% load datetime_filter %}
 <html lang="en">
   <head>
-    {% block title %}Practice - {{ team.abbr }}{% endblock %}
+    {% block title %}Write Practice - {{ team.abbr }}{% endblock %}
     {% block stylesheets %}
-      <link rel="stylesheet" href="{% static 'teams/css/practice_create.css' %}">
+      <link rel="stylesheet" href="{% static 'teams/css/practice_write.css' %}">
     {% endblock %}
   </head>
 
@@ -16,20 +16,26 @@
     {% endblock %}
 
     {% block page-title %}{{ team.name }}{% endblock %}
-    {% block table-title %}{{ practice.weekday|title }} Practice{% endblock %}
+    {% block table-title %}
+      {{ practice.weekday|title }} Practice
+
+      <!-- Edit current practice -->
+      <span data-toggle="modal" data-target="#editModal">
+        <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Edit" data-trigger="hover" data-placement="auto bottom">
+          <span class="glyphicon glyphicon-pencil"></span>
+        </button>
+      </span>
+    {% endblock %}
 
     {% block action-buttons %}
-      <!-- Finish writing practice -->
-      <a href="{% url 'teams:schedule' team.abbr week %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
-        <span class="glyphicon glyphicon-ok-circle"></span> Finish
-      </a>
       <!-- Delete current practice -->
-      <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px">
-        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+      <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Delete" data-trigger="hover" data-placement="auto bottom">
+        <span class="glyphicon glyphicon-remove-circle"></span>
       </a>
-      <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#editModal">
-        <span class="glyphicon glyphicon-pencil"></span> Edit
-      </button>
+      <!-- Finish writing practice -->
+      <a href="{% url 'teams:practiceSchedule' team.abbr week %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Finish" data-trigger="hover" data-placement="auto bottom">
+        <span class="glyphicon glyphicon-ok-circle"></span>
+      </a>
     {% endblock %}
 
     {% block modal %}
@@ -46,7 +52,7 @@
             </div>
 
             <div class="modal-body">
-              <form id="setForm" action="{% url 'teams:practice' team.abbr practice.id %}" method="post">
+              <form id="setForm" action="{% url 'teams:writePractice' team.abbr practice.id %}" method="post">
                 {% csrf_token %}
                 {{ rep_formset.management_form }}
 
@@ -116,7 +122,6 @@
             </div>
 
             <div class="modal-body">
-              Writing a practice is made easy with CoachMate.<br><br>
               <ol>
                 <li>
                   Click on the
@@ -177,14 +182,19 @@
     {% endblock %}
 
     {% block content %}
-      <!-- Add a set to the practice -->
-      <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
-        <span class="glyphicon glyphicon-plus-sign"></span> Add
-      </button>
       <!-- Open a modal containing info about writing a practice -->
-      <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#infoModal">
-        <span class="glyphicon glyphicon-info-sign"></span> Info
-      </button>
+      <span data-toggle="modal" data-target="#infoModal">
+        <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Info" data-trigger="hover" data-placement="auto bottom">
+          <span class="glyphicon glyphicon-info-sign"></span>
+        </button>
+      </span>
+      <!-- Add a set to the practice -->
+      <span data-toggle="modal" data-target="#baseModal">
+        <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Add" data-trigger="hover" data-placement="auto bottom">
+          <span class="glyphicon glyphicon-plus-sign"></span>
+        </button>
+      </span>
+
       {% for set in set_list %}
         <!-- Display sets & reps -->
         <div class="set">
@@ -215,17 +225,9 @@
 
         <!-- Display prompt if no set_list is empty -->
         <div id="first-featurette" class="row featurette empty-set">
-            <h2 class="featurette-heading empty-dialogue">
-              No sets yet<br><br>
-              <button type="button" class="btn btn-primary btn-sm" style="margin-bottom: 3px" data-toggle="modal" data-target="#baseModal">
-                <span class="glyphicon glyphicon-plus-sign"></span> Add
-              </button>
-              a set, or click the
-              <button type="button" class="btn btn-default btn-sm" style="margin-left: 5px" data-toggle="modal" data-target="#infoModal">
-                <span class="glyphicon glyphicon-info-sign"></span> Info
-              </button>
-              button to learn more.
-            </h2>
+          <h2 class="featurette-heading empty-dialogue">
+            No sets yet<br>
+          </h2>
         </div>
 
       {% endfor %}

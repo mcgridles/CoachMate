@@ -18,7 +18,7 @@ def login(request):
             user = auth.authenticate(username=username, password=password)
             if user is not None and user.is_active:
                 auth.login(request, user) # log in user
-                return redirect('teams:team_list')
+                return redirect('teams:teamList')
             else:
                 form = LogInForm()
                 return render(request, 'accounts/login.html', {'form': form})
@@ -41,7 +41,7 @@ def signup(request):
             # authenticate user
             user = auth.authenticate(username=username, password=password)
             auth.login(request, user) # log in user
-            return redirect('teams:team_list')
+            return redirect('teams:teamList')
     else:
         form = SignUpForm()
     return render(request, 'accounts/signup.html', {'form': form})

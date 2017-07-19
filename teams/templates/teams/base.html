@@ -90,7 +90,7 @@
         <div class="col-sm-3 col-md-2 sidebar">
           {% block sidebar %}
             <ul class="nav nav-sidebar">
-              <li class="dashboard"><a href="{% url 'teams:team_list' %}">Overview <span class="sr-only">(current)</span></a></li>
+              <li class="dashboard"><a href="{% url 'teams:teamList' %}">Overview <span class="sr-only">(current)</span></a></li>
               <li class="report"><a href="#">Reports</a></li>
               <li><a href="#">Analytics</a></li>
               <li><a href="#">Export</a></li>
@@ -121,9 +121,11 @@
             <!-- Action performing buttons -->
             <!-- Base: trigger the modal with a button -->
             {% block action-buttons %}
-            <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="modal" data-target="#baseModal">
-              <span class="glyphicon glyphicon-plus-sign"></span> Add
-            </button>
+            <span data-toggle="modal" data-target="#baseModal">
+              <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Add" data-trigger="hover" data-placement="auto bottom">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+              </button>
+            </span>
             {% endblock %}
           </h2>
 
@@ -304,6 +306,12 @@
     <script src="{% static 'bootstrap/js/ie10-viewport-bug-workaround.js' %}"></script>
 
     <!-- Additional scripts -->
+    <!-- Enable popovers -->
+    <script>
+      $(document).ready(function() {
+        $('[data-toggle="popover"]').popover();
+      });
+    </script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

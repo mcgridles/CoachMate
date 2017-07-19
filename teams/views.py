@@ -26,8 +26,7 @@ def teamList(request):
             except:
                 # else create new team
                 form.save()
-                form = TeamForm(user=request.user)
-                return redirect('teams:team_list')
+                return redirect('teams:teamList')
     else:
         form = TeamForm()
 
@@ -44,7 +43,7 @@ def teamList(request):
 def deleteTeam(request, abbr):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     team.delete()
-    return redirect('teams:team_list')
+    return redirect('teams:teamList')
 
 
 @csrf_protect
@@ -52,29 +51,64 @@ def deleteTeam(request, abbr):
 def swimmerList(request, abbr):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     if request.method == 'POST':
-        form = SwimmerForm(request.POST, team=team)
-        if form.is_valid():
-            last_name = form.cleaned_data['l_name']
-            first_name = form.cleaned_data['f_name']
-            try:
-                # do nothing if swimmer already exists
-                swimmer = Swimmer.objects.filter(team=team).filter(
-                    l_name=last_name).get(f_name=first_name)
-            except:
-                # else create new swimmer
-                new_swimmer = form.save()
-                form = SwimmerForm()
-                return redirect('teams:swimmer_list', abbr=team.abbr)
+        if 'swimmer_create' in request.POST:
+            swimmer_form = SwimmerForm(request.POST, team=team)
+            if swimmer_form.is_valid():
+                last_name = swimmer_form.cleaned_data['l_name']
+                first_name = swimmer_form.cleaned_data['f_name']
+                try:
+                    # do nothing if swimmer already exists
+                    swimmer = Swimmer.objects.filter(team=team).filter(
+                        l_name=last_name).get(f_name=first_name)
+                except:
+                    # else create new swimmer
+                    new_swimmer = swimmer_form.save()
+                    return redirect('teams:swimmerList', abbr=team.abbr)
+            else:
+                team_form = TeamForm(instance=team)
+        elif 'team_edit' in request.POST:
+            team_form = TeamForm(request.POST, instance=team, user=request.user)
+            if team_form.is_valid():
+                team_form.save()
+                return redirect('teams:swimmerList', abbr=team.abbr)
+            else:
+                swimmer_form = SwimmerForm()
     else:
-        form = SwimmerForm()
+        swimmer_form = SwimmerForm()
+        team_form = TeamForm(instance=team)
 
     swimmer_list  = Swimmer.objects.filter(team=team).order_by('l_name')
     context = {
         'team': team,
-        'form': form,
+        'team_form': team_form,
         'swimmer_list': swimmer_list,
+        'swimmer_form': swimmer_form,
     }
     return render(request, 'teams/swimmer_list.html', context)
+
+
+# Individual swimmer pages
+@csrf_protect
+@login_required
+def swimmerDetail(request, abbr, s_id):
+    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
+    swimmer = get_object_or_404(Swimmer, pk=s_id)
+
+    if request.method == 'POST':
+        swimmer_form = SwimmerForm(request.POST, instance=swimmer, team=team)
+        if swimmer_form.is_valid():
+            swimmer_form.save()
+            return redirect('teams:swimmerDetail', abbr=team.abbr, s_id=swimmer.id)
+    else:
+        swimmer_form = SwimmerForm(instance=swimmer)
+
+    context =  {
+        'team': team,
+        'swimmer': swimmer,
+        'swimmer_form': swimmer_form,
+    }
+
+    return render(request, 'teams/swimmer_detail.html', context)
 
 
 # Delete a swimmer
@@ -82,7 +116,7 @@ def swimmerList(request, abbr):
 def deleteSwimmer(request, abbr, s_id):
     swimmer = get_object_or_404(Swimmer, pk=s_id)
     swimmer.delete()
-    return redirect('teams:swimmer_list', abbr=abbr)
+    return redirect('teams:swimmerList', abbr=abbr)
 
 
 @csrf_protect
@@ -94,6 +128,7 @@ def writePractice(request, abbr, p_id):
         setForm = SetForm(data=request.POST, practice=practice)
         rep_formset = RepFormSet(request.POST)
         if setForm.is_valid() and rep_formset.is_valid():
+
             # delete any other practices created on weekday for given team/week
             # currently there should never be more than one practice per day
             # checking now instead of when the practice is created means the
@@ -110,10 +145,7 @@ def writePractice(request, abbr, p_id):
             # get set form instance
             setInstance = setForm.save()
             rep_formset.save_formset(setInstance) # set set_id for each rep
-
-            setform = SetForm()
-            rep_formset = RepFormSet()
-            return redirect('teams:practice', abbr=team.abbr, p_id=p_id)
+            return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
 
         else:
             # display errors
@@ -141,7 +173,7 @@ def writePractice(request, abbr, p_id):
         'rep_formset': rep_formset,
         'set_list': set_list,
     }
-    return render(request, 'teams/practice_create.html', context)
+    return render(request, 'teams/practice_write.html', context)
 
 
 # Delete a practice
@@ -150,7 +182,7 @@ def deletePractice(request, abbr, p_id):
     practice = get_object_or_404(Practice, pk=p_id)
     w_id = practice.week_id.id
     practice.delete()
-    return redirect('teams:schedule', abbr=abbr, w_id=w_id)
+    return redirect('teams:practiceSchedule', abbr=abbr, w_id=w_id)
 
 
 @csrf_protect
@@ -162,9 +194,11 @@ def practiceSchedule(request, abbr, w_id):
         'previous_week': 0,
         'next_week': 1,
     }
+
     # loop through current, next, and previous weeks
     for key in sorted(weeks):
         flag = False
+
         try:
             # try database queries
             if int(w_id) is 0 and 'current_week' in key:
@@ -178,6 +212,7 @@ def practiceSchedule(request, abbr, w_id):
             else:
                 # get next and previous weeks (for next/previous buttons)
                 weeks[key] = weeks['current_week'].get_week(weeks[key])
+
         except Week.DoesNotExist:
             # else create week
             if not flag: # return date of necessary Monday
@@ -198,7 +233,7 @@ def practiceSchedule(request, abbr, w_id):
                 'team': team,
                 'practice': practice,
             }
-            return redirect('teams:practice', abbr=team.abbr, p_id=practice.id)
+            return redirect('teams:writePractice', abbr=team.abbr, p_id=practice.id)
     else:
         form = PracticeForm()
 

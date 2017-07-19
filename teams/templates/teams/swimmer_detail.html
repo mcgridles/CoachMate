@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+{% load static from staticfiles %}
+<html lang="en">
+  <head>
+    {% block title %}{{ swimmer.f_name }} {{ swimmer.l_name }} - {{ team.abbr }}{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/swimmer_detail.css' %}">
+    {% endblock %}
+  </head>
+
+  <body>
+    {% block sidebar %}
+      <ul class="nav nav-sidebar">
+        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Overview <span class="sr-only">(current)</span></a></li>
+        <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
+        <li><a href="#">Analytics</a></li>
+        <li><a href="#">Export</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item</a></li>
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="">Another nav item</a></li>
+        <li><a href="">More navigation</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="">Another nav item</a></li>
+      </ul>
+    {% endblock %}
+
+    {% block page-title %}{{ team.name }}{% endblock %}
+    {% block table-title %}
+      {{ swimmer.f_name|title }} {{ swimmer.l_name|title }}
+      <!-- Edit swimmer -->
+      <span data-toggle="modal" data-target="#baseModal">
+        <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Edit" data-trigger="hover" data-placement="auto bottom">
+          <span class="glyphicon glyphicon-pencil"></span>
+        </button>
+      </span>
+    {% endblock %}
+
+    {% block action-buttons %}{% endblock %}
+
+    {% block modal %}
+      <div id="baseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Edit Swimmer
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% if swimmer_form.errors %}
+                  {% for field in swimmer_form %}
+                    {% for error in field.error %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Swimmer form -->
+                {% for field in swimmer_form %}
+                  {{ field }}
+                {% endfor %}
+                <br>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-md btn-primary">Finish</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block content %}
+      <div class="col-sm-12 col-md-4" style="padding-left: 0">
+        <img src="{% static 'teams/img/background.png' %}" style="width: 100%">
+        <div class="table-responsive">
+          <table id="swimmer" class="table table-striped">
+            <tbody>
+              <tr>
+                <td>Gender</td>
+                <td>{{ swimmer.gender }}</td>
+              </tr>
+              <tr>
+                <td>Birth Date</td>
+                <td vertical-align="middle">
+                  {% if swimmer.birth_date %}
+                    {{ swimmer.birth_date }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </td>
+              <tr>
+                <td>Age</td>
+                <td>
+                  {% if swimmer.age %}
+                    {{ swimmer.age }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td>Bio</td>
+                <td>
+                  {% if swimmer.bio %}
+                    {{ swimmer.bio }}
+                  {% else %}
+
+                  {% endif %}
+                </td>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-sm-12 col-md-8">
+        Put charts and data here
+      </div>
+    {% endblock %}
+
+    {% block scripts %}
+    {% endblock %}
+  </body>
+</html>

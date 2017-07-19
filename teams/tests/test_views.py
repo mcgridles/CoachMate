@@ -1,12 +1,14 @@
 from __future__ import unicode_literals
 from unittest import skip, skipIf, skipUnless
 from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 
 from django.test import TestCase
 from django.urls import reverse
 
 import teams.tests.test_setup as test
 from teams.models import Week
+import teams.functions as funct
 
 # Team list
 
@@ -24,7 +26,7 @@ class TestTeamListView(TestCase):
         No teams are displayed if the queryset is empty.
         """
         self.client.login(username='user1', password='password')
-        response = self.client.get(reverse('teams:team_list'))
+        response = self.client.get(reverse('teams:teamList'))
         self.assertQuerysetEqual(response.context['team_list'], [])
         self.assertContains(response, 'No teams yet.')
 
@@ -34,7 +36,7 @@ class TestTeamListView(TestCase):
         """
         self.client.login(username='user1', password='password')
         test.create_team(user=self.user1)
-        response = self.client.get(reverse('teams:team_list'))
+        response = self.client.get(reverse('teams:teamList'))
         self.assertQuerysetEqual(
             response.context['team_list'],
             ['<Team: Northeastern University>'],
@@ -48,7 +50,7 @@ class TestTeamListView(TestCase):
         self.client.login(username='user1', password='password')
         test.create_team(user=self.user1)
         test.create_team(user=self.user1, name='University of Kansas')
-        response = self.client.get(reverse('teams:team_list'))
+        response = self.client.get(reverse('teams:teamList'))
         self.assertQuerysetEqual(
             response.context['team_list'],
             ['<Team: Northeastern University>', '<Team: University of Kansas>'],
@@ -61,7 +63,7 @@ class TestTeamListView(TestCase):
         self.client.login(username='user1', password='password')
         test.create_team(user=self.user1)
         test.create_team(user=self.user2, name='University of Kansas')
-        response = self.client.get(reverse('teams:team_list'))
+        response = self.client.get(reverse('teams:teamList'))
         self.assertQuerysetEqual(
             response.context['team_list'],
             ['<Team: Northeastern University>'],
@@ -70,7 +72,7 @@ class TestTeamListView(TestCase):
         self.assertNotContains(response, 'University of Kansas')
 
         self.client.login(username='user2', password='password')
-        response = self.client.get(reverse('teams:team_list'))
+        response = self.client.get(reverse('teams:teamList'))
         self.assertQuerysetEqual(
             response.context['team_list'],
             ['<Team: University of Kansas>'],
@@ -83,7 +85,7 @@ class TestTeamListView(TestCase):
         Team form validation requires a team name and abbreviation.
         """
         self.client.login(username='user1', password='password')
-        response = self.client.post(reverse('teams:team_list'), {
+        response = self.client.post(reverse('teams:teamList'), {
                 'name': 'Northeastern University Swim Club',
                 'abbr': 'NUSC',
                 'region': 'US-NE',
@@ -91,6 +93,21 @@ class TestTeamListView(TestCase):
             follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'NUSC')
+
+    def test_team_form_errors(self):
+        """
+        Errors displayed if invalid information is entered.
+        """
+        self.client.login(username='user1', password='password')
+        response = self.client.post(reverse('teams:teamList'), {
+                'abbr': 'NUSC',
+                'region': 'US-NE',
+            },
+            follow=True)
+        self.assertEqual(response.context['form'].errors, {
+            'name': ['This field is required.']
+        })
+
 
 
 # Swimmer list
@@ -110,7 +127,7 @@ class TestSwimmerListView(TestCase):
         """
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
-        response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team.abbr}))
+        response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team.abbr}))
         self.assertQuerysetEqual(response.context['swimmer_list'], [])
         self.assertContains(response, 'Northeastern University')
         self.assertNotContains(response, 'Henry Gridley')
@@ -122,7 +139,7 @@ class TestSwimmerListView(TestCase):
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
         test.create_swimmer(team=team)
-        response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team.abbr}))
+        response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
             ['<Swimmer: Gridley>'],
@@ -137,7 +154,7 @@ class TestSwimmerListView(TestCase):
         team = test.create_team(user=self.user1)
         test.create_swimmer(team=team)
         test.create_swimmer(team=team, last='Pinkes')
-        response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team.abbr}))
+        response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
             ['<Swimmer: Gridley>', '<Swimmer: Pinkes>'],
@@ -152,7 +169,7 @@ class TestSwimmerListView(TestCase):
         test.create_swimmer(team=team1)
         team2 = test.create_team(user=self.user2)
         test.create_swimmer(team=team2, last='Thornton')
-        response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team1.abbr}))
+        response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team1.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
             ['<Swimmer: Gridley>'],
@@ -163,7 +180,7 @@ class TestSwimmerListView(TestCase):
 
 
         self.client.login(username='user2', password='password')
-        response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team2.abbr}))
+        response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team2.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
             ['<Swimmer: Thornton>'],
@@ -178,13 +195,14 @@ class TestSwimmerListView(TestCase):
         """
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
-        response = self.client.post(reverse('teams:swimmer_list', kwargs={
+        response = self.client.post(reverse('teams:swimmerList', kwargs={
                 'abbr': team.abbr
             }),
             {
                 'f_name': 'Henry',
                 'l_name': 'Gridley',
                 'gender': 'M',
+                'swimmer_create': 'Submit',
             },
             follow=True)
         self.assertEqual(response.status_code, 200)
@@ -196,19 +214,57 @@ class TestSwimmerListView(TestCase):
         """
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
-        response = self.client.post(reverse('teams:swimmer_list', kwargs={
+        response = self.client.post(reverse('teams:swimmerList', kwargs={
                 'abbr': team.abbr
             }),
             {
                 'f_name': 'Henry',
                 'l_name': 'Gridley',
                 'gender': 'M',
-                'birth_date': '09/21/1996'
+                'birth_date': '09/21/1996',
+                'swimmer_create': 'Submit',
             },
             follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Gridley')
         self.assertEqual(response.context['swimmer_list'].get(l_name='Gridley').age, 20)
+
+    def test_swimmer_form_errors(self):
+        """
+        Errors displayed if invalid information is entered.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        response = self.client.post(reverse('teams:swimmerList', kwargs={
+                'abbr': team.abbr
+            }),
+            {
+                'gender': 'M',
+                'birth_date': '09/21/1996',
+                'swimmer_create': 'Submit',
+            },
+            follow=True)
+        self.assertEqual(response.context['swimmer_form'].errors, {
+            'l_name': ['This field is required.'],
+            'f_name': ['This field is required.'],
+        })
+
+    def test_team_form_edit(self):
+        """
+        Team models can be edited from their swimmerList page.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        response = self.client.post(reverse('teams:swimmerList', kwargs={
+                'abbr': team.abbr
+            }),
+            {
+                'name': 'University of Kansas',
+                'abbr': 'KUSC',
+                'team_edit': 'Submit',
+            },
+            follow=True)
+        self.assertContains(response, 'University of Kansas')
 
 
 # Write practices
@@ -230,7 +286,7 @@ class TestWritePracticeView(TestCase):
         week = test.create_week()
         team = test.create_team(user=self.user1)
         practice = test.create_practice(team, week)
-        response = self.client.get(reverse('teams:practice', kwargs={
+        response = self.client.get(reverse('teams:writePractice', kwargs={
                 'abbr': team.abbr,
                 'p_id': practice.id
             })
@@ -252,7 +308,7 @@ class TestWritePracticeView(TestCase):
         set2 = test.create_set(practice, 'sprint', 2, 2)
         rep2 = test.create_rep(set2, 4, 25, 'fly')
         rep3 = test.create_rep(set2, 8, 200, 'back')
-        response = self.client.get(reverse('teams:practice', kwargs={
+        response = self.client.get(reverse('teams:writePractice', kwargs={
                 'abbr': team.abbr,
                 'p_id': practice.id
             })
@@ -285,7 +341,7 @@ class TestWritePracticeView(TestCase):
         set2 = test.create_set(practice2, 'sprint', 2, 2)
         rep2 = test.create_rep(set2, 4, 25, 'fly')
         rep3 = test.create_rep(set2, 8, 200, 'back')
-        response = self.client.get(reverse('teams:practice', kwargs={
+        response = self.client.get(reverse('teams:writePractice', kwargs={
                 'abbr': team1.abbr,
                 'p_id': practice1.id
             })
@@ -296,7 +352,7 @@ class TestWritePracticeView(TestCase):
         )
 
         self.client.login(username='user2', password='password')
-        response = self.client.get(reverse('teams:practice', kwargs={
+        response = self.client.get(reverse('teams:writePractice', kwargs={
                 'abbr': team2.abbr,
                 'p_id': practice2.id
             })
@@ -314,7 +370,7 @@ class TestWritePracticeView(TestCase):
     #    week = test.create_week()
     #    team = test.create_team(user=self.user1)
     #    practice = test.create_practice(team, week)
-    #    response = self.client.post(reverse('teams:practice', kwargs={
+    #    response = self.client.post(reverse('teams:writePractice', kwargs={
     #            'abbr': team.abbr,
     #            'p_id': practice.id,
     #        }),
@@ -354,7 +410,7 @@ class TestPracticeScheduleView(TestCase):
         weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ,'sunday']
         practices = [None for x in range(7)]
         practices = zip(practices, weekdays)
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': week.id,
             })
@@ -378,7 +434,7 @@ class TestPracticeScheduleView(TestCase):
         practice2 = test.create_practice(team, week, weekday='tuesday')
         set2 = test.create_set(practice=practice2, focus='sprint', repeats=2, order=37)
         set3 = test.create_set(practice=practice2, focus='distance', repeats=3, order=38)
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': week.id,
             })
@@ -404,7 +460,7 @@ class TestPracticeScheduleView(TestCase):
         team2 = test.create_team(user=self.user2)
         practice1 = test.create_practice(team1, week)
         practice2 = test.create_practice(team2, week, weekday='tuesday')
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team1.abbr,
                 'w_id': week.id
             })
@@ -415,7 +471,7 @@ class TestPracticeScheduleView(TestCase):
         self.assertContains(response, '7/16')
 
         self.client.login(username='user2', password='password')
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team2.abbr,
                 'w_id': week.id
             })
@@ -431,7 +487,7 @@ class TestPracticeScheduleView(TestCase):
         """
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': 0,
             })
@@ -439,9 +495,9 @@ class TestPracticeScheduleView(TestCase):
         current_week = Week.objects.get(present=True)
         previous_week = current_week.get_week(0)
         next_week = current_week.get_week(1)
-        self.assertEqual(current_week.monday, date(2017,7,10))
-        self.assertEqual(previous_week.monday, date(2017,7,3))
-        self.assertEqual(next_week.monday, date(2017,7,17))
+        self.assertEqual(current_week.monday, funct.get_monday(n=None))
+        self.assertEqual(previous_week.monday, funct.get_monday(n=0))
+        self.assertEqual(next_week.monday, funct.get_monday(n=1))
 
     def test_schedule_with_current_week_only(self):
         """
@@ -450,9 +506,9 @@ class TestPracticeScheduleView(TestCase):
         """
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
-        week = test.create_week()
+        week = test.create_week(monday=funct.get_monday(n=None))
         week.populate()
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': 0,
             })
@@ -461,8 +517,8 @@ class TestPracticeScheduleView(TestCase):
         previous_week = current_week.get_week(0)
         next_week = current_week.get_week(1)
         self.assertEqual(current_week, week)
-        self.assertEqual(previous_week.monday, date(2017,7,3))
-        self.assertEqual(next_week.monday, date(2017,7,17))
+        self.assertEqual(previous_week.monday, funct.get_monday(n=0))
+        self.assertEqual(next_week.monday, funct.get_monday(n=1))
 
     def test_schedule_get_next_week(self):
         """
@@ -473,7 +529,7 @@ class TestPracticeScheduleView(TestCase):
         team = test.create_team(user=self.user1)
         week = test.create_week()
         week.populate()
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': 0,
             })
@@ -482,14 +538,17 @@ class TestPracticeScheduleView(TestCase):
         current_week = Week.objects.get(present=True)
         next_week = current_week.get_week(1)
 
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': next_week.id,
             })
         )
         self.assertEqual(response.context['current_week'], next_week)
         self.assertEqual(response.context['previous_week'], current_week)
-        self.assertEqual(response.context['next_week'].monday, date(2017,7,24))
+        self.assertEqual(
+            response.context['next_week'].monday,
+            funct.get_monday(n=1) + relativedelta(days=7)
+        )
 
     def test_practice_form_input(self):
         """
@@ -498,7 +557,7 @@ class TestPracticeScheduleView(TestCase):
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
         week = test.create_week()
-        response = self.client.post(reverse('teams:schedule', kwargs={
+        response = self.client.post(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': week.id,
             }),
@@ -508,7 +567,24 @@ class TestPracticeScheduleView(TestCase):
             follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'No sets yet')
-        self.assertTemplateUsed(response, 'teams/practice_create.html')
+        self.assertTemplateUsed(response, 'teams/practice_write.html')
+
+    def test_practice_form_errors(self):
+        """
+        Errors displayed if invalid information is entered.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        week = test.create_week()
+        response = self.client.post(reverse('teams:practiceSchedule', kwargs={
+                'abbr': team.abbr,
+                'w_id': week.id,
+            }),
+            {},
+            follow=True)
+        self.assertEqual(response.context['form'].errors, {
+            'weekday': ['This field is required.'],
+        })
 
 
 # Delete models
@@ -548,7 +624,7 @@ class TestDeleteModelsViews(TestCase):
         self.assertQuerysetEqual(response.context['team_list'], [])
 
         self.client.login(username='user2', password='password')
-        response = self.client.get(reverse('teams:team_list'))
+        response = self.client.get(reverse('teams:teamList'))
         self.assertQuerysetEqual(
             response.context['team_list'],
             ['<Team: Northeastern University>'],
@@ -583,7 +659,7 @@ class TestDeleteModelsViews(TestCase):
         self.assertQuerysetEqual(response.context['swimmer_list'], [])
 
         self.client.login(username='user2', password='password')
-        response = self.client.get(reverse('teams:swimmer_list', kwargs={'abbr': team2.abbr}))
+        response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team2.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
             ['<Swimmer: Gridley>'],
@@ -624,7 +700,7 @@ class TestDeleteModelsViews(TestCase):
         self.assertEqual(response.context['practices'][0], (None, 'monday'))
 
         self.client.login(username='user2', password='password')
-        response = self.client.get(reverse('teams:schedule', kwargs={
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team2.abbr,
                 'w_id': week.id
             })
@@ -632,3 +708,27 @@ class TestDeleteModelsViews(TestCase):
         self.assertEqual(response.context['practices'][0][0].weekday, 'monday')
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
+
+class TestSwimmerDetailView(TestCase):
+    def setUp(self):
+        self.user = test.create_user('user', 'password')
+        self.team = test.create_team(user=self.user)
+
+    def tearDown(self):
+        self.user.delete()
+        self.team.delete()
+
+    def test_swimmer_page(self):
+        """
+        Each swimmer has their own page that contains bio information.
+        """
+        self.client.login(username='user', password='password')
+        swimmer = test.create_swimmer(team=self.team)
+        swimmer.set_age()
+        response = self.client.get(reverse('teams:swimmerDetail', kwargs={
+                'abbr': self.team.abbr,
+                's_id': swimmer.id,
+            })
+        )
+        self.assertEqual(response.context['swimmer'].l_name, 'Gridley')
+        self.assertContains(response, 'Henry Gridley')

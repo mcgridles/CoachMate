@@ -11,6 +11,39 @@ import teams.functions as funct
 
 
 class FunctionTests(TestCase):
+    def test_get_monday_present(self):
+        """
+        Returns most recent Monday. To test, uncomment and change current_mon date.
+        Tested and works.
+        """
+        week = test.create_week()
+        week.populate()
+        monday = funct.get_monday(week=week)
+        current_mon = date(2017,7,10)
+        self.assertEqual(monday, current_mon)
+
+    def test_get_monday_previous(self):
+        """
+        Returns previous Monday. To test, uncomment and change previous_mon date.
+        Tested and works.
+        """
+        week = test.create_week()
+        week.populate()
+        monday = funct.get_monday(week, 0)
+        previous_mon = date(2017,7,3)
+        self.assertEqual(monday, previous_mon)
+
+    def test_get_monday_next(self):
+        """
+        Returns next Monday. To test, uncomment and change next_mon date.
+        Tested and works.
+        """
+        week = test.create_week()
+        week.populate()
+        monday = funct.get_monday(week, 1)
+        next_mon = date(2017,7,17)
+        self.assertEqual(monday, next_mon)
+
     def test_date_range(self):
         """
         Yields all dates in a given week.
@@ -41,11 +74,14 @@ class FunctionTests(TestCase):
         Sets the boolean value of the correct present week to True and all others
         to False. The function also returns True.
         """
-        week1 = test.create_week()
+        mon_present = funct.get_monday(n=None)
+        mon_previous = funct.get_monday(n=0)
+        mon_next = funct.get_monday(n=1)
+        week1 = test.create_week(monday=mon_present)
         week1.populate()
-        week2 = test.create_week(monday=(date.today() - relativedelta(days=7)))
+        week2 = test.create_week(monday=mon_previous)
         week2.populate()
-        week3 = test.create_week(monday=(date.today() + relativedelta(days=7)), present=True)
+        week3 = test.create_week(monday=mon_next, present=True)
         week3.populate()
 
         out = funct.check_present()
@@ -75,36 +111,3 @@ class FunctionTests(TestCase):
         self.assertTrue(out)
         self.assertFalse(week1.present)
         self.assertFalse(week2.present)
-
-    def test_get_monday_present(self):
-        """
-        Returns most recent Monday. To test, uncomment and change current_mon date.
-        Tested and works.
-        """
-        week = test.create_week()
-        week.populate()
-        monday = funct.get_monday(week=week)
-        current_mon = date(2017,7,10)
-        self.assertEqual(monday, current_mon)
-
-    def test_get_monday_previous(self):
-        """
-        Returns previous Monday. To test, uncomment and change previous_mon date.
-        Tested and works.
-        """
-        week = test.create_week()
-        week.populate()
-        monday = funct.get_monday(week, 0)
-        previous_mon = date(2017,7,3)
-        self.assertEqual(monday, previous_mon)
-
-    def test_get_monday_previous(self):
-        """
-        Returns next Monday. To test, uncomment and change next_mon date.
-        Tested and works.
-        """
-        week = test.create_week()
-        week.populate()
-        monday = funct.get_monday(week, 1)
-        next_mon = date(2017,7,17)
-        self.assertEqual(monday, next_mon)

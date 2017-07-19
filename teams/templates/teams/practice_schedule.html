@@ -4,7 +4,7 @@
 {% load datetime_filter %}
 <html lang="en">
   <head>
-    {% block title %}Practice - {{ team.abbr }}{% endblock %}
+    {% block title %}Practice Schedule - {{ team.abbr }}{% endblock %}
     {% block stylesheets %}
       <link rel="stylesheet" href="{% static 'teams/css/practice_schedule.css' %}">
     {% endblock %}
@@ -13,8 +13,8 @@
   <body>
     {% block sidebar %}
       <ul class="nav nav-sidebar">
-        <li class="dashboard"><a href="{% url 'teams:team_list' %}">Overview <span class="sr-only">(current)</span></a></li>
-        <li class="practice"><a href="{% url 'teams:schedule' team.abbr 0 %}">Practice</a></li>
+        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Overview <span class="sr-only">(current)</span></a></li>
+        <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
         <li><a href="#">Analytics</a></li>
         <li><a href="#">Export</a></li>
       </ul>
@@ -58,8 +58,18 @@
             </div>
 
             <div class="modal-body">
-              <form action="{% url 'teams:schedule' team.abbr current_week.id %}" method="post" class="form-signin">
+              <form action="{% url 'teams:practiceSchedule' team.abbr current_week.id %}" method="post" class="form-signin">
                 {% csrf_token %}
+                {% if form.errors %}
+                  {% for field in form %}
+                    {% for error in field.error %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
                 <!-- Practice form: sets weekday -->
                 {% for field in form %}
                   {{ field.label }}<br><br>
@@ -68,7 +78,7 @@
 
                 <br>
                 <div class="modal-footer">
-                  <button type="submit" class="btn btn-md btn-primary">Submit</button>
+                  <button type="submit" class="btn btn-md btn-primary">Next</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
               </form>
@@ -126,11 +136,12 @@
 
                   {% endfor %}
 
-                  <!-- Delete or edit the practice -->
+                  <!-- Delete practice -->
                   <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right follow-link" style="margin-left: 5px">
                     <span class="glyphicon glyphicon-remove-circle"></span> Delete
                   </a>
-                  <a href="{% url 'teams:practice' team.abbr practice.id %}" type="button" class="btn btn-default btn-md pull-right follow-link" style="margin-left: 5px">
+                  <!-- Edit practice -->
+                  <a href="{% url 'teams:writePractice' team.abbr practice.id %}" type="button" class="btn btn-default btn-md pull-right follow-link" style="margin-left: 5px">
                     <span class="glyphicon glyphicon-pencil"></span>Edit
                   </a>
 
@@ -141,11 +152,11 @@
           </div>
         {% endfor %}
       </div>
-      <a href="{% url 'teams:schedule' team.abbr previous_week.id %}" type="button" class="btn btn-primary btn-md pull-left" style="margin-left: 5px">
-        <span class="glyphicon glyphicon-circle-arrow-left"></span> Previous
+      <a href="{% url 'teams:practiceSchedule' team.abbr previous_week.id %}" type="button" class="btn btn-primary btn-md pull-left">
+        <span class="glyphicon glyphicon-circle-arrow-left"></span>
       </a>
-      <a href="{% url 'teams:schedule' team.abbr next_week.id %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
-        <span class="glyphicon glyphicon-circle-arrow-right"></span> Next
+      <a href="{% url 'teams:practiceSchedule' team.abbr next_week.id %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-circle-arrow-right"></span>
       </a>
     {% endblock %}
 
