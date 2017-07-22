@@ -137,18 +137,20 @@ class TestPracticeForm(TestCase):
 class TestSetForm(TestCase):
     def setUp(self):
         user = test.create_user('user', 'password')
-        team = test.create_team(user=user)
+        self.team = test.create_team(user=user)
         week = test.create_week()
-        self.practice = test.create_practice(team, week)
+        self.practice = test.create_practice(self.team, week)
 
     def tearDown(self):
         self.practice.delete()
 
     def test_set_form_init(self):
         """
-        SetForm can take a practice as an argument.
+        SetForm can take a practice and/or a team as an argument.
         """
         SetForm(practice=self.practice)
+        SetForm(team=self.team)
+        SetForm(practice=self.practice, team=self.team)
         SetForm()
 
     def test_set_form_valid_data(self):

@@ -124,52 +124,45 @@ def deleteSwimmer(request, abbr, s_id):
 def writePractice(request, abbr, p_id):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     practice = get_object_or_404(Practice, Q(team=team), pk=p_id)
+    week = get_object_or_404(Week, pk=practice.week_id.id)
     if request.method == 'POST':
-        setForm = SetForm(data=request.POST, practice=practice)
-        rep_formset = RepFormSet(request.POST)
-        if setForm.is_valid() and rep_formset.is_valid():
+        if 'set_create' in request.POST:
+            set_form = SetForm(data=request.POST, practice=practice, team=team)
+            rep_formset = RepFormSet(request.POST)
+            if set_form.is_valid() and rep_formset.is_valid():
+                # checking now instead of when the practice is created means the
+                # previous practice is not lost until this one is populated with sets
+                funct.clean_weekday(team, practice)
 
-            # delete any other practices created on weekday for given team/week
-            # currently there should never be more than one practice per day
-            # checking now instead of when the practice is created means the
-            # previous practice is not lost until this one is populated with sets
-            if Practice.objects.filter(team=team).filter(
-                week_id=practice.week_id).filter(
-                weekday=practice.weekday).exclude(pk=practice.id):
-                practice_list = Practice.objects.filter(team=team).filter(
-                    week_id=practice.week_id).filter(
-                    weekday=practice.weekday).exclude(pk=practice.id)
-                for p in practice_list:
-                    p.delete()
+                # get set form instance
+                setInstance = setForm.save()
+                setForm.save_m2m()
+                rep_formset.save_formset(setInstance) # set set_id for each rep
+                return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
 
-            # get set form instance
-            setInstance = setForm.save()
-            rep_formset.save_formset(setInstance) # set set_id for each rep
-            return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
+            else:
+                practice_form = PracticeForm(instance=practice)
 
-        else:
-            # display errors
-            set_list = Set.objects.filter(practice_id=p_id).order_by('order')
-            context = {
-                'team': team,
-                'practice': practice,
-                'week': practice.week_id.id,
-                'setForm': setForm,
-                'rep_formset': rep_formset,
-                'set_list': set_list,
-            }
-            return render(request, 'teams/practice_create.html', context)
+        elif 'practice_edit' in request.POST:
+            practice_form = PracticeForm(request.POST, instance=practice, team=team, week=week)
+            if practice_form.is_valid():
+                practice_form.save()
+                return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
+            else:
+                set_form = SetForm(team=team)
+                rep_formset = RepFormSet()
 
     else:
-        setForm = SetForm()
+        set_form = SetForm(team=team)
         rep_formset = RepFormSet()
+        practice_form = PracticeForm(instance=practice)
 
     set_list = Set.objects.filter(practice_id=p_id).order_by('order')
     context = {
         'team': team,
         'practice': practice,
         'week': practice.week_id.id,
-        'setForm': setForm,
+        'set_form': set_form,
         'rep_formset': rep_formset,
         'set_list': set_list,
     }
@@ -189,41 +182,10 @@ def deletePractice(request, abbr, p_id):
 @login_required
 def practiceSchedule(request, abbr, w_id):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
-    weeks = {
-        'current_week': None,
-        'previous_week': 0,
-        'next_week': 1,
-    }
-
-    # loop through current, next, and previous weeks
-    for key in sorted(weeks):
-        flag = False
-
-        try:
-            # try database queries
-            if int(w_id) is 0 and 'current_week' in key:
-                # w_id = 0 if requesting the current week
-                flag = True
-                funct.check_present() # check weeks for current
-                weeks[key] = Week.objects.get(present=True)
-            elif int(w_id) is not 0 and 'current_week' in key:
-                # get week with id w_id as 'current week'
-                weeks[key] = Week.objects.get(id=w_id)
-            else:
-                # get next and previous weeks (for next/previous buttons)
-                weeks[key] = weeks['current_week'].get_week(weeks[key])
-
-        except Week.DoesNotExist:
-            # else create week
-            if not flag: # return date of necessary Monday
-                monday = funct.get_monday(weeks['current_week'], weeks[key])
-            else:
-                monday = funct.get_monday(weeks[key])
-            weeks[key] = Week.objects.create(monday=monday, present=flag)
-            weeks[key].populate() # populate dates for rest of week
+    weeks = funct.get_or_create_weeks(w_id)
 
     if request.method == 'POST':
-        form = PracticeForm(request.POST, team=team, week=weeks['current_week'])
+        form = PracticeForm(request.POST, team=team, week=weeks['current'])
         if form.is_valid():
             # create new practice with no sets
             # allows new sets to be associated with a practice
@@ -237,27 +199,7 @@ def practiceSchedule(request, abbr, w_id):
     else:
         form = PracticeForm()
 
-    practices = []
-    weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ,'sunday']
-    for day in weekdays:
-        # create list of practices
-        try:
-            practices.append(Practice.objects.filter(team=team).filter(
-                week_id=weeks['current_week']).order_by('order').get(weekday=day))
-        except Practice.DoesNotExist:
-            practices.append(None)
-
-    practices = zip(practices, weekdays) # add weekdays
-    dates = Week.objects.filter(pk=weeks['current_week'].id).values(
-        'monday',
-        'tuesday',
-        'wednesday',
-        'thursday',
-        'friday',
-        'saturday',
-        'sunday',
-    )[0] # unpack dates from current week
-    dates = zip(dates.keys(), dates.values()) # zip into tuples
+    practices, dates = funct.get_practices_and_dates(team, weeks)
 
     context = {
         'team': team,

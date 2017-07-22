@@ -69,17 +69,20 @@ class Event(models.Model):
         ('50 fly', '50 Butterfly'),
         ('100 fly', '100 Butterfly'),
         ('200 fly', '200 Butterfly'),
+        ('base free', 'Freestyle Base'),
+        ('base back', 'Backstroke Base'),
+        ('base breaset', 'Breaststroke Base'),
+        ('base fly', 'Butterfly Base'),
     )
 
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
     event = models.CharField(max_length=10, choices=EVENT_CHOICE)
     time = models.DurationField()
+    date = models.DateField(null=True)
 
     def __str__(self):
         return self.event
 
-
-# Calendar
 
 # Could add more classes to organize weeks like a calendar or could do it in views
 # Need to figure out how to navigate weeks
@@ -120,7 +123,17 @@ class Week(models.Model):
         return Week.objects.get(monday=monday)
 
 
-# Workout
+# Training
+FOCUS_CHOICE = (
+    ('warmup', 'Warmup'),
+    ('technique', 'Technique'),
+    ('kick', 'Kick'),
+    ('sprint', 'Sprint'),
+    ('mid-distance', 'Mid Distance'),
+    ('distance', 'Distance'),
+    ('race', 'Race'),
+    ('cooldown', 'Cooldown'),
+)
 
 # Sets day, week, and team for each group of sets
 class Practice(models.Model):
@@ -143,18 +156,8 @@ class Practice(models.Model):
 
 # Overall focus and repeats
 class Set(models.Model):
-    FOCUS_CHOICE = (
-        ('warmup', 'Warmup'),
-        ('technique', 'Technique'),
-        ('kick', 'Kick'),
-        ('sprint', 'Sprint'),
-        ('mid-distance', 'Mid Distance'),
-        ('distance', 'Distance'),
-        ('race', 'Race'),
-        ('cooldown', 'Cooldown'),
-    )
-
     practice_id = models.ForeignKey(Practice, on_delete=models.CASCADE)
+    swimmers = models.ManyToManyField(Swimmer, blank=True)
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
     repeats = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(null=True) # creates order within a practice
@@ -182,3 +185,12 @@ class Rep(models.Model):
 
     def __str__(self):
         return self.stroke
+
+# Guide for doing interval calculations
+class TrainingModel(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+class TrainingMultiplier(models.Model):
+    training_model = models.ForeignKey(TrainingModel, on_delete=models.CASCADE)
+    focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
+    multiplier = models.IntegerField()

@@ -6,11 +6,17 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 
 import teams.tests.test_setup as test
-from teams.models import Week
+from teams.models import Week, Practice
 import teams.functions as funct
 
 
 class FunctionTests(TestCase):
+    def setUp(self):
+        self.user = test.create_user('user', 'password')
+
+    def tearDown(self):
+        self.user.delete()
+
     def test_get_monday_present(self):
         """
         Returns most recent Monday. To test, uncomment and change current_mon date.
@@ -111,3 +117,84 @@ class FunctionTests(TestCase):
         self.assertTrue(out)
         self.assertFalse(week1.present)
         self.assertFalse(week2.present)
+
+    def test_clean_weekday(self):
+        """
+        Only one practice can exist on a weekday for each given week.
+        """
+        week1 = test.create_week(monday=date.today())
+        week1.populate()
+        week2 = test.create_week(monday=(date.today() + relativedelta(days=7)))
+        week2.populate()
+        team = test.create_team(user=self.user)
+        practice1 = test.create_practice(team, week1)
+        practice2 = test.create_practice(team, week1)
+        practice3 = test.create_practice(team, week2)
+
+        funct.clean_weekday(team, practice2)
+
+        practices = Practice.objects.all()
+        self.assertQuerysetEqual(
+            practices,
+            ['<Practice: monday>', '<Practice: monday>'],
+            ordered=False
+        )
+        self.assertTrue(practice1 not in practices)
+
+    def test_get_or_create_weeks_with_no_weeks(self):
+        """
+        The previous, current, and next weeks should be created and added to a dict.
+        """
+        weeks = funct.get_or_create_weeks(0)
+        self.assertEqual(sorted(weeks.keys()), ['current', 'next', 'previous'])
+        self.assertEqual(weeks['current'].monday, funct.get_monday())
+        self.assertEqual(weeks['previous'].monday, funct.get_monday(None, 0))
+        self.assertEqual(weeks['next'].monday, funct.get_monday(None, 1))
+
+    def test_get_or_create_weeks_with_weeks(self):
+        """
+        The previous, current, and next weeks should be added to a dict.
+        """
+        previous_week = test.create_week(monday=funct.get_monday(None, 0))
+        previous_week.populate()
+        current_week = test.create_week(monday=funct.get_monday())
+        current_week.populate()
+        next_week = test.create_week(monday=funct.get_monday(None, 1))
+        next_week.populate()
+        weeks = funct.get_or_create_weeks(0)
+        self.assertEqual(sorted(weeks.keys()), ['current', 'next', 'previous'])
+        self.assertEqual(weeks['current'].monday, current_week.monday)
+        self.assertEqual(weeks['previous'].monday, previous_week.monday)
+        self.assertEqual(weeks['next'].monday, next_week.monday)
+
+    def test_get_practices_and_dates(self):
+        self.maxDiff = None
+        """
+        Returns a list of practices and a list of dates.
+        """
+        weeks = funct.get_or_create_weeks(0)
+        team = test.create_team(user=self.user)
+        practices, dates = funct.get_practices_and_dates(team, weeks)
+
+        test_dates = []
+        for day in funct.date_range(weeks['current'].monday, weeks['current'].sunday):
+            test_dates.append(day)
+
+        self.assertEqual(practices, [
+            (None, 'monday'),
+            (None, 'tuesday'),
+            (None, 'wednesday'),
+            (None, 'thursday'),
+            (None, 'friday'),
+            (None, 'saturday'),
+            (None, 'sunday'),
+        ])
+        self.assertEqual(dates, [
+            ('monday', test_dates[0]),
+            ('tuesday', test_dates[1]),
+            ('friday', test_dates[4]),
+            ('wednesday', test_dates[2]),
+            ('thursday', test_dates[3]),
+            ('sunday', test_dates[6]),
+            ('saturday', test_dates[5]),
+        ])

@@ -57,15 +57,15 @@
                 {{ rep_formset.management_form }}
 
                 <!-- Set form errors -->
-                {% if setForm.errors %}
-                  {% for field in setForm %}
+                {% if set_form.errors %}
+                  {% for field in set_form %}
                     {% for error in field.errors %}
                       <div class="alert alert-danger" style="text-align: center">
                           <strong>{{ error|escape }}</strong>
                       </div>
                     {% endfor %}
                   {% endfor %}
-                  {% for error in setForm.non_field_errors %}
+                  {% for error in set_form.non_field_errors %}
                     <div class="alert alert-danger" style="text-align: center">
                         <strong>{{ error|escape }}</strong>
                     </div>
@@ -73,7 +73,7 @@
                 {% endif %}
 
                 <!-- Set form -->
-                {% for field in setForm %}
+                {% for field in set_form %}
                   {{ field }}
                 {% endfor %}
                 <hr>
@@ -97,7 +97,59 @@
                 <br>
 
                 <div class="modal-footer">
-                  <button type="submit" class="btn btn-md btn-primary">Finish</button>
+                  <button type="submit" name="set_create" class="btn btn-md btn-primary">Finish</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <div id="editModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Create a Set
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form id="editForm" action="{% url 'teams:writePractice' team.abbr practice.id %}" method="post">
+                {% csrf_token %}
+                {{ rep_formset.management_form }}
+
+                <!-- Practice form errors -->
+                {% if practiceForm.errors %}
+                  {% for field in practiceForm %}
+                    {% for error in field.errors %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                  {% for error in practiceForm.non_field_errors %}
+                    <div class="alert alert-danger" style="text-align: center">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Practice form -->
+                {% for field in practiceForm %}
+                  {{ field }}
+                {% endfor %}
+                <hr>
+
+                <div class="modal-footer">
+                  <button type="submit" name="practice_edit" class="btn btn-md btn-primary">Save</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
               </form>

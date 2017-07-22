@@ -249,7 +249,7 @@ class TestSwimmerListView(TestCase):
             'f_name': ['This field is required.'],
         })
 
-    def test_team_form_edit(self):
+    def test_edit_team_form(self):
         """
         Team models can be edited from their swimmerList page.
         """
@@ -284,6 +284,7 @@ class TestWritePracticeView(TestCase):
         """
         self.client.login(username='user1', password='password')
         week = test.create_week()
+        week.populate()
         team = test.create_team(user=self.user1)
         practice = test.create_practice(team, week)
         response = self.client.get(reverse('teams:writePractice', kwargs={
@@ -301,6 +302,7 @@ class TestWritePracticeView(TestCase):
         """
         self.client.login(username='user1', password='password')
         week = test.create_week()
+        week.populate()
         team = test.create_team(user=self.user1)
         practice = test.create_practice(team, week)
         set1 = test.create_set(practice=practice)
@@ -332,6 +334,7 @@ class TestWritePracticeView(TestCase):
         """
         self.client.login(username='user1', password='password')
         week = test.create_week()
+        week.populate()
         team1 = test.create_team(user=self.user1)
         team2 = test.create_team(user=self.user2)
         practice1 = test.create_practice(team1, week)
@@ -361,6 +364,27 @@ class TestWritePracticeView(TestCase):
             response.context['set_list'],
             ['<Set: sprint>']
         )
+
+    def test_practice_form(self):
+        """
+        Practices can be edited from the set creation page.
+        """
+        self.client.login(username='user1', password='password')
+        week = test.create_week()
+        week.populate()
+        team = test.create_team(user=self.user1)
+        practice = test.create_practice(team, week)
+        response = self.client.post(reverse('teams:writePractice', kwargs={
+                'abbr': team.abbr,
+                'p_id': practice.id,
+            }),
+            {
+                'weekday': 'friday',
+                'practice_edit': 'Submit',
+            },
+            follow=True)
+        self.assertEqual(response.context['practice'].weekday, 'friday')
+        self.assertContains(response, 'Friday')
 
     #def test_write_practice_set_form(self):
     #    """
@@ -543,10 +567,10 @@ class TestPracticeScheduleView(TestCase):
                 'w_id': next_week.id,
             })
         )
-        self.assertEqual(response.context['current_week'], next_week)
-        self.assertEqual(response.context['previous_week'], current_week)
+        self.assertEqual(response.context['current'], next_week)
+        self.assertEqual(response.context['previous'], current_week)
         self.assertEqual(
-            response.context['next_week'].monday,
+            response.context['next'].monday,
             funct.get_monday(n=1) + relativedelta(days=7)
         )
 

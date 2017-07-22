@@ -36,7 +36,7 @@
 
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}
-      Schedule ({{ current_week.monday|date:"m/d/y" }} - {{ current_week.sunday|date:"m/d/y" }})
+      Schedule ({{ current.monday|date:"m/d/y" }} - {{ current.sunday|date:"m/d/y" }})
     {% endblock %}
 
     {% block action-buttons %}
@@ -58,7 +58,7 @@
             </div>
 
             <div class="modal-body">
-              <form action="{% url 'teams:practiceSchedule' team.abbr current_week.id %}" method="post" class="form-signin">
+              <form action="{% url 'teams:practiceSchedule' team.abbr current.id %}" method="post" class="form-signin">
                 {% csrf_token %}
                 {% if form.errors %}
                   {% for field in form %}
@@ -152,10 +152,10 @@
           </div>
         {% endfor %}
       </div>
-      <a href="{% url 'teams:practiceSchedule' team.abbr previous_week.id %}" type="button" class="btn btn-primary btn-md pull-left">
+      <a href="{% url 'teams:practiceSchedule' team.abbr previous.id %}" type="button" class="btn btn-primary btn-md pull-left">
         <span class="glyphicon glyphicon-circle-arrow-left"></span>
       </a>
-      <a href="{% url 'teams:practiceSchedule' team.abbr next_week.id %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
+      <a href="{% url 'teams:practiceSchedule' team.abbr next.id %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-circle-arrow-right"></span>
       </a>
     {% endblock %}

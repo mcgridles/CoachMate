@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.forms import ModelForm, BaseFormSet, ValidationError
+from django.forms import ModelForm, BaseFormSet, ValidationError, widgets
 from django.forms import formset_factory, inlineformset_factory
 
 from teams.models import Team, Swimmer, Rep, Set, Practice
@@ -121,7 +121,10 @@ class SetForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.practice = kwargs.pop('practice', None)
+        self.team = kwargs.pop('team', None)
         super(SetForm, self).__init__(*args, **kwargs)
+        self.fields['swimmers'].widget = widgets.CheckboxSelectMultiple()
+        self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team)
         self.fields['focus'].widget.attrs.update({
                 'class': 'form-control'
             })
