@@ -52,7 +52,7 @@
             </div>
 
             <div class="modal-body">
-              <form id="setForm" action="{% url 'teams:writePractice' team.abbr practice.id %}" method="post">
+              <form id="set_form" action="{% url 'teams:writePractice' team.abbr practice.id %}" method="post">
                 {% csrf_token %}
                 {{ rep_formset.management_form }}
 
@@ -73,9 +73,9 @@
                 {% endif %}
 
                 <!-- Set form -->
-                {% for field in set_form %}
-                  {{ field }}
-                {% endfor %}
+                {{ set_form.focus }}
+                {{ set_form.repeats }}
+                {{ set_form.order }}
                 <hr>
 
 
@@ -94,6 +94,27 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <hr>
+
+                <div class="btn-group btn-group-justified">
+                  <div class="btn-group">
+                    <button id="team" type="button" class="btn btn-primary">Team</button>
+                  </div>
+                  <div class="btn-group">
+                    <button id="individuals" type="button" class="btn btn-primary">Individuals</button>
+                  </div>
+                </div>
+
+                <div class="table-responsive swimmers" style="display: none">
+                  <table class="table table-striped table-hover swimmers">
+                    {% for checkbox in set_form.swimmers %}
+                      <tr class="swimmer-checklist">
+                        <td class="swimmer-checkbox">{{ checkbox.tag }}</td>
+                        <td>{{ checkbox.choice_label }}</td>
+                      </tr>
+                    {% endfor %}
+                  </table>
+                </div>
                 <br>
 
                 <div class="modal-footer">
@@ -117,25 +138,23 @@
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">&times;</button>
               <h4 class="modal-title">
-                Create a Set
+                Edit Practice
               </h4>
             </div>
 
             <div class="modal-body">
               <form id="editForm" action="{% url 'teams:writePractice' team.abbr practice.id %}" method="post">
                 {% csrf_token %}
-                {{ rep_formset.management_form }}
-
                 <!-- Practice form errors -->
-                {% if practiceForm.errors %}
-                  {% for field in practiceForm %}
+                {% if practice_form.errors %}
+                  {% for field in practice_form %}
                     {% for error in field.errors %}
                       <div class="alert alert-danger" style="text-align: center">
                           <strong>{{ error|escape }}</strong>
                       </div>
                     {% endfor %}
                   {% endfor %}
-                  {% for error in practiceForm.non_field_errors %}
+                  {% for error in practice_form.non_field_errors %}
                     <div class="alert alert-danger" style="text-align: center">
                         <strong>{{ error|escape }}</strong>
                     </div>
@@ -143,10 +162,11 @@
                 {% endif %}
 
                 <!-- Practice form -->
-                {% for field in practiceForm %}
+                {% for field in practice_form %}
+                  {{ field.label }}<br>
                   {{ field }}
                 {% endfor %}
-                <hr>
+                <br>
 
                 <div class="modal-footer">
                   <button type="submit" name="practice_edit" class="btn btn-md btn-primary">Save</button>
@@ -290,7 +310,7 @@
       <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
       <script>
         $(function() {
-            $('#setForm tbody tr').formset({
+            $('#set_form #reps tbody tr').formset({
               addText: 'Add Rep'
             });
         })
@@ -311,7 +331,7 @@
             }
 
             var delete_row = document.getElementsByClassName("delete-row")
-            for (var i=0; i<delete_row.length; i++) {
+            for (var i = 0; i < delete_row.length; i++) {
               delete_row[i].addEventListener("click", toggleRemove_onDelete);
             }
           }
@@ -325,6 +345,41 @@
             }
           }
         });
+      </script>
+
+      <!-- Controls display property of swimmer list with click of button group -->
+      <script>
+        $(function() {
+          $( "#team" ).click(function() {
+            $( "#team" ).addClass("active");
+            $( "#individuals" ).removeClass("active");
+            $( ".swimmers" ).hide();
+          });
+          $( "#individuals" ).click(function() {
+            $( "#team" ).removeClass("active");
+            $( "#individuals" ).addClass("active");
+            $( ".swimmers" ).show();
+          });
+        });
+      </script>
+
+      <!-- Toggle checkbox when the table row is clicked -->
+      <script>
+      $(function() {
+        var checkLists = document.getElementsByClassName("swimmer-checklist");
+        function toggleCheck(a) {
+          id_string = "#id_swimmers_" + a;
+          cBox = $( id_string );
+          cBox.prop("checked", !cBox.prop("checked"));
+        }
+        for ( var i = 0; i < checkLists.length; i++ ) {
+          checkLists[i].onclick = (function(i) {
+            return function() {
+              toggleCheck(i);
+            }
+          })(i);
+        }
+      });
       </script>
     {% endblock %}
   </body>

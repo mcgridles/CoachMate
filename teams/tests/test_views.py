@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 import teams.tests.test_setup as test
-from teams.models import Week
+from teams.models import Week, Set
 import teams.functions as funct
 
 # Team list
@@ -386,30 +386,36 @@ class TestWritePracticeView(TestCase):
         self.assertEqual(response.context['practice'].weekday, 'friday')
         self.assertContains(response, 'Friday')
 
-    #def test_write_practice_set_form(self):
-    #    """
-    #    Set form data is cleaned and used to create a new Set instance.
-    #    """
-    #    self.client.login(username='user1', password='password')
-    #    week = test.create_week()
-    #    team = test.create_team(user=self.user1)
-    #    practice = test.create_practice(team, week)
-    #    response = self.client.post(reverse('teams:writePractice', kwargs={
-    #            'abbr': team.abbr,
-    #            'p_id': practice.id,
-    #        }),
-    #        {
-    #            'focus': 'warmup',
-    #            'repeats': 2,
-    #            'order': 1,
-    #            'num': 4,
-    #            'distance': 100,
-    #            'stroke': 'free',
-    #        },
-    #        follow=True
-    #    )
-    #    self.assertEqual(response.status_code, 200)
-    #    self.assertHTMLEqual(response, '<h3>1) Warmup - 2x</h3>')
+    def test_write_practice_set_form(self):
+        """
+        Set form data is cleaned and used to create a new Set instance.
+        """
+        self.client.login(username='user1', password='password')
+        week = test.create_week()
+        week.populate()
+        team = test.create_team(user=self.user1)
+        practice = test.create_practice(team, week)
+        response = self.client.post(reverse('teams:writePractice', kwargs={
+                'abbr': team.abbr,
+                'p_id': practice.id,
+            }),
+            {
+                'focus': 'warmup',
+                'repeats': 2,
+                'order': 1,
+                'form-0-num': 4,
+                'form-0-distance': 100,
+                'form-0-stroke': 'free',
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'set_create': 'Submit',
+            },
+            follow=True
+        )
+        set_list = Set.objects.all()
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(set_list, ['<Set: warmup>'])
+        self.assertContains(response, '4 x 100 free')
 
 
 # Practice schedule

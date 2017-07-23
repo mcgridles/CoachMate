@@ -1,3 +1,14 @@
+/* Set form */
+.swimmers {
+  margin-bottom: 0;
+  max-height: 100px;
+  overflow: scroll;
+}
+
+.swimmer-checklist {
+  cursor: pointer;
+}
+
 /* Dynamic formset */
 .delete-row {
   margin-left: 10px;

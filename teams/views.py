@@ -135,8 +135,8 @@ def writePractice(request, abbr, p_id):
                 funct.clean_weekday(team, practice)
 
                 # get set form instance
-                setInstance = setForm.save()
-                setForm.save_m2m()
+                setInstance = set_form.save()
+                set_form.save_m2m()
                 rep_formset.save_formset(setInstance) # set set_id for each rep
                 return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
 
@@ -162,9 +162,10 @@ def writePractice(request, abbr, p_id):
         'team': team,
         'practice': practice,
         'week': practice.week_id.id,
+        'set_list': set_list,
         'set_form': set_form,
         'rep_formset': rep_formset,
-        'set_list': set_list,
+        'practice_form': practice_form,
     }
     return render(request, 'teams/practice_write.html', context)
 

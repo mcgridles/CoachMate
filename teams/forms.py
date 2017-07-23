@@ -21,17 +21,17 @@ class TeamForm(ModelForm):
         self.user = kwargs.pop('user', None)
         super(TeamForm, self).__init__(*args, **kwargs)
         self.fields['name'].widget.attrs.update({
-                'placeholder': 'Name*',
-                'class': 'form-control'
-            })
+            'placeholder': 'Name*',
+            'class': 'form-control'
+        })
         self.fields['abbr'].widget.attrs.update({
-                'placeholder': 'Abbreviation*',
-                'class': 'form-control'
-            })
+            'placeholder': 'Abbreviation*',
+            'class': 'form-control'
+        })
         self.fields['region'].widget.attrs.update({
-                'placeholder': 'Region',
-                'class': 'form-control'
-            })
+            'placeholder': 'Region',
+            'class': 'form-control'
+        })
 
     def save(self):
         team = super(TeamForm, self).save(commit=False)
@@ -56,24 +56,24 @@ class SwimmerForm(ModelForm):
         self.team = kwargs.pop('team', None)
         super(SwimmerForm, self).__init__(*args, **kwargs)
         self.fields['f_name'].widget.attrs.update({
-                'placeholder': 'First Name*',
-                'class': 'form-control'
-            })
+            'placeholder': 'First Name*',
+            'class': 'form-control'
+        })
         self.fields['l_name'].widget.attrs.update({
-                'placeholder': 'Last Name*',
-                'class': 'form-control'
-            })
+            'placeholder': 'Last Name*',
+            'class': 'form-control'
+        })
         self.fields['gender'].widget.attrs.update({
-                'class': 'form-control'
-            })
+            'class': 'form-control'
+        })
         self.fields['birth_date'].widget.attrs.update({
-                'placeholder': 'Birth Date',
-                'class': 'form-control'
-            })
+            'placeholder': 'Birth Date',
+            'class': 'form-control'
+        })
         self.fields['bio'].widget.attrs.update({
-                'placeholder': 'Bio',
-                'class': 'form-control'
-            })
+            'placeholder': 'Bio',
+            'class': 'form-control'
+        })
 
     def save(self):
         swimmer = super(SwimmerForm, self).save(commit=False)
@@ -94,24 +94,24 @@ class RepForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(RepForm, self).__init__(*args, **kwargs)
         self.fields['num'].widget.attrs.update({
-                'placeholder': 'Number*',
-                'class': 'form-control'
-            })
+            'placeholder': 'Number*',
+            'class': 'form-control'
+        })
         self.fields['distance'].widget.attrs.update({
-                'placeholder': 'Distance*',
-                'class': 'form-control'
-            })
+            'placeholder': 'Distance*',
+            'class': 'form-control'
+        })
         self.fields['stroke'].widget.attrs.update({
-                'class': 'form-control'
-            })
+            'class': 'form-control'
+        })
         self.fields['rest'].widget.attrs.update({
-                'placeholder': 'Rest',
-                'class': 'form-control'
-            })
+            'placeholder': 'Rest',
+            'class': 'form-control'
+        })
         self.fields['comments'].widget.attrs.update({
-                'placeholder': 'Comments',
-                'class': 'form-control'
-            })
+            'placeholder': 'Comments',
+            'class': 'form-control'
+        })
 
 
 class SetForm(ModelForm):
@@ -124,18 +124,18 @@ class SetForm(ModelForm):
         self.team = kwargs.pop('team', None)
         super(SetForm, self).__init__(*args, **kwargs)
         self.fields['swimmers'].widget = widgets.CheckboxSelectMultiple()
-        self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team)
+        self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team).order_by('l_name')
         self.fields['focus'].widget.attrs.update({
-                'class': 'form-control'
-            })
+            'class': 'form-control'
+        })
         self.fields['repeats'].widget.attrs.update({
-                'placeholder': 'Repeats',
-                'class': 'form-control'
-            })
+            'placeholder': 'Repeats',
+            'class': 'form-control'
+        })
         self.fields['order'].widget.attrs.update({
-                'placeholder': 'Set Order*',
-                'class': 'form-control'
-            })
+            'placeholder': 'Set Order*',
+            'class': 'form-control'
+        })
 
     def clean(self):
         cleaned_data = super(SetForm, self).clean()

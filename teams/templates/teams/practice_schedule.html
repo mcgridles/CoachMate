@@ -72,7 +72,7 @@
 
                 <!-- Practice form: sets weekday -->
                 {% for field in form %}
-                  {{ field.label }}<br><br>
+                  {{ field.label }}<br>
                   {{ field }}
                 {% endfor %}
 
@@ -142,7 +142,7 @@
                   </a>
                   <!-- Edit practice -->
                   <a href="{% url 'teams:writePractice' team.abbr practice.id %}" type="button" class="btn btn-default btn-md pull-right follow-link" style="margin-left: 5px">
-                    <span class="glyphicon glyphicon-pencil"></span>Edit
+                    <span class="glyphicon glyphicon-pencil"></span> Edit
                   </a>
 
                 {% endif %}
