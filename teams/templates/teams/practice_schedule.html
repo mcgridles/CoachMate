@@ -60,8 +60,8 @@
             <div class="modal-body">
               <form action="{% url 'teams:practiceSchedule' team.abbr current.id %}" method="post" class="form-signin">
                 {% csrf_token %}
-                {% if form.errors %}
-                  {% for field in form %}
+                {% if practice_form.errors %}
+                  {% for field in practice_form %}
                     {% for error in field.error %}
                       <div class="alert alert-danger" style="text-align: center">
                           <strong>{{ error|escape }}</strong>
@@ -71,7 +71,7 @@
                 {% endif %}
 
                 <!-- Practice form: sets weekday -->
-                {% for field in form %}
+                {% for field in practice_form %}
                   {{ field.label }}<br>
                   {{ field }}
                 {% endfor %}

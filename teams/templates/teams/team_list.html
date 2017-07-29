@@ -34,8 +34,8 @@
             <div class="modal-body">
               <form action="{% url 'teams:teamList' %}" method="post" class="form-signin">
                 {% csrf_token %}
-                {% if form.errors %}
-                  {% for field in form %}
+                {% if team_form.errors %}
+                  {% for field in team_form %}
                     {% for error in field.error %}
                       <div class="alert alert-danger" style="text-align: center">
                           <strong>{{ error|escape }}</strong>
@@ -45,7 +45,7 @@
                 {% endif %}
 
                 <!-- Team form -->
-                {% for field in form %}
+                {% for field in team_form %}
                   {{ field }}
                 {% endfor %}
 

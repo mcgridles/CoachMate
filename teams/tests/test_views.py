@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 import teams.tests.test_setup as test
-from teams.models import Week, Set
+from teams.models import Week, Set, TrainingModel
 import teams.functions as funct
 
 # Team list
@@ -104,7 +104,7 @@ class TestTeamListView(TestCase):
                 'region': 'US-NE',
             },
             follow=True)
-        self.assertEqual(response.context['form'].errors, {
+        self.assertEqual(response.context['team_form'].errors, {
             'name': ['This field is required.']
         })
 
@@ -395,6 +395,8 @@ class TestWritePracticeView(TestCase):
         week.populate()
         team = test.create_team(user=self.user1)
         practice = test.create_practice(team, week)
+        swimmer1 = test.create_swimmer(team=team)
+        swimmer2 = test.create_swimmer(team=team, first='David', last='Thornton')
         response = self.client.post(reverse('teams:writePractice', kwargs={
                 'abbr': team.abbr,
                 'p_id': practice.id,
@@ -403,19 +405,27 @@ class TestWritePracticeView(TestCase):
                 'focus': 'warmup',
                 'repeats': 2,
                 'order': 1,
+                'base': 'train',
                 'form-0-num': 4,
                 'form-0-distance': 100,
                 'form-0-stroke': 'free',
                 'form-TOTAL_FORMS': 1,
                 'form-INITIAL_FORMS': 0,
+                'swimmers': [swimmer1.id, swimmer2.id],
                 'set_create': 'Submit',
             },
             follow=True
         )
         set_list = Set.objects.all()
+        swimmer_set = set_list[0].swimmers.all()
         self.assertEqual(response.status_code, 200)
         self.assertQuerysetEqual(set_list, ['<Set: warmup>'])
         self.assertContains(response, '4 x 100 free')
+        self.assertQuerysetEqual(
+            swimmer_set,
+            ['<Swimmer: Gridley>', '<Swimmer: Thornton>'],
+            ordered=False
+        )
 
 
 # Practice schedule
@@ -612,7 +622,7 @@ class TestPracticeScheduleView(TestCase):
             }),
             {},
             follow=True)
-        self.assertEqual(response.context['form'].errors, {
+        self.assertEqual(response.context['practice_form'].errors, {
             'weekday': ['This field is required.'],
         })
 
@@ -762,3 +772,92 @@ class TestSwimmerDetailView(TestCase):
         )
         self.assertEqual(response.context['swimmer'].l_name, 'Gridley')
         self.assertContains(response, 'Henry Gridley')
+
+
+class TestCreateTrainingView(TestCase):
+    def setUp(self):
+        self.user = test.create_user('user', 'password')
+
+    def tearDown(self):
+        self.user.delete()
+
+    def test_create_training_page(self):
+        """
+        The training model form is displayed on the page (not hidden by a modal).
+        """
+        self.client.login(username='user', password='password')
+        team = test.create_team(user=self.user)
+        response = self.client.get(reverse('teams:createTraining', kwargs={
+                't_id': 0,
+            })
+        )
+        self.assertContains(response, 'Training Model')
+
+    def test_create_training_form(self):
+        """
+        Form input creates a training model to be used for interval calculations.
+        """
+        self.client.login(username='user', password='password')
+        team = test.create_team(user=self.user)
+        response = self.client.post(reverse('teams:createTraining', kwargs={
+                't_id': 0,
+            }),
+            {
+                'team': team.id,
+                'form-0-focus': 'warmup',
+                'form-0-multiplier': 1,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'submit': 'Submit',
+            },
+            follow=True
+        )
+        training_model = TrainingModel.objects.all()
+        multiplier_set = training_model[0].trainingmultiplier_set.all()
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
+        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
+
+    def test_create_training_edit_form(self):
+        """
+        The form can be used to edit the model.
+        """
+        self.client.login(username='user', password='password')
+        team = test.create_team(user=self.user)
+        response = self.client.post(reverse('teams:createTraining', kwargs={
+                't_id': 0,
+            }),
+            {
+                'team': team.id,
+                'form-0-focus': 'warmup',
+                'form-0-multiplier': 1,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'submit': 'Submit',
+            },
+            follow=True
+        )
+        training_model = TrainingModel.objects.all()
+        multiplier_set = training_model[0].trainingmultiplier_set.all()
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
+        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
+
+        response = self.client.post(reverse('teams:createTraining', kwargs={
+                't_id': training_model[0].id,
+            }),
+            {
+                'team': team.id,
+                'form-0-focus': 'kick',
+                'form-0-multiplier': 2,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'submit': 'Submit',
+            },
+            follow=True
+        )
+        training_model = TrainingModel.objects.all()
+        multiplier_set = training_model[0].trainingmultiplier_set.all()
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
+        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: kick>'])

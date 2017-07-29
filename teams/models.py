@@ -134,6 +134,10 @@ FOCUS_CHOICE = (
     ('race', 'Race'),
     ('cooldown', 'Cooldown'),
 )
+BASE_CHOICE = (
+    ('train', 'Base training pace'),
+    ('race', '100 race pace'),
+)
 
 # Sets day, week, and team for each group of sets
 class Practice(models.Model):
@@ -161,6 +165,7 @@ class Set(models.Model):
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
     repeats = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(null=True) # creates order within a practice
+    pace = models.CharField(max_length=10, choices=BASE_CHOICE, null=True)
 
     def __str__(self):
         return self.focus
@@ -190,7 +195,13 @@ class Rep(models.Model):
 class TrainingModel(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.team.abbr
+
 class TrainingMultiplier(models.Model):
     training_model = models.ForeignKey(TrainingModel, on_delete=models.CASCADE)
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
     multiplier = models.IntegerField()
+
+    def __str__(self):
+        return self.focus

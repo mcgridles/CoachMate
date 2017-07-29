@@ -76,6 +76,14 @@
                 {{ set_form.focus }}
                 {{ set_form.repeats }}
                 {{ set_form.order }}
+                <div class="btn-group btn-group-justified" data-toggle="buttons">
+                  {% for radio in set_form.pace %}
+                    <label class="btn btn-default">
+                      {{ radio.tag }}
+                      {{ radio.choice_label }}
+                    </label>
+                  {% endfor %}
+                </div>
                 <hr>
 
 
@@ -96,6 +104,7 @@
                 </table>
                 <hr>
 
+                <!-- Swimmer/Team select -->
                 <div class="btn-group btn-group-justified">
                   <div class="btn-group">
                     <button id="team" type="button" class="btn btn-primary">Team</button>
@@ -229,7 +238,7 @@
                 <li>
                   Enter each rep within the set. Make sure to either enter the amount
                   of rest or select whether the interval should be calculated based
-                  on a base training pace or 100 pace.
+                  on a training pace or 100 pace.
                 </li><br>
                 <li>
                   Use the 'add' and 'remove' buttons to add and remove reps as needed.

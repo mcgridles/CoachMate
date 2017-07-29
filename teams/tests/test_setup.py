@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 
-from teams.models import Team, Swimmer, Event, Set, Rep, Practice, Week
+from teams.models import *
 
 def create_user(username, password):
     """
@@ -88,3 +88,15 @@ def create_rep(_set, num=10, distance=100, stroke='free'):
         distance=distance,
         stroke=stroke,
     )
+
+def create_training_model(team):
+    """
+    Create a test training model.
+    """
+    return TrainingModel.objects.create(team=team)
+
+def create_training_multiplier(model, focus='warmup', multiplier=1):
+    """
+    Create a test training multiplier.
+    """
+    return TrainingMultiplier.objects.create(training_model=model, focus=focus, multiplier=multiplier)

@@ -9,6 +9,10 @@
   cursor: pointer;
 }
 
+.swimmer-checkbox {
+  width: 50px;
+}
+
 /* Dynamic formset */
 .delete-row {
   margin-left: 10px;

@@ -17,22 +17,22 @@ import teams.functions as funct
 @login_required
 def teamList(request):
     if request.method == 'POST':
-        form = TeamForm(request.POST, user=request.user)
-        if form.is_valid():
+        team_form = TeamForm(request.POST, user=request.user)
+        if team_form.is_valid():
             try:
                 # do nothing if team already exists
-                team_name = form.cleaned_data['name']
+                team_name = team_form.cleaned_data['name']
                 team = Team.objects.filter(user=request.user).get(name=team_name)
             except:
                 # else create new team
-                form.save()
+                team_form.save()
                 return redirect('teams:teamList')
     else:
-        form = TeamForm()
+        team_form = TeamForm()
 
     team_list = Team.objects.filter(user=request.user).order_by('name')
     context = {
-        'form': form,
+        'team_form': team_form,
         'team_list': team_list,
     }
     return render(request, 'teams/team_list.html', context)
@@ -186,28 +186,73 @@ def practiceSchedule(request, abbr, w_id):
     weeks = funct.get_or_create_weeks(w_id)
 
     if request.method == 'POST':
-        form = PracticeForm(request.POST, team=team, week=weeks['current'])
-        if form.is_valid():
+        practice_form = PracticeForm(request.POST, team=team, week=weeks['current'])
+        if practice_form.is_valid():
             # create new practice with no sets
             # allows new sets to be associated with a practice
-            practice = form.save()
+            practice = practice_form.save()
 
+            # don't need?
             context = {
                 'team': team,
                 'practice': practice,
             }
             return redirect('teams:writePractice', abbr=team.abbr, p_id=practice.id)
     else:
-        form = PracticeForm()
+        practice_form = PracticeForm()
 
     practices, dates = funct.get_practices_and_dates(team, weeks)
 
     context = {
         'team': team,
-        'form': form,
+        'practice_form': practice_form,
         'practices': practices,
         'dates': dates,
     }
     context.update(weeks) # include 'weeks' dict in context
 
     return render(request, 'teams/practice_schedule.html', context)
+
+
+@csrf_protect
+@login_required
+def createTraining(request, t_id):
+    if int(t_id) is 0:
+        training_model = None
+        multiplier_set = TrainingMultiplier.objects.none()
+    else:
+        training_model = get_object_or_404(TrainingModel, pk=t_id)
+        multiplier_set = TrainingMultiplier.objects.filter(training_model=training_model)
+
+    if request.method == 'POST':
+        training_form = TrainingForm(request.POST, instance=training_model)
+        multiplier_formset = MultiplierFormSet(request.POST, queryset=multiplier_set)
+        if training_form.is_valid() and multiplier_formset.is_valid():
+            trainingInstance = training_form.save()
+            multiplier_formset.save(trainingInstance)
+            return redirect('teams:showTraining')
+
+    else:
+        training_form = TrainingForm(instance=training_model)
+        multiplier_formset = MultiplierFormSet(queryset=multiplier_set)
+
+    context = {
+        't_id': t_id,
+        'training_form': training_form,
+        'multiplier_formset': multiplier_formset,
+    }
+
+    return render(request, 'teams/training_create.html', context)
+
+
+@login_required
+def deleteTraining(request, t_id):
+    training_model = get_object_or_404(TrainingModel, pk=t_id)
+    training_model.delete()
+    return redirect('teams:showTraining')
+
+
+@csrf_protect
+@login_required
+def showTraining(request):
+    return render(request, 'teams/training_show.html', {})

@@ -142,6 +142,7 @@ class TestSetForm(TestCase):
         self.practice = test.create_practice(self.team, week)
 
     def tearDown(self):
+        self.team.delete()
         self.practice.delete()
 
     def test_set_form_init(self):
@@ -158,6 +159,7 @@ class TestSetForm(TestCase):
         SetForm takes a focus and an order to validate.
         """
         form = SetForm({
+            'base': 'train',
             'focus': 'warmup',
             'order': 1,
         }, practice=self.practice)
@@ -174,6 +176,135 @@ class TestSetForm(TestCase):
         form = SetForm({}, practice=self.practice)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
+            'base': ['This field is required.'],
             'focus': ['This field is required.'],
             'order': ['This field is required.'],
+        })
+
+
+class TestRepForm(TestCase):
+    def setUp(self):
+        user = test.create_user('user', 'password')
+        team = test.create_team(user=user)
+        week = test.create_week()
+        practice = test.create_practice(team, week)
+        self.test_set = test.create_set(practice=practice)
+
+    def tearDown(self):
+        self.test_set.delete()
+
+    def test_rep_form_init(self):
+        """
+        RepForm takes no arguments.
+        """
+        RepForm()
+
+    def test_rep_form_valid_data(self):
+        """
+        RepForm takes a number, distance, stroke to validate.
+        """
+        form = RepForm({
+            'num': 1,
+            'distance': 100,
+            'stroke': 'free',
+        })
+        self.assertTrue(form.is_valid())
+        repInstance = form.save(commit=False)
+        repInstance.set_id = self.test_set
+        repInstance.save()
+        self.assertEqual(repInstance.num, 1)
+        self.assertEqual(repInstance.distance, 100)
+        self.assertEqual(repInstance.stroke, 'free')
+        self.assertEqual(repInstance.set_id, self.test_set)
+
+    def test_rep_form_invalid_data(self):
+        """
+        RepForm will not validate without a number, distance, and stroke.
+        """
+        form = RepForm({
+            'num': 1,
+            'distance': 100,
+        })
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {
+            'stroke': ['This field is required.'],
+        })
+
+
+class TestTrainingForm(TestCase):
+    def setUp(self):
+        user = test.create_user('user', 'password')
+        self.team = test.create_team(user=user)
+
+    def tearDown(self):
+        self.team.delete()
+
+    def test_training_form_init(self):
+        """
+        TrainingForm takes no arguments.
+        """
+        TrainingForm()
+
+    def test_training_form_valid_data(self):
+        """
+        TrainingForm takes a team to validate.
+        """
+        form = TrainingForm({
+            'team': self.team.id,
+        })
+        self.assertTrue(form.is_valid())
+        trainingInstance = form.save()
+        self.assertEqual(trainingInstance.team, self.team)
+
+    def test_training_form_invalid_data(self):
+        """
+        TrainingForm will not validate without a team.
+        """
+        form = TrainingForm({})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {
+            'team': ['This field is required.'],
+        })
+
+
+class TestMultiplierForm(TestCase):
+    def setUp(self):
+        user = test.create_user('user', 'password')
+        team = test.create_team(user=user)
+        self.training_model = test.create_training_model(team)
+
+    def tearDown(self):
+        self.training_model.delete()
+
+    def test_multiplier_form_init(self):
+        """
+        MultiplierForm takes no arguments.
+        """
+        MultiplierForm()
+
+    def test_multiplier_form_valid_data(self):
+        """
+        MultiplierForm takes a focus and multiplier to validate.
+        """
+        form = MultiplierForm({
+            'focus': 'warmup',
+            'multiplier': 1,
+        })
+        self.assertTrue(form.is_valid())
+        multiplierInstance = form.save(commit=False)
+        multiplierInstance.training_model = self.training_model
+        multiplierInstance.save()
+        self.assertEqual(multiplierInstance.focus, 'warmup')
+        self.assertEqual(multiplierInstance.multiplier, 1)
+        self.assertEqual(multiplierInstance.training_model, self.training_model)
+
+    def test_multiplier_form_invalid_data(self):
+        """
+        MultiplierForm will not validate without a focus and multiplier.
+        """
+        form = MultiplierForm({})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {
+            'focus': ['This field is required.'],
+            'multiplier': ['This field is required.'],
         })

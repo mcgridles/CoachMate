@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+{% load static from staticfiles %}
+<html lang="en">
+  <head>
+    {% block title %}Create Training Model{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/training_create.css' %}">
+    {% endblock %}
+  </head>
+
+<body>
+  {% block sidebar %}
+    {{ block.super }}
+  {% endblock %}
+
+  {% block page-title %}Training{% endblock %}
+  {% block table-title %}Create Training Model{% endblock %}
+
+  {% block action-buttons %}{% endblock %}
+
+  {% block content %}
+    <form id="training_form" action="{% url 'teams:createTraining' t_id %}" method="post">
+      {% csrf_token %}
+      {{ multiplier_formset.management_form }}
+
+      <!-- Training form errors -->
+      {% if training_form.errors %}
+        {% for field in training_form %}
+          {% for error in field.errors %}
+            <div class="alert alert-danger" style="text-align: center">
+                <strong>{{ error|escape }}</strong>
+            </div>
+          {% endfor %}
+        {% endfor %}
+        {% for error in training_form.non_field_errors %}
+          <div class="alert alert-danger" style="text-align: center">
+              <strong>{{ error|escape }}</strong>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- training form -->
+      {{ training_form.team }}
+      <hr>
+
+
+      <!-- Multiplier form -->
+      <div class="col-sm-12" style="padding: 0">
+        <table id="mult" border="0" cellpadding="0" cellspacing="0">
+            <tbody>
+              {% for multiplier_field in multiplier_formset %}
+                <tr>
+                  {{ multiplier_field.errors }}
+                  {{ multiplier_field.id }}
+                  <td>{{ multiplier_field.focus }}</td>
+                  <td>{{ multiplier_field.multiplier }}</td>
+                  <td class="remove"></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+      </div>
+
+      <button type="button" class="btn btn-default pull-right" style="margin-left: 5px">Close</button>
+      <button type="submit" class="btn btn-md btn-primary pull-right" style="margin-left: 5px">Finish</button>
+    </form>
+  {% endblock %}
+
+  {% block scripts %}
+    <!-- Allow reps to be added or removed from set form -->
+    <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
+    <script>
+      $(function() {
+          $('#training_form #mult tbody tr').formset({
+            addText: 'Add Rep'
+          });
+      })
+    </script>
+
+    <!-- Disables 'remove' function when there is only one rep -->
+    <script>
+      $(function() {
+        document.getElementsByClassName("remove")[0].style.display = "none";
+        document.getElementsByClassName("add-row")[0].addEventListener("click", toggleRemove_onAdd);
+
+        function toggleRemove_onAdd() {
+          var row_count = $("#mult tr").length;
+          if (row_count <= 2){
+            document.getElementsByClassName("remove")[0].style.display = "none";
+          } else {
+            document.getElementsByClassName("remove")[0].style.display = "table-cell";
+          }
+
+          var delete_row = document.getElementsByClassName("delete-row")
+          for (var i = 0; i < delete_row.length; i++) {
+            delete_row[i].addEventListener("click", toggleRemove_onDelete);
+          }
+        }
+
+        function toggleRemove_onDelete() {
+          var row_count = $("#mult tr").length;
+          if (row_count <= 2){
+            document.getElementsByClassName("remove")[0].style.display = "none";
+          } else {
+            document.getElementsByClassName("remove")[0].style.display = "table-cell";
+          }
+        }
+      });
+    </script>
+  {% endblock %}

@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-from django.forms import ModelForm, BaseFormSet, ValidationError, widgets
-from django.forms import formset_factory, inlineformset_factory
+from django.forms import ModelForm, BaseFormSet, BaseModelFormSet, formset_factory, modelformset_factory
+from django.forms.widgets import CheckboxSelectMultiple, RadioSelect
 
-from teams.models import Team, Swimmer, Rep, Set, Practice
+from teams.models import *
 
 # Model forms
 
@@ -123,8 +123,6 @@ class SetForm(ModelForm):
         self.practice = kwargs.pop('practice', None)
         self.team = kwargs.pop('team', None)
         super(SetForm, self).__init__(*args, **kwargs)
-        self.fields['swimmers'].widget = widgets.CheckboxSelectMultiple()
-        self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team).order_by('l_name')
         self.fields['focus'].widget.attrs.update({
             'class': 'form-control'
         })
@@ -136,6 +134,9 @@ class SetForm(ModelForm):
             'placeholder': 'Set Order*',
             'class': 'form-control'
         })
+        self.fields['swimmers'].widget = CheckboxSelectMultiple()
+        self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team).order_by('l_name')
+        self.fields['base'].widget = RadioSelect(choices=BASE_CHOICE)
 
     def clean(self):
         cleaned_data = super(SetForm, self).clean()
@@ -173,6 +174,44 @@ class PracticeForm(ModelForm):
         return practice
 
 
+class TrainingForm(ModelForm):
+    class Meta:
+        model = TrainingModel
+        fields = ['team']
+
+    def __init__(self, *args, **kwargs):
+        super(TrainingForm, self).__init__(*args, **kwargs)
+        self.fields['team'].widget.attrs.update({
+            'class': 'form-control'
+        })
+
+    def save(self):
+        training_model = super(TrainingForm, self).save(commit=False)
+        team_models = TrainingModel.objects.filter(team=training_model.team)
+        for model in team_models:
+            model.delete()
+        training_model.save()
+        return training_model
+
+
+class MultiplierForm(ModelForm):
+    class Meta:
+        model = TrainingMultiplier
+        exclude = ['training_model']
+
+    def __init__(self, *args, **kwargs):
+        super(MultiplierForm, self).__init__(*args, **kwargs)
+        self.fields['focus'].widget.attrs.update({
+            'class': 'form-control'
+        })
+        self.fields['multiplier'].widget.attrs.update({
+            'placeholder': 'Multiplier*',
+            'class': 'form-control'
+        })
+
+
+# Formsets
+
 class BaseRepFormset(BaseFormSet):
     def save_formset(self, set_id):
         for form in self.forms:
@@ -181,7 +220,37 @@ class BaseRepFormset(BaseFormSet):
                 instance.set_id = set_id
                 instance.save()
 
-
-# Formsets
-
 RepFormSet = formset_factory(RepForm, formset=BaseRepFormset)
+
+
+class BaseMultiplierFormset(BaseModelFormSet):
+    def clean(self):
+        super(BaseMultiplierFormset, self).clean()
+        used = []
+        for form in self.forms:
+            cleaned_data = form.clean()
+            try:
+                focus = cleaned_data['focus']
+
+                if focus in used:
+                    msg = 'Error: Each intensity can only be assigned 1 multiplier'
+                    form.add_error('focus', msg)
+                else:
+                    used.append(focus)
+            except KeyError:
+                return
+
+
+    def save(self, training_model):
+        for form in self.forms:
+            if form.cleaned_data:
+                instance = form.save(commit=False)
+                instance.training_model = training_model
+                instance.save()
+
+MultiplierFormSet = modelformset_factory(
+    TrainingMultiplier,
+    form=MultiplierForm,
+    formset=BaseMultiplierFormset,
+    fields=('focus', 'multiplier')
+)
