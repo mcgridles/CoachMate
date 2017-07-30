@@ -125,6 +125,11 @@ def writePractice(request, abbr, p_id):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     practice = get_object_or_404(Practice, Q(team=team), pk=p_id)
     week = get_object_or_404(Week, pk=practice.week_id.id)
+    try:
+        training_model = TrainingModel.objects.get(team=team)
+    except TrainingModel.DoesNotExist:
+        training_model = None
+
     if request.method == 'POST':
         if 'set_create' in request.POST:
             set_form = SetForm(data=request.POST, practice=practice, team=team)
@@ -136,8 +141,10 @@ def writePractice(request, abbr, p_id):
 
                 # get set form instance
                 setInstance = set_form.save()
-                set_form.save_m2m()
                 rep_formset.save_formset(setInstance) # set set_id for each rep
+
+                funct.calculate_intervals(setInstance, training_model)
+
                 return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
 
             else:
@@ -255,4 +262,19 @@ def deleteTraining(request, t_id):
 @csrf_protect
 @login_required
 def showTraining(request):
-    return render(request, 'teams/training_show.html', {})
+    teams = Team.objects.filter(user=request.user).order_by('name')
+
+    models = []
+    for team in teams:
+        try:
+            training_model = TrainingModel.objects.get(team=team)
+        except TrainingModel.DoesNotExist:
+            training_model = None
+        models.append(training_model)
+
+    teams = zip(teams, models)
+
+    context = {
+        'teams': teams,
+    }
+    return render(request, 'teams/training_show.html', context)

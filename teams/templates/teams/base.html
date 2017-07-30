@@ -51,8 +51,13 @@
           <a class="navbar-brand" href="#">CoachMate</a>
         </div>
 
-        <!-- Account dropdown -->
         <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="{% url 'teams:teamList' %}">Teams</a></li>
+            <li><a href="{% url 'teams:showTraining' %}">Training</a></li>
+          </ul>
+
+          <!-- Account dropdown -->
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile<span class="caret"></span></a>
@@ -85,16 +90,16 @@
 
     <div class="container-fluid">
       <div class="row">
-
         <!-- Sidebar -->
         <div class="col-sm-3 col-md-2 sidebar">
           {% block sidebar %}
             <ul class="nav nav-sidebar">
-              <li class="dashboard"><a href="{% url 'teams:teamList' %}">Overview <span class="sr-only">(current)</span></a></li>
-              <li class="Training"><a href="{% url 'teams:createTraining' 0 %}">Training</a></li>
+              <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams<span class="sr-only">(current)</span></a></li>
+              <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
               <li><a href="#">Analytics</a></li>
               <li><a href="#">Export</a></li>
             </ul>
+          {% endblock %}
 
             <ul class="nav nav-sidebar">
               <li><a href="">Nav item</a></li>
@@ -109,7 +114,6 @@
               <li><a href="">One more nav</a></li>
               <li><a href="">Another nav item</a></li>
             </ul>
-          {% endblock %}
         </div>
 
         <!-- Main block -->

@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 
-from teams.models import Week, Practice
+from teams.models import *
 
 def date_range(start_date, end_date):
     """
@@ -143,3 +143,39 @@ def get_practices_and_dates(team, weeks):
     dates = zip(dates.keys(), dates.values()) # zip into tuples
 
     return practices, dates
+
+def get_base(swimmer, pace, stroke):
+    """
+    Returns a swimmer's base pace for the given stroke and pace.
+    """
+    if pace == 'train':
+        return swimmer.event_set.filter(event=stroke).order_by('time')[0]
+    elif pace == 'race':
+        base = swimmer.event_set.filter(event='100 ' + stroke).order_by('time')[0]
+        return timedelta(seconds=(0.5 * base.total_seconds()))
+
+def calculate_intervals(setInstance, training_model):
+    """
+    Calculates intervals for each rep for each swimmer.
+    """
+    try:
+        multiplier = training_model.trainingmultiplier_set.get(focus=setInstance.focus).multiplier
+    except TrainingMultiplier.DoesNotExist, AttributeError:
+        multiplier = None
+
+    for rep in setInstance.rep_set.all():
+        num_50 = rep.distance / 50 # number of 50s for the distance
+        for swimmer in setInstance.swimmers.all():
+            base = get_base(swimmer, setInstance.pace, rep.stroke) # get base
+            if multiplier:
+                # add multiplier to base
+                time = timedelta(seconds=((1 + multiplier) * base.time.total_seconds()))
+                # multiply base by the number of 50s
+                time = timedelta(seconds=(num_50 * time.total_seconds()))
+            else:
+                # time is 0 if no multiplier is set
+                # essentially a flag
+                time = timedelta(seconds=0)
+
+            # create interval object
+            Interval.objects.create(swimmer=swimmer, rep=rep, time=time)

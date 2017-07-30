@@ -123,6 +123,7 @@ class SetForm(ModelForm):
         self.practice = kwargs.pop('practice', None)
         self.team = kwargs.pop('team', None)
         super(SetForm, self).__init__(*args, **kwargs)
+        self.fields['group'].widget = RadioSelect(choices=GROUP_CHOICE)
         self.fields['focus'].widget.attrs.update({
             'class': 'form-control'
         })
@@ -136,21 +137,31 @@ class SetForm(ModelForm):
         })
         self.fields['swimmers'].widget = CheckboxSelectMultiple()
         self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team).order_by('l_name')
-        self.fields['base'].widget = RadioSelect(choices=BASE_CHOICE)
+        self.fields['pace'].widget = RadioSelect(choices=PACE_CHOICE)
 
     def clean(self):
         cleaned_data = super(SetForm, self).clean()
         order = cleaned_data.get('order')
         # check for any sets with the same order number
         if Set.objects.filter(practice_id=self.practice).filter(order=order):
-            msg = 'Error: Another set already given order #%d' % order
+            msg = 'Error: Another set already given order #%d.' % order
             self.add_error('order', msg)
+
+        group = cleaned_data.get('group')
+        swimmers = cleaned_data.get('swimmers')
+        # swimmers should be chosen or "Team" should be selected
+        if group == 'ind' and not swimmers:
+            msg = 'Error: Select \'Team\' or choose swimmers.'
+            self.add_error('group', msg)
         return cleaned_data
 
     def save(self):
         setInstance = super(SetForm, self).save(commit=False)
         setInstance.practice_id = self.practice # associate practice
         setInstance.save()
+        if setInstance.group == 'team':
+            setInstance.swimmers = Swimmer.objects.filter(team=self.team)
+        self.save_m2m()
         return setInstance
 
 
@@ -205,7 +216,7 @@ class MultiplierForm(ModelForm):
             'class': 'form-control'
         })
         self.fields['multiplier'].widget.attrs.update({
-            'placeholder': 'Multiplier*',
+            'placeholder': 'Percentage*',
             'class': 'form-control'
         })
 

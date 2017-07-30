@@ -13,24 +13,7 @@
   <body>
     {% block sidebar %}
       <ul class="nav nav-sidebar">
-        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Overview <span class="sr-only">(current)</span></a></li>
         <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
-        <li><a href="#">Analytics</a></li>
-        <li><a href="#">Export</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
-        <li><a href="">Nav item</a></li>
-        <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
-        <li><a href="">More navigation</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
-        <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
       </ul>
     {% endblock %}
     <!-- This needs to be <Team Name> Dashboard -->
@@ -214,7 +197,7 @@
       {% if swimmer_list %}
         <!-- Display swimmers in table -->
         <div class="table-responsive">
-          <table id="swimmers" class="table table-striped">
+          <table id="swimmers" class="table table-striped table-hover">
             <thead>
               <tr>
                 <th></th>
@@ -226,13 +209,9 @@
             </thead>
             <tbody>
               {% for swimmer in swimmer_list %}
-                <tr>
+                <tr class="clickable-row" data-href="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}">
                   <td>{{ forloop.counter }}</td>
-                  <td>
-                    <a href={% url 'teams:swimmerDetail' team.abbr swimmer.id %}>
-                      {{ swimmer.l_name }}
-                    </a>
-                  </td>
+                  <td>{{ swimmer.l_name }}</td>
                   <td>{{ swimmer.f_name }}</td>
                   <td>
                     {% if swimmer.age %}
@@ -261,6 +240,14 @@
     {% endblock %}
 
     {% block scripts %}
+      <!-- Makes table rows clickable -->
+      <script>
+        $(function() {
+          $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+          });
+        });
+      </script>
       <!-- Create DataTable from swimmer table -->
       <!-- Need to figure out how to make each entry a link -->
       <!--

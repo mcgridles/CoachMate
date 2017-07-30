@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 import teams.tests.test_setup as test
-from teams.models import Week, Set, TrainingModel
+from teams.models import *
 import teams.functions as funct
 
 # Team list
@@ -395,8 +395,14 @@ class TestWritePracticeView(TestCase):
         week.populate()
         team = test.create_team(user=self.user1)
         practice = test.create_practice(team, week)
+
+        training_model = test.create_training_model(team)
+        warmup_mult = test.create_training_multiplier(training_model, multiplier=0.07)
+
         swimmer1 = test.create_swimmer(team=team)
+        base1 = test.create_event(swimmer=swimmer1, event='free', time=timedelta(seconds=25))
         swimmer2 = test.create_swimmer(team=team, first='David', last='Thornton')
+        base2 = test.create_event(swimmer=swimmer2, event='free', time=timedelta(seconds=24))
         response = self.client.post(reverse('teams:writePractice', kwargs={
                 'abbr': team.abbr,
                 'p_id': practice.id,
@@ -405,12 +411,13 @@ class TestWritePracticeView(TestCase):
                 'focus': 'warmup',
                 'repeats': 2,
                 'order': 1,
-                'base': 'train',
+                'pace': 'train',
                 'form-0-num': 4,
                 'form-0-distance': 100,
                 'form-0-stroke': 'free',
                 'form-TOTAL_FORMS': 1,
                 'form-INITIAL_FORMS': 0,
+                'group': 'ind',
                 'swimmers': [swimmer1.id, swimmer2.id],
                 'set_create': 'Submit',
             },
@@ -418,6 +425,8 @@ class TestWritePracticeView(TestCase):
         )
         set_list = Set.objects.all()
         swimmer_set = set_list[0].swimmers.all()
+        rep_set = set_list[0].rep_set.all()
+        interval_set = Interval.objects.filter(rep=rep_set[0])
         self.assertEqual(response.status_code, 200)
         self.assertQuerysetEqual(set_list, ['<Set: warmup>'])
         self.assertContains(response, '4 x 100 free')
@@ -426,6 +435,9 @@ class TestWritePracticeView(TestCase):
             ['<Swimmer: Gridley>', '<Swimmer: Thornton>'],
             ordered=False
         )
+
+        self.assertEqual(interval_set[0].time, timedelta(seconds=53.5))
+        self.assertEqual(interval_set[1].time, timedelta(seconds=51.36))
 
 
 # Practice schedule
@@ -861,3 +873,26 @@ class TestCreateTrainingView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
         self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: kick>'])
+
+
+class TestShowTrainingView(TestCase):
+    def setUp(self):
+        self.user1 = test.create_user('user1', 'password')
+        self.user2 = test.create_user('user2', 'password')
+
+    def tearDown(self):
+        self.user1.delete()
+        self.user2.delete()
+
+    def test_show_training_page(self):
+        """
+        The training model form is displayed on the page (not hidden by a modal).
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        training_model = test.create_training_model(team)
+        training_multiplier = test.create_training_multiplier(model=training_model)
+        response = self.client.get(reverse('teams:showTraining'))
+        self.assertContains(response, 'Training')
+        self.assertContains(response, 'Northeastern University')
+        self.assertContains(response, 'Warmup')

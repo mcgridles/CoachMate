@@ -41,7 +41,7 @@ def create_swimmer(team, first='Henry', last='Gridley', gender='M'):
         bio='',
     )
 
-def create_event(swimmer, event='50 free', time=timedelta(seconds=22, milliseconds=320)):
+def create_event(swimmer, event='50 free', time=timedelta(seconds=22.32)):
     """
     Create a test event.
     """

@@ -1,1 +1,79 @@
-Hello
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+{% load static from staticfiles %}
+<html lang="en">
+  <head>
+    {% block title %}Training{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/training_show.css' %}">
+    {% endblock %}
+  </head>
+
+  <body>
+    {% block sidebar %}
+      {{ block.super }}
+    {% endblock %}
+
+    {% block page-title %}Dashboard{% endblock %}
+    {% block table-title %}Training{% endblock %}
+
+    {% block action-buttons %}
+      <a href="{% url 'teams:createTraining' 0 %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Add" data-trigger="hover" data-placement="auto bottom">
+        <span class="glyphicon glyphicon-plus-sign"></span>
+      </a>
+    {% endblock %}
+
+    {% block modal %}{% endblock %}
+
+    {% block content %}
+      <div class="panel-group" id="accordion">
+        <!-- Loop through each team and display the training model -->
+        {% for team, training_model in teams %}
+          <div class="panel panel-info" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter }}">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                {{ team.name }}
+              </h4>
+            </div>
+
+            <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse">
+              <div class="panel-body" style="padding-left: 0; padding-right: 0">
+                <!-- Display training model: same format as when writing -->
+                {% if training_model %}
+                  <div class="table table-responsive">
+                    <table class="table table-striped">
+                      {% for multiplier in training_model.trainingmultiplier_set.all %}
+                        <tr>
+                          <td><h4>{{ multiplier.focus|title }}</h4></td>
+                          <td><h4>{{ multiplier.multiplier|floatformat:2 }}%</h4></td>
+                        </tr>
+                      {% endfor %}
+                    </table>
+                  </div>
+
+                  <!-- Delete training model -->
+                  <a href="{% url 'teams:deleteTraining' training_model.id %}" type="button" class="btn btn-danger btn-md pull-right follow-link" style="margin-left: 5px; margin-right: 15px">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                  </a>
+                  <!-- Edit training model -->
+                  <a href="{% url 'teams:createTraining' training_model.id %}" type="button" class="btn btn-default btn-md pull-right follow-link" style="margin-left: 5px">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                  </a>
+
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+    {% endblock %}
+
+    {% block scripts %}
+      <!-- Fixes bug where links would collapse panels instead of follow link -->
+      <script>
+        $('.follow-link').click(function(e) {
+          e.stopPropagation();
+        })
+      </script>
+    {% endblock %}

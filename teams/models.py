@@ -31,6 +31,7 @@ class Swimmer(models.Model):
     birth_date = models.DateField(blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     bio = models.TextField(blank=True)
+    #picture = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return self.l_name
@@ -69,10 +70,11 @@ class Event(models.Model):
         ('50 fly', '50 Butterfly'),
         ('100 fly', '100 Butterfly'),
         ('200 fly', '200 Butterfly'),
-        ('base free', 'Freestyle Base'),
-        ('base back', 'Backstroke Base'),
-        ('base breaset', 'Breaststroke Base'),
-        ('base fly', 'Butterfly Base'),
+        ('free', 'Freestyle Base'),
+        ('back', 'Backstroke Base'),
+        ('breaset', 'Breaststroke Base'),
+        ('fly', 'Butterfly Base'),
+        ('im', 'IM'),
     )
 
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
@@ -134,9 +136,13 @@ FOCUS_CHOICE = (
     ('race', 'Race'),
     ('cooldown', 'Cooldown'),
 )
-BASE_CHOICE = (
+PACE_CHOICE = (
     ('train', 'Base training pace'),
     ('race', '100 race pace'),
+)
+GROUP_CHOICE = (
+    ('team', 'Team'),
+    ('ind', 'Individuals'),
 )
 
 # Sets day, week, and team for each group of sets
@@ -161,11 +167,12 @@ class Practice(models.Model):
 # Overall focus and repeats
 class Set(models.Model):
     practice_id = models.ForeignKey(Practice, on_delete=models.CASCADE)
+    group = models.CharField(max_length=25, choices=GROUP_CHOICE, null=True)
     swimmers = models.ManyToManyField(Swimmer, blank=True)
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
     repeats = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(null=True) # creates order within a practice
-    pace = models.CharField(max_length=10, choices=BASE_CHOICE, null=True)
+    pace = models.CharField(max_length=10, choices=PACE_CHOICE, null=True)
 
     def __str__(self):
         return self.focus
@@ -178,7 +185,6 @@ class Rep(models.Model):
         ('breast', 'Breaststroke'),
         ('free', 'Freestyle'),
         ('im', 'IM'),
-        ('kick', 'Kick'),
     )
 
     set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
@@ -191,6 +197,11 @@ class Rep(models.Model):
     def __str__(self):
         return self.stroke
 
+class Interval(models.Model):
+    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
+    rep = models.ForeignKey(Rep, on_delete=models.CASCADE)
+    time = models.DurationField()
+
 # Guide for doing interval calculations
 class TrainingModel(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -201,7 +212,7 @@ class TrainingModel(models.Model):
 class TrainingMultiplier(models.Model):
     training_model = models.ForeignKey(TrainingModel, on_delete=models.CASCADE)
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
-    multiplier = models.IntegerField()
+    multiplier = models.FloatField(null=True)
 
     def __str__(self):
         return self.focus

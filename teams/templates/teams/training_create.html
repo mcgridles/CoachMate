@@ -3,7 +3,7 @@
 {% load static from staticfiles %}
 <html lang="en">
   <head>
-    {% block title %}Create Training Model{% endblock %}
+    {% block title %}Training{% endblock %}
     {% block stylesheets %}
       <link rel="stylesheet" href="{% static 'teams/css/training_create.css' %}">
     {% endblock %}
@@ -15,9 +15,89 @@
   {% endblock %}
 
   {% block page-title %}Training{% endblock %}
-  {% block table-title %}Create Training Model{% endblock %}
+  {% block table-title %}
+    Create Training Model
+    <span data-toggle="modal" data-target="#infoModal">
+      <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Info" data-trigger="hover" data-placement="auto bottom">
+        <span class="glyphicon glyphicon-info-sign"></span>
+      </button>
+    </span>
+  {% endblock %}
 
   {% block action-buttons %}{% endblock %}
+
+  {% block modal %}
+    <div id="infoModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">
+              Writing a Practice
+            </h4>
+          </div>
+
+          <div class="modal-body">
+            <ol>
+              <li>
+                Click on the
+                <button type="button" class="btn btn-primary btn-sm info">
+                  <span class="glyphicon glyphicon-plus-sign"></span> Add
+                </button>
+                button to begin adding a set.
+              </li><br>
+              <li>
+                Use the
+                <select class="form-control info">
+                  <option>------</option>
+                  <option>Warmup</option>
+                  <option>Technique</option>
+                  <option>Kick</option>
+                  <option>Sprint</option>
+                  <option>Mid Distance</option>
+                  <option>Distance</option>
+                  <option>Race</option>
+                  <option>Cooldown</option>
+                </select>
+                dropdown to select the focus of the set.
+              </li><br>
+              <li>
+                Enter the number of times the set is to be repeated.<br>
+                <strong>Note:</strong> entering '1' means the set will only be
+                1x.
+              </li><br>
+              <li>
+                Enter the order of the set within the practice. '1' is first,
+                '2' is second, and so on. Only one set can be assigned to a number.
+              </li><br>
+              <li>
+                Enter each rep within the set. Make sure to either enter the amount
+                of rest or select whether the interval should be calculated based
+                on a training pace or 100 pace.
+              </li><br>
+              <li>
+                Use the 'add' and 'remove' buttons to add and remove reps as needed.
+              </li><br>
+              <li>
+                When done, click the 'Finish' button to add the set to the practice.
+              </li><br>
+              <li>
+                Continue adding sets as desired.
+              </li><br>
+            </ol>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  {% endblock %}
 
   {% block content %}
     <form id="training_form" action="{% url 'teams:createTraining' t_id %}" method="post">
@@ -62,8 +142,12 @@
         </table>
       </div>
 
-      <button type="button" class="btn btn-default pull-right" style="margin-left: 5px">Close</button>
-      <button type="submit" class="btn btn-md btn-primary pull-right" style="margin-left: 5px">Finish</button>
+      <a href="{% url 'teams:showTraining' %}" type="button" class="btn btn-danger pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-remove-circle"></span>
+      </a>
+      <button type="submit" class="btn btn-md btn-primary pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-ok-circle"></span>
+      </button>
     </form>
   {% endblock %}
 
@@ -73,7 +157,7 @@
     <script>
       $(function() {
           $('#training_form #mult tbody tr').formset({
-            addText: 'Add Rep'
+            addText: 'Add'
           });
       })
     </script>

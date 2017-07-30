@@ -156,18 +156,21 @@ class TestSetForm(TestCase):
 
     def test_set_form_valid_data(self):
         """
-        SetForm takes a focus and an order to validate.
+        SetForm takes a focus, group, pace, and order to validate.
         """
         form = SetForm({
-            'base': 'train',
+            'pace': 'train',
             'focus': 'warmup',
             'order': 1,
+            'group': 'team',
         }, practice=self.practice)
         self.assertTrue(form.is_valid())
         setInstance = form.save()
         self.assertEqual(setInstance.focus, 'warmup')
         self.assertEqual(setInstance.order, 1)
         self.assertEqual(setInstance.practice_id, self.practice)
+        self.assertEqual(setInstance.group, 'team')
+        self.assertQuerysetEqual(setInstance.swimmers.all(), [])
 
     def test_set_form_invalid_data(self):
         """
@@ -176,9 +179,10 @@ class TestSetForm(TestCase):
         form = SetForm({}, practice=self.practice)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
-            'base': ['This field is required.'],
+            'pace': ['This field is required.'],
             'focus': ['This field is required.'],
             'order': ['This field is required.'],
+            'group': ['This field is required.'],
         })
 
 

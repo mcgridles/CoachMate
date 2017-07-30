@@ -67,7 +67,7 @@
       {% if team_list %}
         <!-- Display team in table -->
         <div class="table-responsive">
-          <table id="teams" class="table table-striped">
+          <table id="teams" class="table table-striped table-hover">
             <thead>
               <tr>
                 <th></th>
@@ -79,9 +79,9 @@
             </thead>
             <tbody>
               {% for team in team_list %}
-                <tr>
+                <tr class="clickable-row" data-href="{% url 'teams:swimmerList' team.abbr %}">
                   <td>{{ forloop.counter }}</td>
-                  <td><a href="{% url 'teams:swimmerList' team.abbr %}">{{ team.name }}</a></td>
+                  <td>{{ team.name }}</a></td>
                   <td>{{ team.abbr }}</td>
                   <td>{{ team.region }}</td>
                   <td>{{ team.swimmer_set.all|length }}</td>
@@ -113,6 +113,15 @@
           } else {
             $('.dashboard').addClass('active');
           }
+        });
+      </script>
+
+      <!-- Makes table rows clickable -->
+      <script>
+        $(function() {
+          $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+          });
         });
       </script>
 

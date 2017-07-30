@@ -47,6 +47,24 @@ body {
   color: black;
 }
 
+.dropdown-header {
+  color: white;
+}
+
+.divider {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dropdown-header {
+    color: #777;
+  }
+
+  .divider {
+    display: list-item;
+  }
+}
+
 
 /*
  * Sidebar
