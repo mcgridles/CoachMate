@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 from unittest import skip, skipIf, skipUnless
-from datetime import date
+from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 
 from django.test import TestCase
 
 import teams.tests.test_setup as test
-from teams.models import Week, Practice
+from teams.models import Week, Practice, Interval
 import teams.functions as funct
 
 
@@ -49,24 +49,6 @@ class FunctionTests(TestCase):
         monday = funct.get_monday(week, 1)
         next_mon = date(2017,7,17)
         self.assertEqual(monday, next_mon)
-
-    def test_date_range(self):
-        """
-        Yields all dates in a given week.
-        """
-        dates = [
-            date(2017,7,10),
-            date(2017,7,11),
-            date(2017,7,12),
-            date(2017,7,13),
-            date(2017,7,14),
-            date(2017,7,15),
-            date(2017,7,16),
-        ]
-        returned_dates = []
-        for day in funct.date_range(date(2017,7,10), date(2017,7,16)):
-            returned_dates.append(day)
-        self.assertEqual(dates, returned_dates)
 
     def test_check_present_with_no_weeks(self):
         """
@@ -168,26 +150,37 @@ class FunctionTests(TestCase):
         self.assertEqual(weeks['next'].monday, next_week.monday)
 
     def test_get_practices_and_dates(self):
-        self.maxDiff = None
         """
         Returns a list of practices and a list of dates.
         """
         weeks = funct.get_or_create_weeks(0)
         team = test.create_team(user=self.user)
+        swimmer1 = test.create_swimmer(team)
+        base_free = test.create_event(swimmer1, event='base free', time=timedelta(seconds=25))
+        swimmer2 = test.create_swimmer(team, first='Dave', last='Thornton')
+        practice = test.create_practice(team, weeks['current'])
+        setInstance = test.create_set(practice=practice, swimmers=[swimmer1, swimmer2])
+        rep1 = test.create_rep(setInstance)
+
+        training_model = test.create_training_model(team)
+        training_mult = test.create_training_multiplier(training_model, multiplier=0.07)
+        funct.calculate_intervals(setInstance, training_model)
+
         practices, dates = funct.get_practices_and_dates(team, weeks)
 
         test_dates = []
-        for day in funct.date_range(weeks['current'].monday, weeks['current'].sunday):
+        for day in weeks['current'].date_range():
             test_dates.append(day)
 
+        intervals = Interval.objects.filter(rep=rep1)
         self.assertEqual(practices, [
-            (None, 'monday'),
-            (None, 'tuesday'),
-            (None, 'wednesday'),
-            (None, 'thursday'),
-            (None, 'friday'),
-            (None, 'saturday'),
-            (None, 'sunday'),
+            ((practice, [(setInstance, [(swimmer1, [(rep1, intervals[0])]), (swimmer2, [(rep1, None)])])]), 'monday'),
+            ((None, (None, (None, (None, None)))), 'tuesday'),
+            ((None, (None, (None, (None, None)))), 'wednesday'),
+            ((None, (None, (None, (None, None)))), 'thursday'),
+            ((None, (None, (None, (None, None)))), 'friday'),
+            ((None, (None, (None, (None, None)))), 'saturday'),
+            ((None, (None, (None, (None, None)))), 'sunday'),
         ])
         self.assertEqual(dates, [
             ('monday', test_dates[0]),
@@ -197,4 +190,69 @@ class FunctionTests(TestCase):
             ('thursday', test_dates[3]),
             ('sunday', test_dates[6]),
             ('saturday', test_dates[5]),
+        ])
+
+    def test_calculate_intervals(self):
+        """
+        Calculates intervals for a set and returns nothing.
+        """
+        week = test.create_week()
+        week.populate()
+        team = test.create_team(self.user)
+        swimmer1 = test.create_swimmer(team)
+        swimmer2 = test.create_swimmer(team, first='Dave', last='Thornton')
+        base1_free = test.create_event(swimmer1, 'base free', timedelta(seconds=25))
+        base2_free = test.create_event(swimmer2, 'base free', timedelta(seconds=24))
+
+        training_model = test.create_training_model(team)
+        training_mult = test.create_training_multiplier(training_model, multiplier=0.07)
+
+        practice = test.create_practice(team, week)
+        setInstance = test.create_set(practice, swimmers=[swimmer1, swimmer2])
+        rep1 = test.create_rep(setInstance)
+
+        funct.calculate_intervals(setInstance, training_model)
+        intervals = Interval.objects.filter(rep=rep1)
+        self.assertEqual(intervals[0].swimmer.l_name, 'Gridley')
+        self.assertEqual(intervals[1].swimmer.l_name, 'Thornton')
+        self.assertEqual(intervals[0].time, timedelta(seconds=53.5))
+        self.assertEqual(intervals[1].time, timedelta(seconds=51.36))
+
+    def test_get_zipped_set(self):
+        """
+        Returns list of tuples containing the rep, swimmer, and interval.
+        """
+        week = test.create_week()
+        week.populate()
+        team = test.create_team(self.user)
+        swimmer1 = test.create_swimmer(team)
+        swimmer2 = test.create_swimmer(team, first='Dave', last='Thornton')
+        base1_free = test.create_event(swimmer1, 'base free', timedelta(seconds=25))
+        base2_free = test.create_event(swimmer2, 'base free', timedelta(seconds=24))
+
+        practice = test.create_practice(team, week)
+        setInstance = test.create_set(practice, swimmers=[swimmer1, swimmer2])
+        rep1 = test.create_rep(setInstance)
+
+        training_model = test.create_training_model(team)
+
+        funct.calculate_intervals(setInstance, training_model)
+        intervals = Interval.objects.filter(rep=rep1)
+        set_zip = funct.get_zipped_set(setInstance)
+
+        self.assertEqual(set_zip, [
+            (swimmer1, [(rep1, None)]),
+            (swimmer2, [(rep1, None)]),
+        ])
+
+        training_mult = test.create_training_multiplier(training_model, multiplier=0.07)
+
+
+        funct.calculate_intervals(setInstance, training_model)
+        intervals = Interval.objects.filter(rep=rep1)
+        set_zip = funct.get_zipped_set(setInstance)
+
+        self.assertEqual(set_zip, [
+            (swimmer1, [(rep1, intervals[0])]),
+            (swimmer2, [(rep1, intervals[1])]),
         ])

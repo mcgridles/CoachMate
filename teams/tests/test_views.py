@@ -400,9 +400,9 @@ class TestWritePracticeView(TestCase):
         warmup_mult = test.create_training_multiplier(training_model, multiplier=0.07)
 
         swimmer1 = test.create_swimmer(team=team)
-        base1 = test.create_event(swimmer=swimmer1, event='free', time=timedelta(seconds=25))
+        base1 = test.create_event(swimmer=swimmer1, event='base free', time=timedelta(seconds=25))
         swimmer2 = test.create_swimmer(team=team, first='David', last='Thornton')
-        base2 = test.create_event(swimmer=swimmer2, event='free', time=timedelta(seconds=24))
+        base2 = test.create_event(swimmer=swimmer2, event='base free', time=timedelta(seconds=24))
         response = self.client.post(reverse('teams:writePractice', kwargs={
                 'abbr': team.abbr,
                 'p_id': practice.id,
@@ -436,6 +436,8 @@ class TestWritePracticeView(TestCase):
             ordered=False
         )
 
+        self.assertEqual(interval_set[0].swimmer.l_name, 'Gridley')
+        self.assertEqual(interval_set[1].swimmer.l_name, 'Thornton')
         self.assertEqual(interval_set[0].time, timedelta(seconds=53.5))
         self.assertEqual(interval_set[1].time, timedelta(seconds=51.36))
 
@@ -460,7 +462,7 @@ class TestPracticeScheduleView(TestCase):
         week.populate()
         team = test.create_team(user=self.user1)
         weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ,'sunday']
-        practices = [None for x in range(7)]
+        practices = [(None, (None, (None, (None, None)))) for x in range(7)]
         practices = zip(practices, weekdays)
         response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
@@ -473,33 +475,118 @@ class TestPracticeScheduleView(TestCase):
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
 
-    def test_schedule_with_practices(self):
+    def test_schedule_with_practices_with_rest(self):
         """
-        Practices are displayed in the correct panel.
+        Practices are displayed in the correct panel, rest is displayed instead of
+        an interval if rest has been entered.
         """
         self.client.login(username='user1', password='password')
         week = test.create_week()
         week.populate()
         team = test.create_team(user=self.user1)
+        swimmer1 = test.create_swimmer(team)
+        base_free = test.create_event(swimmer1, event='base free', time=timedelta(seconds=25))
+        swimmer2 = test.create_swimmer(team, first='Dave', last='Thornton')
+
         practice1 = test.create_practice(team, week)
-        set1 = test.create_set(practice=practice1, order=23)
+        set1 = test.create_set(practice=practice1, order=23, swimmers=[swimmer1, swimmer2])
+        rep1 = test.create_rep(set1, rest=timedelta(seconds=10))
         practice2 = test.create_practice(team, week, weekday='tuesday')
         set2 = test.create_set(practice=practice2, focus='sprint', repeats=2, order=37)
         set3 = test.create_set(practice=practice2, focus='distance', repeats=3, order=38)
+
         response = self.client.get(reverse('teams:practiceSchedule', kwargs={
                 'abbr': team.abbr,
                 'w_id': week.id,
             })
         )
-        self.assertEqual(response.context['practices'][0][0].weekday, 'monday')
-        self.assertEqual(response.context['practices'][1][0].weekday, 'tuesday')
-        self.assertEqual(response.context['practices'][2][0], None)
+        self.assertEqual(response.context['practices'][0][0][0].weekday, 'monday')
+        self.assertEqual(response.context['practices'][1][0][0].weekday, 'tuesday')
+        self.assertEqual(response.context['practices'][2][0], (None, (None, (None, (None, None)))))
         self.assertContains(response, 'Monday')
         self.assertContains(response, 23)
         self.assertContains(response, 37)
         self.assertContains(response, 38)
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
+        self.assertContains(response, '00:10 r')
+        self.assertNotContains(response, '00:53')
+
+    def test_schedule_with_practices_no_intervals(self):
+        """
+        Practices are displayed in the correct panel, intervals are '--'
+        if not found.
+        """
+        self.client.login(username='user1', password='password')
+        week = test.create_week()
+        week.populate()
+        team = test.create_team(user=self.user1)
+        swimmer1 = test.create_swimmer(team)
+        base_free = test.create_event(swimmer1, event='base free', time=timedelta(seconds=25))
+        swimmer2 = test.create_swimmer(team, first='Dave', last='Thornton')
+
+        practice1 = test.create_practice(team, week)
+        set1 = test.create_set(practice=practice1, order=23, swimmers=[swimmer1, swimmer2])
+        rep1 = test.create_rep(set1)
+        practice2 = test.create_practice(team, week, weekday='tuesday')
+        set2 = test.create_set(practice=practice2, focus='sprint', repeats=2, order=37)
+        set3 = test.create_set(practice=practice2, focus='distance', repeats=3, order=38)
+
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
+                'abbr': team.abbr,
+                'w_id': week.id,
+            })
+        )
+        self.assertEqual(response.context['practices'][0][0][0].weekday, 'monday')
+        self.assertEqual(response.context['practices'][1][0][0].weekday, 'tuesday')
+        self.assertEqual(response.context['practices'][2][0], (None, (None, (None, (None, None)))))
+        self.assertContains(response, 'Monday')
+        self.assertContains(response, 23)
+        self.assertContains(response, 37)
+        self.assertContains(response, 38)
+        self.assertContains(response, '7/10')
+        self.assertContains(response, '7/16')
+        self.assertContains(response, '--')
+        self.assertNotContains(response, '00:53')
+
+    def test_schedule_with_practices_and_intervals(self):
+        """
+        Practices are displayed in the correct panel with intervals.
+        """
+        self.client.login(username='user1', password='password')
+        week = test.create_week()
+        week.populate()
+        team = test.create_team(user=self.user1)
+        swimmer1 = test.create_swimmer(team)
+        base_free = test.create_event(swimmer1, event='base free', time=timedelta(seconds=25))
+        swimmer2 = test.create_swimmer(team, first='Dave', last='Thornton')
+
+        practice1 = test.create_practice(team, week)
+        set1 = test.create_set(practice=practice1, order=23, swimmers=[swimmer1, swimmer2])
+        rep1 = test.create_rep(set1)
+        practice2 = test.create_practice(team, week, weekday='tuesday')
+        set2 = test.create_set(practice=practice2, focus='sprint', repeats=2, order=37)
+        set3 = test.create_set(practice=practice2, focus='distance', repeats=3, order=38)
+
+        training_model = test.create_training_model(team)
+        training_mult = test.create_training_multiplier(training_model, multiplier=0.07)
+        funct.calculate_intervals(set1, training_model)
+
+        response = self.client.get(reverse('teams:practiceSchedule', kwargs={
+                'abbr': team.abbr,
+                'w_id': week.id,
+            })
+        )
+        self.assertEqual(response.context['practices'][0][0][0].weekday, 'monday')
+        self.assertEqual(response.context['practices'][1][0][0].weekday, 'tuesday')
+        self.assertEqual(response.context['practices'][2][0], (None, (None, (None, (None, None)))))
+        self.assertContains(response, 'Monday')
+        self.assertContains(response, 23)
+        self.assertContains(response, 37)
+        self.assertContains(response, 38)
+        self.assertContains(response, '7/10')
+        self.assertContains(response, '7/16')
+        self.assertContains(response, '00:53')
 
     def test_multiple_users_with_practices(self):
         """
@@ -517,8 +604,8 @@ class TestPracticeScheduleView(TestCase):
                 'w_id': week.id
             })
         )
-        self.assertEqual(response.context['practices'][0][0].weekday, 'monday')
-        self.assertEqual(response.context['practices'][1][0], None)
+        self.assertEqual(response.context['practices'][0][0][0].weekday, 'monday')
+        self.assertEqual(response.context['practices'][1][0], (None, (None, (None, (None, None)))))
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
 
@@ -528,8 +615,8 @@ class TestPracticeScheduleView(TestCase):
                 'w_id': week.id
             })
         )
-        self.assertEqual(response.context['practices'][0][0], None)
-        self.assertEqual(response.context['practices'][1][0].weekday, 'tuesday')
+        self.assertEqual(response.context['practices'][0][0], (None, (None, (None, (None, None)))))
+        self.assertEqual(response.context['practices'][1][0][0].weekday, 'tuesday')
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
 
@@ -730,7 +817,7 @@ class TestDeleteModelsViews(TestCase):
                 'teams:deletePractice',
                 kwargs={'abbr': team.abbr, 'p_id': practice.id}),
             follow=True)
-        self.assertEqual(response.context['practices'][0], (None, 'monday'))
+        self.assertEqual(response.context['practices'][0], ((None, (None, (None, (None, None)))), 'monday'))
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
 
@@ -749,7 +836,7 @@ class TestDeleteModelsViews(TestCase):
                 'teams:deletePractice',
                 kwargs={'abbr': team1.abbr, 'p_id': practice1.id}),
             follow=True)
-        self.assertEqual(response.context['practices'][0], (None, 'monday'))
+        self.assertEqual(response.context['practices'][0], ((None, (None, (None, (None, None)))), 'monday'))
 
         self.client.login(username='user2', password='password')
         response = self.client.get(reverse('teams:practiceSchedule', kwargs={
@@ -757,9 +844,44 @@ class TestDeleteModelsViews(TestCase):
                 'w_id': week.id
             })
         )
-        self.assertEqual(response.context['practices'][0][0].weekday, 'monday')
+        self.assertEqual(response.context['practices'][0][0][0].weekday, 'monday')
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
+
+    def test_delete_training_model(self):
+        """
+        Deletes a training model.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        training_model = test.create_training_model(team)
+        response = self.client.get(reverse('teams:deleteTraining', kwargs={
+                't_id': training_model.id,
+            }),
+            follow=True,
+        )
+        self.assertEqual(response.context['teams'][0][1], None)
+
+    def test_multiple_users_delete_training_model(self):
+        """
+        Deleting a training model for one user does not delete it for another.
+        """
+        self.client.login(username='user1', password='password')
+        team1 = test.create_team(user=self.user1)
+        training_model1 = test.create_training_model(team1)
+        team2 = test.create_team(user=self.user2)
+        training_model2 = test.create_training_model(team2)
+        response = self.client.get(reverse('teams:deleteTraining', kwargs={
+                't_id': training_model1.id,
+            }),
+            follow=True,
+        )
+        self.assertEqual(response.context['teams'][0][1], None)
+
+        self.client.login(username='user2', password='password')
+        response = self.client.get(reverse('teams:showTraining'))
+        self.assertEqual(response.context['teams'][0][1].team.name, 'Northeastern University')
+
 
 class TestSwimmerDetailView(TestCase):
     def setUp(self):

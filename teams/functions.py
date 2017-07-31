@@ -3,14 +3,6 @@ from dateutil.relativedelta import relativedelta
 
 from teams.models import *
 
-def date_range(start_date, end_date):
-    """
-    Yields each date in a week.
-    """
-    end_date += timedelta(days=1)
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + timedelta(n)
-
 def check_present():
     """
     Finds the current week if one exists and sets the current flag to True.
@@ -21,7 +13,7 @@ def check_present():
     if week_set.exists():
         for week in week_set.iterator():
             flag = False
-            for day in date_range(week.monday, week.sunday):
+            for day in week.date_range():
                 if day == date.today():
                     week.present = True
                     week.save()
@@ -35,6 +27,7 @@ def check_present():
         return True
     else:
         return False
+
 
 def get_monday(week=None, n=None):
     """
@@ -61,6 +54,7 @@ def get_monday(week=None, n=None):
             day -= relativedelta(days=1)
         return day
 
+
 def clean_weekday(team, practice):
     """
     Delete any other practices created on the same weekday for given team/week.
@@ -74,6 +68,7 @@ def clean_weekday(team, practice):
             weekday=practice.weekday).exclude(pk=practice.id)
         for p in practice_list:
             p.delete()
+
 
 def get_or_create_weeks(w_id):
     """
@@ -115,22 +110,65 @@ def get_or_create_weeks(w_id):
 
     return weeks
 
+
+def get_zipped_set(setInstance):
+    """
+    Returns a list of tuples that represents a set in the
+    (Swimmer, (Rep, Interval)) format
+    """
+    swimmers = []
+    swimmer_reps = []
+    for swimmer in setInstance.swimmers.all():
+        swimmers.append(swimmer)
+        reps = []
+        intervals = []
+        for rep in setInstance.rep_set.all():
+            # get interval object
+            try:
+                interval = Interval.objects.filter(rep=rep).get(swimmer=swimmer)
+                if interval.time == timedelta(seconds=0):
+                    interval = None
+            except Interval.DoesNotExist:
+                interval = None
+
+            reps.append(rep)
+            intervals.append(interval)
+        swimmer_reps.append(zip(reps, intervals)) # list of (Rep, Interval) tuples
+
+    return zip(swimmers, swimmer_reps) # list of (Swimmer, (Rep, Interval)) tuples)
+
+
 def get_practices_and_dates(team, weeks):
     """
     Returns two lists: one of practice, weekday tuples; and one of weekday, date
     tuples.
     """
     practices = []
+    practice_sets = []
     weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ,'sunday']
     for day in weekdays:
         # create list of practices
         try:
-            practices.append(Practice.objects.filter(team=team).filter(
-                week_id=weeks['current']).order_by('order').get(weekday=day))
+            sets = []
+            swimmers = []
+            practice = Practice.objects.filter(team=team).filter(
+                week_id=weeks['current']).order_by('order').get(weekday=day)
+            for s in practice.set_set.all():
+                sets.append(s) # Set object
+                # list of (Swimmer, (Rep, Interval)) tuples
+                swimmers.append(get_zipped_set(s))
+
+            # list of (Set, (Swimmer, (Rep, Interval))) tuples
+            practice_sets.append(zip(sets, swimmers))
+            practices.append(practice)
         except Practice.DoesNotExist:
+            practice_sets.append((None, (None, (None, None))))
             practices.append(None)
 
-    practices = zip(practices, weekdays) # add weekdays
+    # list of (Practice, (Set, (Swimmer, (Rep, Interval)))) tuples
+    practices = zip(practices, practice_sets)
+    # list of ((Practice, (Set, (Swimmer, (Rep, Interval)))), weekday) tuples
+    practices = zip(practices, weekdays)
     dates = Week.objects.filter(pk=weeks['current'].id).values(
         'monday',
         'tuesday',
@@ -144,15 +182,6 @@ def get_practices_and_dates(team, weeks):
 
     return practices, dates
 
-def get_base(swimmer, pace, stroke):
-    """
-    Returns a swimmer's base pace for the given stroke and pace.
-    """
-    if pace == 'train':
-        return swimmer.event_set.filter(event=stroke).order_by('time')[0]
-    elif pace == 'race':
-        base = swimmer.event_set.filter(event='100 ' + stroke).order_by('time')[0]
-        return timedelta(seconds=(0.5 * base.total_seconds()))
 
 def calculate_intervals(setInstance, training_model):
     """
@@ -163,13 +192,16 @@ def calculate_intervals(setInstance, training_model):
     except TrainingMultiplier.DoesNotExist, AttributeError:
         multiplier = None
 
+    reps = []
+    swimmers = []
+    intervals = []
     for rep in setInstance.rep_set.all():
         num_50 = rep.distance / 50 # number of 50s for the distance
         for swimmer in setInstance.swimmers.all():
-            base = get_base(swimmer, setInstance.pace, rep.stroke) # get base
-            if multiplier:
+            base = swimmer.get_base(setInstance.pace, rep.stroke) # get base
+            if multiplier and base:
                 # add multiplier to base
-                time = timedelta(seconds=((1 + multiplier) * base.time.total_seconds()))
+                time = timedelta(seconds=((1 + multiplier) * base.total_seconds()))
                 # multiply base by the number of 50s
                 time = timedelta(seconds=(num_50 * time.total_seconds()))
             else:
@@ -178,4 +210,10 @@ def calculate_intervals(setInstance, training_model):
                 time = timedelta(seconds=0)
 
             # create interval object
-            Interval.objects.create(swimmer=swimmer, rep=rep, time=time)
+            try:
+                interval = Interval.objects.filter(rep=rep).get(swimmer=swimmer)
+                interval.delete()
+            except Interval.DoesNotExist:
+                pass
+
+            interval = Interval.objects.create(swimmer=swimmer, rep=rep, time=time)

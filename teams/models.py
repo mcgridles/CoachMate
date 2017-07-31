@@ -49,6 +49,19 @@ class Swimmer(models.Model):
         """
         return self.event_set.filter(event=event).order_by('time')[0]
 
+    def get_base(self, pace, stroke):
+        """
+        Returns a swimmer's base pace for the given stroke and pace.
+        """
+        try:
+            if pace == 'train':
+                return self.event_set.filter(event='base ' + stroke).order_by('time')[0].time
+            elif pace == 'race':
+                base = self.event_set.filter(event='100 ' + stroke).order_by('time')[0]
+                return timedelta(seconds=(0.5 * base.time.total_seconds()))
+        except IndexError:
+            return None
+
 
 # Events
 
@@ -70,11 +83,11 @@ class Event(models.Model):
         ('50 fly', '50 Butterfly'),
         ('100 fly', '100 Butterfly'),
         ('200 fly', '200 Butterfly'),
-        ('free', 'Freestyle Base'),
-        ('back', 'Backstroke Base'),
-        ('breaset', 'Breaststroke Base'),
-        ('fly', 'Butterfly Base'),
-        ('im', 'IM'),
+        ('base free', 'Freestyle Base'),
+        ('base back', 'Backstroke Base'),
+        ('base breaset', 'Breaststroke Base'),
+        ('base fly', 'Butterfly Base'),
+        ('base im', 'IM Base'),
     )
 
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
@@ -123,6 +136,15 @@ class Week(models.Model):
             monday = self.monday - timedelta(days=7)
 
         return Week.objects.get(monday=monday)
+
+    def date_range(self):
+        """
+        Yields each date in a week.
+        """
+        start_date = self.monday
+        end_date = self.sunday + timedelta(days=1)
+        for n in range(int((end_date - start_date).days)):
+            yield start_date + timedelta(n)
 
 
 # Training
@@ -201,6 +223,9 @@ class Interval(models.Model):
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
     rep = models.ForeignKey(Rep, on_delete=models.CASCADE)
     time = models.DurationField()
+
+    def __str__(self):
+        return unicode(self.time)
 
 # Guide for doing interval calculations
 class TrainingModel(models.Model):

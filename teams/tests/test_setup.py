@@ -67,18 +67,22 @@ def create_practice(team, week, weekday='monday'):
         weekday=weekday,
     )
 
-def create_set(practice, focus='warmup', repeats=1, order=1):
+def create_set(practice, focus='warmup', repeats=1, order=1, pace='train', swimmers=[]):
     """
     Create a test set.
     """
-    return Set.objects.create(
+    new_set =  Set.objects.create(
         practice_id=practice,
         focus=focus,
         repeats=repeats,
         order=order,
+        pace=pace,
     )
+    for swimmer in swimmers:
+        new_set.swimmers.add(swimmer.id)
+    return new_set
 
-def create_rep(_set, num=10, distance=100, stroke='free'):
+def create_rep(_set, num=10, distance=100, stroke='free', rest=None):
     """
     Create a test rep.
     """
@@ -87,6 +91,7 @@ def create_rep(_set, num=10, distance=100, stroke='free'):
         num=num,
         distance=distance,
         stroke=stroke,
+        rest=rest,
     )
 
 def create_training_model(team):

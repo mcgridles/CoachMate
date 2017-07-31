@@ -27,14 +27,30 @@ class SwimmerModelTests(TestCase):
 
     def test_best_time(self):
         """
-        The best time in the given event should be returned.
+        Returns the best time in the given event.
         """
         team = test.create_team(user=self.user)
         swimmer = test.create_swimmer(team=team)
         test.create_event(swimmer=swimmer)
-        test.create_event(swimmer=swimmer, time=timedelta(seconds=22, milliseconds=960))
-        self.assertEqual(swimmer.get_best_time(event='50 free').time, timedelta(seconds=22, milliseconds=320))
-        self.assertNotEqual(swimmer.get_best_time(event='50 free').time, timedelta(seconds=22, milliseconds=960))
+        test.create_event(swimmer=swimmer, time=timedelta(seconds=22.96))
+        self.assertEqual(swimmer.get_best_time(event='50 free').time, timedelta(seconds=22.32))
+        self.assertNotEqual(swimmer.get_best_time(event='50 free').time, timedelta(seconds=22.96))
+
+    def test_get_base(self):
+        """
+        Returns the base for the given swimmer depending on the pace specified.
+        """
+        team = test.create_team(self.user)
+        swimmer = test.create_swimmer(team)
+        base_free = test.create_event(swimmer, 'base free', timedelta(seconds=25))
+        race_free = test.create_event(swimmer, '100 free', timedelta(seconds=49.86))
+
+        base_train = swimmer.get_base('train', 'free')
+        base_race = swimmer.get_base('race', 'free')
+        none_race = swimmer.get_base('race', 'back')
+        self.assertEqual(base_train, timedelta(seconds=25))
+        self.assertEqual(base_race, timedelta(seconds=24.93))
+        self.assertEqual(none_race, None)
 
 class WeekModelTests(TestCase):
     def test_populate(self):
@@ -63,3 +79,23 @@ class WeekModelTests(TestCase):
         week = test.create_week()
         previous = test.create_week(monday=date(2017,7,3))
         self.assertEqual(week.get_week(-1), previous)
+
+    def test_date_range(self):
+        """
+        Yields all dates in a given week.
+        """
+        week = test.create_week()
+        week.populate()
+        dates = [
+            date(2017,7,10),
+            date(2017,7,11),
+            date(2017,7,12),
+            date(2017,7,13),
+            date(2017,7,14),
+            date(2017,7,15),
+            date(2017,7,16),
+        ]
+        returned_dates = []
+        for day in week.date_range():
+            returned_dates.append(day)
+        self.assertEqual(dates, returned_dates)
