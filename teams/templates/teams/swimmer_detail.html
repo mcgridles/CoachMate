@@ -37,17 +37,57 @@
     {% block table-title %}
       {{ swimmer.f_name|title }} {{ swimmer.l_name|title }}
       <!-- Edit swimmer -->
-      <span data-toggle="modal" data-target="#baseModal">
+      <span data-toggle="modal" data-target="#editModal">
         <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Edit" data-trigger="hover" data-placement="auto bottom">
           <span class="glyphicon glyphicon-pencil"></span>
         </button>
       </span>
     {% endblock %}
 
-    {% block action-buttons %}{% endblock %}
+    {% block action-buttons %}{{ block.super }}{% endblock %}
 
     {% block modal %}
       <div id="baseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Add Event
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% if event_form.errors %}
+                  {% for field in event_form %}
+                    {% for error in field.error %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Event form -->
+                {% for field in event_form %}
+                  {{ field }}
+                {% endfor %}
+                <br>
+                <div class="modal-footer">
+                  <button name="add_event" type="submit" class="btn btn-md btn-primary">Finish</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="editModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
 
           <!-- Modal content-->
@@ -78,7 +118,7 @@
                 {% endfor %}
                 <br>
                 <div class="modal-footer">
-                  <button type="submit" class="btn btn-md btn-primary">Finish</button>
+                  <button name="edit_swimmer" type="submit" class="btn btn-md btn-primary">Save</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
               </form>

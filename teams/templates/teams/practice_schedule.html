@@ -123,18 +123,25 @@
                     </h3>
 
                     <div class="reps">
-                      {% for rep in set.rep_set.all reversed %}
-                        {{ rep.num }}x{{ rep.distance }} {{ rep.stroke }}
+                      {% for rep in set.0.rep_set.all %}
+                        {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
+                        {% if rep.rest %}
+                          @ {{ rep.rest|format_duration }} rest
+                        {% endif %}
+                        {% if rep.comments %}
+                          - {{ rep.comments|capfirst }}
+                        {% endif %}
                       {% endfor %}
+                      <br>
                     </div>
 
-                    <div class="reps table table-responsive">
+                    <div class="table table-responsive">
                       <table class="table table-striped">
                         <thead>
                           <tr>
                             <td></td>
                             <!-- Reps in each set -->
-                            {% for rep in set.rep_set.all reversed %}
+                            {% for rep in set.0.rep_set.all %}
                               <td>{{ rep.num }}x{{ rep.distance }} {{ rep.stroke }}</td>
                             {% endfor %}
                           </tr>
@@ -146,7 +153,7 @@
                               <!-- List the interval for each rep for each swimmer -->
                               {% for rep in swimmer.1 %}
                                 {% if rep.0.rest %}
-                                  <td>{{ rep.0.rest|format_duration }} r</td>
+                                  <td>{{ rep.0.rest|format_duration }} rest</td>
                                 {% elif rep.1 %}
                                   <td>{{ rep.1.time|format_duration }}</td>
                                 {% else %}

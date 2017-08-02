@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from unittest import skip, skipIf, skipUnless
+from datetime import date, timedelta
 
 from django.test import TestCase
 from django.urls import reverse
@@ -90,6 +91,51 @@ class TestSwimmerForm(TestCase):
             'f_name': ['This field is required.'],
             'l_name': ['This field is required.'],
             'gender': ['This field is required.'],
+        })
+
+
+class TestEventForm(TestCase):
+    def setUp(self):
+        user = test.create_user('user', 'password')
+        team = test.create_team(user=user)
+        self.swimmer = test.create_swimmer(team)
+
+    def tearDown(self):
+        self.swimmer.delete()
+
+    def test_event_form_init(self):
+        """
+        EventForm can take a swimmer as an argument.
+        """
+        EventForm()
+        EventForm(swimmer=self.swimmer)
+
+    def test_event_form_valid_data(self):
+        """
+        EventForm takes an event, time, and date to validate.
+        """
+        form = EventForm({
+            'event': '50 free',
+            'time': timedelta(seconds=22.32),
+            'date': date(2017,4,9),
+        }, swimmer=self.swimmer)
+        self.assertTrue(form.is_valid())
+        event = form.save()
+        self.assertEqual(event.event, '50 free')
+        self.assertEqual(event.time, timedelta(seconds=22.32))
+        self.assertEqual(event.date, date(2017,4,9))
+        self.assertEqual(event.swimmer, self.swimmer)
+
+    def test_event_form_invalid_data(self):
+        """
+        An event, time, and date are needed to validate.
+        """
+        form = EventForm({}, swimmer=self.swimmer)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {
+            'event': ['This field is required.'],
+            'time': ['This field is required.'],
+            'date': ['This field is required.'],
         })
 
 
@@ -225,12 +271,11 @@ class TestRepForm(TestCase):
         """
         RepForm will not validate without a number, distance, and stroke.
         """
-        form = RepForm({
-            'num': 1,
-            'distance': 100,
-        })
+        form = RepForm({})
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
+            'num': ['This field is required.'],
+            'distance': ['This field is required.'],
             'stroke': ['This field is required.'],
         })
 

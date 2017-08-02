@@ -267,6 +267,88 @@ class TestSwimmerListView(TestCase):
         self.assertContains(response, 'University of Kansas')
 
 
+# Swimmer Detail
+
+class TestSwimmerDetailView(TestCase):
+    def setUp(self):
+        self.user = test.create_user('user', 'password')
+        self.team = test.create_team(user=self.user)
+
+    def tearDown(self):
+        self.user.delete()
+        self.team.delete()
+
+    def test_swimmer_page(self):
+        """
+        Each swimmer has their own page that contains bio information.
+        """
+        self.client.login(username='user', password='password')
+        swimmer = test.create_swimmer(self.team)
+        swimmer.set_age()
+        response = self.client.get(reverse('teams:swimmerDetail', kwargs={
+                'abbr': self.team.abbr,
+                's_id': swimmer.id,
+            })
+        )
+        self.assertEqual(response.context['swimmer'].l_name, 'Gridley')
+        self.assertContains(response, 'Henry Gridley')
+
+    def test_swimmer_edit(self):
+        """
+        Swimmers can be edited on their personal page.
+        """
+        self.client.login(username='user', password='password')
+        swimmer = test.create_swimmer(self.team)
+        swimmer.set_age()
+        response = self.client.get(reverse('teams:swimmerDetail', kwargs={
+                'abbr': self.team.abbr,
+                's_id': swimmer.id,
+            }),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Henry Gridley')
+
+        response = self.client.post(reverse('teams:swimmerDetail', kwargs={
+                'abbr': self.team.abbr,
+                's_id': swimmer.id,
+            }),
+            {
+                'f_name': 'Dave',
+                'l_name': 'Thornton',
+                'edit_swimmer': 'Submit',
+            },
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Dave Thornton')
+
+    def test_event_input(self):
+        """
+        EventForms take an event, time, and date to validate, and create an event
+        associated with the current swimmer.
+        """
+        self.client.login(username='user', password='password')
+        swimmer = test.create_swimmer(self.team)
+        swimmer.set_age()
+        response = self.client.post(reverse('teams:swimmerDetail', kwargs={
+                'abbr': self.team.abbr,
+                's_id': swimmer.id,
+            }),
+            {
+                'event': '50 free',
+                'time': timedelta(seconds=22.32),
+                'date': date(2017,4,9),
+                'add_event': 'Submit',
+            },
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Henry Gridley')
+
+
 # Write practices
 
 class TestWritePracticeView(TestCase):
@@ -415,10 +497,10 @@ class TestWritePracticeView(TestCase):
                 'form-0-num': 4,
                 'form-0-distance': 100,
                 'form-0-stroke': 'free',
+                'form-0-rest': timedelta(seconds=10),
                 'form-TOTAL_FORMS': 1,
                 'form-INITIAL_FORMS': 0,
-                'group': 'ind',
-                'swimmers': [swimmer1.id, swimmer2.id],
+                'group': 'team',
                 'set_create': 'Submit',
             },
             follow=True
@@ -438,8 +520,8 @@ class TestWritePracticeView(TestCase):
 
         self.assertEqual(interval_set[0].swimmer.l_name, 'Gridley')
         self.assertEqual(interval_set[1].swimmer.l_name, 'Thornton')
-        self.assertEqual(interval_set[0].time, timedelta(seconds=53.5))
-        self.assertEqual(interval_set[1].time, timedelta(seconds=51.36))
+        self.assertEqual(interval_set[0].time, timedelta(seconds=55))
+        self.assertEqual(interval_set[1].time, timedelta(seconds=55))
 
 
 # Practice schedule
@@ -586,7 +668,7 @@ class TestPracticeScheduleView(TestCase):
         self.assertContains(response, 38)
         self.assertContains(response, '7/10')
         self.assertContains(response, '7/16')
-        self.assertContains(response, '00:53')
+        self.assertContains(response, '00:55')
 
     def test_multiple_users_with_practices(self):
         """
@@ -724,6 +806,148 @@ class TestPracticeScheduleView(TestCase):
         self.assertEqual(response.context['practice_form'].errors, {
             'weekday': ['This field is required.'],
         })
+
+
+# Set detail
+
+class TestSetDetailView(TestCase):
+    def setUp(self):
+        user = test.create_user('user', 'password')
+        team = test.create_team(user)
+        week = test.create_week()
+        self.practice = test.create_practice(team, week)
+
+    def tearDown(self):
+        self.practice.delete()
+
+    def test_set_detail_page(self):
+        """
+        Each set has a page that contains reps, swimmers, and intervals.
+        """
+        set1 = test.create_set(self.practice)
+        self.client.login(username='user', password='password')
+        response = self.client.get(reverse('teams:setDetail', kwargs={
+                'abbr': self.team.abbr,
+                'set_id': set1.id,
+            })
+        )
+
+
+
+# Create training
+
+class TestCreateTrainingView(TestCase):
+    def setUp(self):
+        self.user = test.create_user('user', 'password')
+
+    def tearDown(self):
+        self.user.delete()
+
+    def test_create_training_page(self):
+        """
+        The training model form is displayed on the page (not hidden by a modal).
+        """
+        self.client.login(username='user', password='password')
+        team = test.create_team(user=self.user)
+        response = self.client.get(reverse('teams:createTraining', kwargs={
+                't_id': 0,
+            })
+        )
+        self.assertContains(response, 'Training Model')
+
+    def test_create_training_form(self):
+        """
+        Form input creates a training model to be used for interval calculations.
+        """
+        self.client.login(username='user', password='password')
+        team = test.create_team(user=self.user)
+        response = self.client.post(reverse('teams:createTraining', kwargs={
+                't_id': 0,
+            }),
+            {
+                'team': team.id,
+                'form-0-focus': 'warmup',
+                'form-0-multiplier': 1,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'submit': 'Submit',
+            },
+            follow=True
+        )
+        training_model = TrainingModel.objects.all()
+        multiplier_set = training_model[0].trainingmultiplier_set.all()
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
+        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
+
+    def test_create_training_edit_form(self):
+        """
+        The form can be used to edit the model.
+        """
+        self.client.login(username='user', password='password')
+        team = test.create_team(user=self.user)
+        response = self.client.post(reverse('teams:createTraining', kwargs={
+                't_id': 0,
+            }),
+            {
+                'team': team.id,
+                'form-0-focus': 'warmup',
+                'form-0-multiplier': 1,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'submit': 'Submit',
+            },
+            follow=True
+        )
+        training_model = TrainingModel.objects.all()
+        multiplier_set = training_model[0].trainingmultiplier_set.all()
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
+        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
+
+        response = self.client.post(reverse('teams:createTraining', kwargs={
+                't_id': training_model[0].id,
+            }),
+            {
+                'team': team.id,
+                'form-0-focus': 'kick',
+                'form-0-multiplier': 2,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'submit': 'Submit',
+            },
+            follow=True
+        )
+        training_model = TrainingModel.objects.all()
+        multiplier_set = training_model[0].trainingmultiplier_set.all()
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
+        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: kick>'])
+
+
+# Show training
+
+class TestShowTrainingView(TestCase):
+    def setUp(self):
+        self.user1 = test.create_user('user1', 'password')
+        self.user2 = test.create_user('user2', 'password')
+
+    def tearDown(self):
+        self.user1.delete()
+        self.user2.delete()
+
+    def test_show_training_page(self):
+        """
+        The training model form is displayed on the page (not hidden by a modal).
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        training_model = test.create_training_model(team)
+        training_multiplier = test.create_training_multiplier(model=training_model)
+        response = self.client.get(reverse('teams:showTraining'))
+        self.assertContains(response, 'Training')
+        self.assertContains(response, 'Northeastern University')
+        self.assertContains(response, 'Warmup')
 
 
 # Delete models
@@ -881,140 +1105,3 @@ class TestDeleteModelsViews(TestCase):
         self.client.login(username='user2', password='password')
         response = self.client.get(reverse('teams:showTraining'))
         self.assertEqual(response.context['teams'][0][1].team.name, 'Northeastern University')
-
-
-class TestSwimmerDetailView(TestCase):
-    def setUp(self):
-        self.user = test.create_user('user', 'password')
-        self.team = test.create_team(user=self.user)
-
-    def tearDown(self):
-        self.user.delete()
-        self.team.delete()
-
-    def test_swimmer_page(self):
-        """
-        Each swimmer has their own page that contains bio information.
-        """
-        self.client.login(username='user', password='password')
-        swimmer = test.create_swimmer(team=self.team)
-        swimmer.set_age()
-        response = self.client.get(reverse('teams:swimmerDetail', kwargs={
-                'abbr': self.team.abbr,
-                's_id': swimmer.id,
-            })
-        )
-        self.assertEqual(response.context['swimmer'].l_name, 'Gridley')
-        self.assertContains(response, 'Henry Gridley')
-
-
-class TestCreateTrainingView(TestCase):
-    def setUp(self):
-        self.user = test.create_user('user', 'password')
-
-    def tearDown(self):
-        self.user.delete()
-
-    def test_create_training_page(self):
-        """
-        The training model form is displayed on the page (not hidden by a modal).
-        """
-        self.client.login(username='user', password='password')
-        team = test.create_team(user=self.user)
-        response = self.client.get(reverse('teams:createTraining', kwargs={
-                't_id': 0,
-            })
-        )
-        self.assertContains(response, 'Training Model')
-
-    def test_create_training_form(self):
-        """
-        Form input creates a training model to be used for interval calculations.
-        """
-        self.client.login(username='user', password='password')
-        team = test.create_team(user=self.user)
-        response = self.client.post(reverse('teams:createTraining', kwargs={
-                't_id': 0,
-            }),
-            {
-                'team': team.id,
-                'form-0-focus': 'warmup',
-                'form-0-multiplier': 1,
-                'form-TOTAL_FORMS': 1,
-                'form-INITIAL_FORMS': 0,
-                'submit': 'Submit',
-            },
-            follow=True
-        )
-        training_model = TrainingModel.objects.all()
-        multiplier_set = training_model[0].trainingmultiplier_set.all()
-        self.assertEqual(response.status_code, 200)
-        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
-        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
-
-    def test_create_training_edit_form(self):
-        """
-        The form can be used to edit the model.
-        """
-        self.client.login(username='user', password='password')
-        team = test.create_team(user=self.user)
-        response = self.client.post(reverse('teams:createTraining', kwargs={
-                't_id': 0,
-            }),
-            {
-                'team': team.id,
-                'form-0-focus': 'warmup',
-                'form-0-multiplier': 1,
-                'form-TOTAL_FORMS': 1,
-                'form-INITIAL_FORMS': 0,
-                'submit': 'Submit',
-            },
-            follow=True
-        )
-        training_model = TrainingModel.objects.all()
-        multiplier_set = training_model[0].trainingmultiplier_set.all()
-        self.assertEqual(response.status_code, 200)
-        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
-        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
-
-        response = self.client.post(reverse('teams:createTraining', kwargs={
-                't_id': training_model[0].id,
-            }),
-            {
-                'team': team.id,
-                'form-0-focus': 'kick',
-                'form-0-multiplier': 2,
-                'form-TOTAL_FORMS': 1,
-                'form-INITIAL_FORMS': 0,
-                'submit': 'Submit',
-            },
-            follow=True
-        )
-        training_model = TrainingModel.objects.all()
-        multiplier_set = training_model[0].trainingmultiplier_set.all()
-        self.assertEqual(response.status_code, 200)
-        self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
-        self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: kick>'])
-
-
-class TestShowTrainingView(TestCase):
-    def setUp(self):
-        self.user1 = test.create_user('user1', 'password')
-        self.user2 = test.create_user('user2', 'password')
-
-    def tearDown(self):
-        self.user1.delete()
-        self.user2.delete()
-
-    def test_show_training_page(self):
-        """
-        The training model form is displayed on the page (not hidden by a modal).
-        """
-        self.client.login(username='user1', password='password')
-        team = test.create_team(user=self.user1)
-        training_model = test.create_training_model(team)
-        training_multiplier = test.create_training_multiplier(model=training_model)
-        response = self.client.get(reverse('teams:showTraining'))
-        self.assertContains(response, 'Training')
-        self.assertContains(response, 'Northeastern University')
-        self.assertContains(response, 'Warmup')

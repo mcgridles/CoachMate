@@ -287,16 +287,23 @@
             {% endif %}
           </h3>
 
-          <div class="reps">
+          <div class="col-xs-12 col-sm-4 set-components">
             {% for rep in set.rep_set.all reversed %}
               {{ rep.num }} x {{ rep.distance }} {{ rep.stroke }}
               {% if rep.rest %}
                 @ {{ rep.rest|format_duration }} rest
               {% endif %}
               {% if rep.comments %}
-                - {{ rep.comments }}
+                - {{ rep.comments|capfirst }}
               {% endif %}
               <br>
+            {% endfor %}
+          </div>
+
+          <div class="col-xs-12 col-sm-8 set-components">
+            <h5>Swimmers</h5>
+            {% for swimmer in set.swimmers.all %}
+              {{ swimmer.f_name }} {{ swimmer.l_name }}<br>
             {% endfor %}
           </div>
 

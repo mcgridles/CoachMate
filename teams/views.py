@@ -30,7 +30,7 @@ def teamList(request):
     else:
         team_form = TeamForm()
 
-    team_list = Team.objects.filter(user=request.user).order_by('name')
+    team_list = Team.objects.filter(user=request.user)
     context = {
         'team_form': team_form,
         'team_list': team_list,
@@ -77,7 +77,7 @@ def swimmerList(request, abbr):
         swimmer_form = SwimmerForm()
         team_form = TeamForm(instance=team)
 
-    swimmer_list  = Swimmer.objects.filter(team=team).order_by('l_name')
+    swimmer_list  = Swimmer.objects.filter(team=team)
     context = {
         'team': team,
         'team_form': team_form,
@@ -95,17 +95,36 @@ def swimmerDetail(request, abbr, s_id):
     swimmer = get_object_or_404(Swimmer, pk=s_id)
 
     if request.method == 'POST':
-        swimmer_form = SwimmerForm(request.POST, instance=swimmer, team=team)
-        if swimmer_form.is_valid():
-            swimmer_form.save()
-            return redirect('teams:swimmerDetail', abbr=team.abbr, s_id=swimmer.id)
+        if 'edit_swimmer' in request.POST:
+            swimmer_form = SwimmerForm(request.POST, instance=swimmer, team=team)
+            if swimmer_form.is_valid():
+                swimmer_form.save()
+                event_form = EventForm(swimmer=swimmer)
+                return redirect('teams:swimmerDetail', abbr=team.abbr, s_id=swimmer.id)
+            else:
+                event_form = EventForm(swimmer=swimmer)
+
+        elif 'add_event' in request.POST:
+            event_form = EventForm(request.POST, swimmer=swimmer)
+            if event_form.is_valid():
+                event_form.save()
+                swimmer_form = SwimmerForm(instance=swimmer)
+                return redirect('teams:swimmerDetail', abbr=team.abbr, s_id=swimmer.id)
+            else:
+                swimmer_form = SwimmerForm(instance=swimmer)
+        else:
+            swimmer_form = SwimmerForm(instance=swimmer)
+            event_form = EventForm(swimmer=swimmer)
+
     else:
         swimmer_form = SwimmerForm(instance=swimmer)
+        event_form = EventForm(swimmer=swimmer)
 
     context =  {
         'team': team,
         'swimmer': swimmer,
         'swimmer_form': swimmer_form,
+        'event_form': event_form,
     }
 
     return render(request, 'teams/swimmer_detail.html', context)
@@ -164,7 +183,7 @@ def writePractice(request, abbr, p_id):
         rep_formset = RepFormSet()
         practice_form = PracticeForm(instance=practice)
 
-    set_list = Set.objects.filter(practice_id=p_id).order_by('order')
+    set_list = Set.objects.filter(practice_id=p_id)
     context = {
         'team': team,
         'practice': practice,
@@ -262,7 +281,7 @@ def deleteTraining(request, t_id):
 @csrf_protect
 @login_required
 def showTraining(request):
-    teams = Team.objects.filter(user=request.user).order_by('name')
+    teams = Team.objects.filter(user=request.user)
 
     models = []
     for team in teams:

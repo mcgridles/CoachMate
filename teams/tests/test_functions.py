@@ -215,8 +215,8 @@ class FunctionTests(TestCase):
         intervals = Interval.objects.filter(rep=rep1)
         self.assertEqual(intervals[0].swimmer.l_name, 'Gridley')
         self.assertEqual(intervals[1].swimmer.l_name, 'Thornton')
-        self.assertEqual(intervals[0].time, timedelta(seconds=53.5))
-        self.assertEqual(intervals[1].time, timedelta(seconds=51.36))
+        self.assertEqual(intervals[0].time, timedelta(seconds=55))
+        self.assertEqual(intervals[1].time, timedelta(seconds=55))
 
     def test_get_zipped_set(self):
         """

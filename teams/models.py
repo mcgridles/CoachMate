@@ -15,6 +15,9 @@ class Team(models.Model):
     abbr = models.CharField(max_length=5)
     region = models.CharField(max_length=25, blank=True)
 
+    class Meta:
+        ordering = ['name']
+
     def __str__(self):
         return self.name
 
@@ -33,6 +36,9 @@ class Swimmer(models.Model):
     bio = models.TextField(blank=True)
     #picture = models.ImageField(null=True, blank=True)
 
+    class Meta:
+        ordering = ['l_name', 'f_name']
+
     def __str__(self):
         return self.l_name
 
@@ -47,7 +53,7 @@ class Swimmer(models.Model):
         """
         Return best time in given event.
         """
-        return self.event_set.filter(event=event).order_by('time')[0]
+        return self.event_set.filter(event=event)[0]
 
     def get_base(self, pace, stroke):
         """
@@ -55,9 +61,9 @@ class Swimmer(models.Model):
         """
         try:
             if pace == 'train':
-                return self.event_set.filter(event='base ' + stroke).order_by('time')[0].time
+                return self.event_set.filter(event='base ' + stroke)[0].time
             elif pace == 'race':
-                base = self.event_set.filter(event='100 ' + stroke).order_by('time')[0]
+                base = self.event_set.filter(event='100 ' + stroke)[0]
                 return timedelta(seconds=(0.5 * base.time.total_seconds()))
         except IndexError:
             return None
@@ -83,17 +89,23 @@ class Event(models.Model):
         ('50 fly', '50 Butterfly'),
         ('100 fly', '100 Butterfly'),
         ('200 fly', '200 Butterfly'),
+        ('100 im', '100 IM'),
+        ('200 im', '200 IM'),
+        ('400 im', '400 IM'),
         ('base free', 'Freestyle Base'),
         ('base back', 'Backstroke Base'),
-        ('base breaset', 'Breaststroke Base'),
+        ('base breast', 'Breaststroke Base'),
         ('base fly', 'Butterfly Base'),
-        ('base im', 'IM Base'),
+        ('base IM', 'IM Base'),
     )
 
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
     event = models.CharField(max_length=10, choices=EVENT_CHOICE)
     time = models.DurationField()
     date = models.DateField(null=True)
+
+    class Meta:
+        ordering = ['event', 'time']
 
     def __str__(self):
         return self.event
@@ -183,6 +195,9 @@ class Practice(models.Model):
     week_id = models.ForeignKey(Week, on_delete=models.CASCADE, null=True)
     weekday = models.CharField(max_length=10, choices=DAY_CHOICE)
 
+    class Meta:
+        ordering = ['week_id']
+
     def __str__(self):
         return self.weekday
 
@@ -196,6 +211,9 @@ class Set(models.Model):
     order = models.IntegerField(null=True) # creates order within a practice
     pace = models.CharField(max_length=10, choices=PACE_CHOICE, null=True)
 
+    class Meta:
+        ordering = ['practice_id', 'order']
+
     def __str__(self):
         return self.focus
 
@@ -206,7 +224,7 @@ class Rep(models.Model):
         ('back', 'Backstroke'),
         ('breast', 'Breaststroke'),
         ('free', 'Freestyle'),
-        ('im', 'IM'),
+        ('IM', 'IM'),
     )
 
     set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
@@ -216,6 +234,9 @@ class Rep(models.Model):
     rest = models.DurationField(blank=True, null=True)
     comments = models.CharField(max_length=254, blank=True)
 
+    class Meta:
+        ordering = ['set_id', 'stroke']
+
     def __str__(self):
         return self.stroke
 
@@ -223,6 +244,9 @@ class Interval(models.Model):
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
     rep = models.ForeignKey(Rep, on_delete=models.CASCADE)
     time = models.DurationField()
+
+    class Meta:
+        ordering = ['swimmer', 'rep', 'time']
 
     def __str__(self):
         return unicode(self.time)
@@ -238,6 +262,9 @@ class TrainingMultiplier(models.Model):
     training_model = models.ForeignKey(TrainingModel, on_delete=models.CASCADE)
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
     multiplier = models.FloatField(null=True)
+
+    class Meta:
+        ordering = ['training_model', 'focus']
 
     def __str__(self):
         return self.focus

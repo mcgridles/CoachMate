@@ -94,6 +94,16 @@ def create_rep(_set, num=10, distance=100, stroke='free', rest=None):
         rest=rest,
     )
 
+def create_interval(swimmer, rep, time=timedelta(seconds=25)):
+    """
+    Create test interval.
+    """
+    return Interval.objects.create(
+        swimmer=swimmer,
+        rep=rep,
+        time=time,
+    )
+
 def create_training_model(team):
     """
     Create a test training model.

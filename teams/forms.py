@@ -86,6 +86,38 @@ class SwimmerForm(ModelForm):
         return swimmer
 
 
+class EventForm(ModelForm):
+    class Meta:
+        model = Event
+        exclude = ['swimmer']
+        labels = {
+            'event': 'Event',
+            'time': 'Time',
+            'date': 'Date',
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.swimmer = kwargs.pop('swimmer', None)
+        super(EventForm, self).__init__(*args, **kwargs)
+        self.fields['event'].widget.attrs.update({
+            'placeholder': 'Event',
+            'class': 'form-control'
+        })
+        self.fields['time'].widget.attrs.update({
+            'placeholder': 'Time',
+            'class': 'form-control'
+        })
+        self.fields['date'].widget.attrs.update({
+            'placeholder': 'Date',
+            'class': 'form-control'
+        })
+
+    def save(self):
+        event = super(EventForm, self).save(commit=False)
+        event.swimmer = self.swimmer # associate swimmer
+        event.save()
+        return event
+
 class RepForm(ModelForm):
     class Meta:
         model = Rep
@@ -136,7 +168,7 @@ class SetForm(ModelForm):
             'class': 'form-control'
         })
         self.fields['swimmers'].widget = CheckboxSelectMultiple()
-        self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team).order_by('l_name')
+        self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team)
         self.fields['pace'].widget = RadioSelect(choices=PACE_CHOICE)
 
     def clean(self):
@@ -159,9 +191,13 @@ class SetForm(ModelForm):
         setInstance = super(SetForm, self).save(commit=False)
         setInstance.practice_id = self.practice # associate practice
         setInstance.save()
-        if setInstance.group == 'team':
-            setInstance.swimmers = Swimmer.objects.filter(team=self.team)
         self.save_m2m()
+
+        swimmers = Swimmer.objects.filter(team=self.team)
+        if setInstance.group == 'team' and swimmers.exists():
+            for swimmer in swimmers.iterator():
+                setInstance.swimmers.add(swimmer.id)
+        setInstance.save()
         return setInstance
 
 

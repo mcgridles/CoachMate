@@ -60,12 +60,10 @@ def clean_weekday(team, practice):
     Delete any other practices created on the same weekday for given team/week.
     Currently there should never be more than one practice per day
     """
-    if Practice.objects.filter(team=team).filter(
+    practice_list = Practice.objects.filter(team=team).filter(
         week_id=practice.week_id).filter(
-        weekday=practice.weekday).exclude(pk=practice.id):
-        practice_list = Practice.objects.filter(team=team).filter(
-            week_id=practice.week_id).filter(
-            weekday=practice.weekday).exclude(pk=practice.id)
+        weekday=practice.weekday).exclude(pk=practice.id)
+    if practice_list.exists():
         for p in practice_list:
             p.delete()
 
@@ -152,7 +150,7 @@ def get_practices_and_dates(team, weeks):
             sets = []
             swimmers = []
             practice = Practice.objects.filter(team=team).filter(
-                week_id=weeks['current']).order_by('order').get(weekday=day)
+                week_id=weeks['current']).get(weekday=day)
             for s in practice.set_set.all():
                 sets.append(s) # Set object
                 # list of (Swimmer, (Rep, Interval)) tuples
@@ -204,16 +202,22 @@ def calculate_intervals(setInstance, training_model):
                 time = timedelta(seconds=((1 + multiplier) * base.total_seconds()))
                 # multiply base by the number of 50s
                 time = timedelta(seconds=(num_50 * time.total_seconds()))
+
+                if setInstance.pace == 'train':
+                    # training intervals should end in :00 or :05
+                    time = timedelta(seconds=int(time.total_seconds()))
+                    while int(time.total_seconds() % 5):
+                        time += timedelta(seconds=1)
+                else:
+                    time = timedelta(seconds=int(time.total_seconds()))
+
             else:
                 # time is 0 if no multiplier is set
                 # essentially a flag
                 time = timedelta(seconds=0)
 
             # create interval object
-            try:
-                interval = Interval.objects.filter(rep=rep).get(swimmer=swimmer)
+            intervals = Interval.objects.filter(rep=rep).filter(swimmer=swimmer)
+            for interval in intervals:
                 interval.delete()
-            except Interval.DoesNotExist:
-                pass
-
             interval = Interval.objects.create(swimmer=swimmer, rep=rep, time=time)
