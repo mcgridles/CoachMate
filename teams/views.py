@@ -7,11 +7,12 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.core import serializers
+from django.contrib import messages
 
 from teams.models import *
 from teams.forms import *
 import teams.functions as funct
+from teams.TeamManager import TeamManager
 
 @csrf_protect
 @login_required
@@ -66,6 +67,8 @@ def swimmerList(request, abbr):
                     return redirect('teams:swimmerList', abbr=team.abbr)
             else:
                 team_form = TeamForm(instance=team)
+                upload_form = UploadZipForm()
+
         elif 'team_edit' in request.POST:
             team_form = TeamForm(request.POST, instance=team, user=request.user)
             if team_form.is_valid():
@@ -73,9 +76,25 @@ def swimmerList(request, abbr):
                 return redirect('teams:swimmerList', abbr=team.abbr)
             else:
                 swimmer_form = SwimmerForm()
+                upload_form = UploadZipForm()
+
+        elif 'upload_roster' in request.POST:
+            upload_form = UploadZipForm(request.POST, request.FILES)
+            if upload_form.is_valid():
+                tm = TeamManager(team=team, zip_file=request.FILES['zip_file'])
+                msg = tm.load_roster()
+                if msg[0] == 'success':
+                    messages.success(request, msg[1])
+                else:
+                    messages.error(request, msg[1])
+                return redirect('teams:swimmerList', abbr=team.abbr)
+            else:
+                team_form = TeamForm(instance=team)
+                swimmer_form = SwimmerForm()
     else:
         swimmer_form = SwimmerForm()
         team_form = TeamForm(instance=team)
+        upload_form = UploadZipForm()
 
     swimmer_list  = Swimmer.objects.filter(team=team)
     context = {
@@ -83,6 +102,7 @@ def swimmerList(request, abbr):
         'team_form': team_form,
         'swimmer_list': swimmer_list,
         'swimmer_form': swimmer_form,
+        'upload_form': upload_form,
     }
     return render(request, 'teams/swimmer_list.html', context)
 

@@ -46,7 +46,9 @@ class Swimmer(models.Model):
         """
         Calculate and set age field based on birth date.
         """
-        self.age = int((date.today() - self.birth_date).days / 365.2425)
+        if self.birth_date:
+            self.age = int((date.today() - self.birth_date).days / 365.2425)
+        self.save()
         return self.age
 
     def get_best_time(self, event):

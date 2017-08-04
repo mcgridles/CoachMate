@@ -266,6 +266,181 @@ class TestSwimmerListView(TestCase):
             follow=True)
         self.assertContains(response, 'University of Kansas')
 
+    def test_team_roster_upload(self):
+        """
+        Team Manager rosters can be uploaded in a .zip file.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(self.user1)
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster003.zip') as f:
+            response = self.client.post(reverse('teams:swimmerList', kwargs={
+                    'abbr': team.abbr
+                }),
+                {
+                    'zip_file': f,
+                    'upload_roster': 'Submit'
+                },
+                follow=True
+            )
+            
+            swimmers = [
+                '<Swimmer: Abel>',
+                '<Swimmer: Alkislar>',
+                '<Swimmer: Angotti>',
+                '<Swimmer: Armstrong>',
+                '<Swimmer: Asai-Sarris>',
+                '<Swimmer: Banak>',
+                '<Swimmer: Barlow>',
+                '<Swimmer: Barnes>',
+                '<Swimmer: Bartlett>',
+                '<Swimmer: Bauer>',
+                '<Swimmer: Behar>',
+                '<Swimmer: Berger>',
+                '<Swimmer: Bissonnette>',
+                '<Swimmer: Bloom>',
+                '<Swimmer: Bogatko>',
+                '<Swimmer: Chen>',
+                '<Swimmer: Cheng>',
+                '<Swimmer: Coghlan>',
+                '<Swimmer: Coreno>',
+                '<Swimmer: DeLiberti>',
+                '<Swimmer: Dottinger>',
+                '<Swimmer: Doyle>',
+                '<Swimmer: Elmaarouf>',
+                '<Swimmer: Fleischer>',
+                '<Swimmer: Foley>',
+                '<Swimmer: Fong>',
+                '<Swimmer: Formica>',
+                '<Swimmer: Fritzinger>',
+                '<Swimmer: Furuta>',
+                '<Swimmer: Galus>',
+                '<Swimmer: Garber>',
+                '<Swimmer: Greene>',
+                '<Swimmer: Gridley>',
+                '<Swimmer: Harris>',
+                '<Swimmer: Haviland>',
+                '<Swimmer: Heath>',
+                '<Swimmer: Hoang>',
+                '<Swimmer: Jaisle>',
+                '<Swimmer: Kenyon>',
+                '<Swimmer: Landon>',
+                '<Swimmer: Laundry>',
+                '<Swimmer: Lefler>',
+                '<Swimmer: Lenney>',
+                '<Swimmer: Leopold>',
+                '<Swimmer: Lin>',
+                '<Swimmer: Mack>',
+                '<Swimmer: Manetti>',
+                '<Swimmer: McCollister>',
+                '<Swimmer: McCord>',
+                '<Swimmer: McCrobie>',
+                '<Swimmer: McGann>',
+                '<Swimmer: Miller>',
+                '<Swimmer: Monasterio>',
+                '<Swimmer: Movchan>',
+                '<Swimmer: Murphy>',
+                '<Swimmer: Niemi>',
+                '<Swimmer: Nikopoulos>',
+                '<Swimmer: Noble>',
+                '<Swimmer: Nozhenko>',
+                "<Swimmer: O'Donnell>",
+                '<Swimmer: Papes>',
+                '<Swimmer: Perez>',
+                '<Swimmer: Philbrick>',
+                '<Swimmer: Pinkes>',
+                '<Swimmer: Plummer>',
+                '<Swimmer: Regulapati>',
+                '<Swimmer: Renaud>',
+                '<Swimmer: Shi>',
+                '<Swimmer: Smolyar>',
+                '<Swimmer: Soucy>',
+                '<Swimmer: Thornton>',
+                '<Swimmer: Toppazzini>',
+                '<Swimmer: Tou>',
+                '<Swimmer: Van Winkle>',
+            ]
+            new_swimmers = []
+            for swimmer in team.swimmer_set.all():
+                new_swimmers.append('<Swimmer: ' + swimmer.l_name + '>')
+            self.assertEqual(new_swimmers, swimmers)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Roster loaded')
+
+    def test_team_roster_upload_error(self):
+        """
+        An error message is displayed if swimmers can't be uploaded, or files can't
+        be found.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(self.user1)
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster003_bad.zip') as f:
+            response = self.client.post(reverse('teams:swimmerList', kwargs={
+                    'abbr': team.abbr
+                }),
+                {
+                    'zip_file': f,
+                    'upload_roster': 'Submit'
+                },
+                follow=True
+            )
+            self.assertQuerysetEqual(team.swimmer_set.all(), [])
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Couldn&#39;t load swimmer(s)')
+
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/fftlighttest-Roster.zip') as f:
+            response = self.client.post(reverse('teams:swimmerList', kwargs={
+                    'abbr': team.abbr
+                }),
+                {
+                    'zip_file': f,
+                    'upload_roster': 'Submit'
+                },
+                follow=True
+            )
+            self.assertQuerysetEqual(team.swimmer_set.all(), [])
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Couldn&#39;t find .CL2 or .HY3 file in zip file')
+
+    def test_team_roster_invalid_zip_file(self):
+        """
+        An error message is displayed if the file is not named correctly.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(self.user1)
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/fftlighttest.zip') as f:
+            response = self.client.post(reverse('teams:swimmerList', kwargs={
+                    'abbr': team.abbr
+                }),
+                {
+                    'zip_file': f,
+                    'upload_roster': 'Submit'
+                },
+                follow=True
+            )
+            self.assertQuerysetEqual(team.swimmer_set.all(), [])
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Invalid file')
+
+    def test_team_roster_invalid_file(self):
+        """
+        An error message is displayed if the file is not named correctly.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(self.user1)
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/CFILE01.CL2') as f:
+            response = self.client.post(reverse('teams:swimmerList', kwargs={
+                    'abbr': team.abbr
+                }),
+                {
+                    'zip_file': f,
+                    'upload_roster': 'Submit'
+                },
+                follow=True
+            )
+            self.assertQuerysetEqual(team.swimmer_set.all(), [])
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Error: File must be in ZIP format')
+
 
 # Swimmer Detail
 
@@ -813,11 +988,12 @@ class TestPracticeScheduleView(TestCase):
 class TestSetDetailView(TestCase):
     def setUp(self):
         user = test.create_user('user', 'password')
-        team = test.create_team(user)
+        self.team = test.create_team(user)
         week = test.create_week()
-        self.practice = test.create_practice(team, week)
+        self.practice = test.create_practice(self.team, week)
 
     def tearDown(self):
+        self.team.delete()
         self.practice.delete()
 
     def test_set_detail_page(self):

@@ -46,3 +46,4 @@ Thumbs.db
 /CoachMate/settings/local.py
 .coverage
 /teams/static/teams/img
+*.CL2

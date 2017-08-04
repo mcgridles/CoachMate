@@ -1,13 +1,12 @@
 from __future__ import unicode_literals
 
-from django.forms import ModelForm, BaseFormSet, BaseModelFormSet, formset_factory, modelformset_factory
-from django.forms.widgets import CheckboxSelectMultiple, RadioSelect
+import django.forms as forms
 
 from teams.models import *
 
 # Model forms
 
-class TeamForm(ModelForm):
+class TeamForm(forms.ModelForm):
     class Meta:
         model = Team
         exclude = ['user']
@@ -40,7 +39,7 @@ class TeamForm(ModelForm):
         return team
 
 
-class SwimmerForm(ModelForm):
+class SwimmerForm(forms.ModelForm):
     class Meta:
         model = Swimmer
         exclude = ['team', 'age']
@@ -79,14 +78,11 @@ class SwimmerForm(ModelForm):
         swimmer = super(SwimmerForm, self).save(commit=False)
         swimmer.team = self.team # associate team
         cleaned_data = super(SwimmerForm, self).clean()
-        birth_date = cleaned_data.get('birth_date') # check for DoB
-        if birth_date:
-            swimmer.set_age() # calculate age
-        swimmer.save()
+        swimmer.set_age() # calculate age
         return swimmer
 
 
-class EventForm(ModelForm):
+class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         exclude = ['swimmer']
@@ -118,7 +114,7 @@ class EventForm(ModelForm):
         event.save()
         return event
 
-class RepForm(ModelForm):
+class RepForm(forms.ModelForm):
     class Meta:
         model = Rep
         exclude = ['set_id']
@@ -146,7 +142,7 @@ class RepForm(ModelForm):
         })
 
 
-class SetForm(ModelForm):
+class SetForm(forms.ModelForm):
     class Meta:
         model = Set
         exclude = ['practice_id']
@@ -155,7 +151,7 @@ class SetForm(ModelForm):
         self.practice = kwargs.pop('practice', None)
         self.team = kwargs.pop('team', None)
         super(SetForm, self).__init__(*args, **kwargs)
-        self.fields['group'].widget = RadioSelect(choices=GROUP_CHOICE)
+        self.fields['group'].widget = forms.widgets.RadioSelect(choices=GROUP_CHOICE)
         self.fields['focus'].widget.attrs.update({
             'class': 'form-control'
         })
@@ -167,9 +163,9 @@ class SetForm(ModelForm):
             'placeholder': 'Set Order*',
             'class': 'form-control'
         })
-        self.fields['swimmers'].widget = CheckboxSelectMultiple()
+        self.fields['swimmers'].widget = forms.widgets.CheckboxSelectMultiple()
         self.fields['swimmers'].queryset = Swimmer.objects.filter(team=self.team)
-        self.fields['pace'].widget = RadioSelect(choices=PACE_CHOICE)
+        self.fields['pace'].widget = forms.widgets.RadioSelect(choices=PACE_CHOICE)
 
     def clean(self):
         cleaned_data = super(SetForm, self).clean()
@@ -201,7 +197,7 @@ class SetForm(ModelForm):
         return setInstance
 
 
-class PracticeForm(ModelForm):
+class PracticeForm(forms.ModelForm):
     class Meta:
         model = Practice
         fields = ['weekday']
@@ -221,7 +217,7 @@ class PracticeForm(ModelForm):
         return practice
 
 
-class TrainingForm(ModelForm):
+class TrainingForm(forms.ModelForm):
     class Meta:
         model = TrainingModel
         fields = ['team']
@@ -241,7 +237,7 @@ class TrainingForm(ModelForm):
         return training_model
 
 
-class MultiplierForm(ModelForm):
+class MultiplierForm(forms.ModelForm):
     class Meta:
         model = TrainingMultiplier
         exclude = ['training_model']
@@ -259,7 +255,7 @@ class MultiplierForm(ModelForm):
 
 # Formsets
 
-class BaseRepFormset(BaseFormSet):
+class BaseRepFormset(forms.BaseFormSet):
     def save_formset(self, set_id):
         for form in self.forms:
             if form.cleaned_data:
@@ -267,10 +263,10 @@ class BaseRepFormset(BaseFormSet):
                 instance.set_id = set_id
                 instance.save()
 
-RepFormSet = formset_factory(RepForm, formset=BaseRepFormset)
+RepFormSet = forms.formset_factory(RepForm, formset=BaseRepFormset)
 
 
-class BaseMultiplierFormset(BaseModelFormSet):
+class BaseMultiplierFormset(forms.BaseModelFormSet):
     def clean(self):
         super(BaseMultiplierFormset, self).clean()
         used = []
@@ -295,9 +291,26 @@ class BaseMultiplierFormset(BaseModelFormSet):
                 instance.training_model = training_model
                 instance.save()
 
-MultiplierFormSet = modelformset_factory(
+MultiplierFormSet = forms.modelformset_factory(
     TrainingMultiplier,
     form=MultiplierForm,
     formset=BaseMultiplierFormset,
     fields=('focus', 'multiplier')
 )
+
+class UploadZipForm(forms.Form):
+    zip_file = forms.FileField()
+
+    def __init__(self, *args, **kwargs):
+        super(UploadZipForm, self).__init__(*args, **kwargs)
+        self.fields['zip_file'].widget.attrs.update({
+            'class': 'form-control'
+        })
+
+    def clean(self):
+        cleaned_data = super(UploadZipForm, self).clean()
+        file = self.cleaned_data.get('zip_file')
+        if file.name[-4:] != '.zip':
+            msg = 'Error: File must be in ZIP format'
+            self.add_error('zip_file', msg)
+        return cleaned_data

@@ -17,6 +17,6 @@
 }
 
 /* Table content */
-tr {
+tr:not(.thead) {
   cursor: pointer;
 }
