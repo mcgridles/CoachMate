@@ -100,7 +100,7 @@
             </div>
 
             <div class="modal-body">
-              <form action="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}" method="post" class="form-signin">
+              <form action="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}" method="post" enctype="multipart/form-data" class="form-signin">
                 {% csrf_token %}
                 {% if swimmer_form.errors %}
                   {% for field in swimmer_form %}
@@ -113,9 +113,13 @@
                 {% endif %}
 
                 <!-- Swimmer form -->
-                {% for field in swimmer_form %}
-                  {{ field }}
-                {% endfor %}
+                {{ swimmer_form.f_name }}
+                {{ swimmer_form.l_name }}
+                {{ swimmer_form.gender }}
+                {{ swimmer_form.birth_date }}
+                {{ swimmer_form.bio }}
+                {{ swimmer_form.picture }}
+
                 <br>
                 <div class="modal-footer">
                   <button name="edit_swimmer" type="submit" class="btn btn-md btn-primary">Save</button>
@@ -130,7 +134,11 @@
 
     {% block content %}
       <div class="col-xs-12 col-sm-4" style="padding-left: 0">
-        <img src="{% static 'teams/img/background.png' %}" style="width: 100%">
+        {% if swimmer.picture %}
+          <img src="{{ picture.img.url }}" style="width: 100%">
+        {% else %}
+          <img src="{% static 'teams/img/background.png' %}" style="width: 100%">
+        {% endif %}
         <div class="table-responsive">
           <table id="swimmer" class="table table-striped">
             <tbody>

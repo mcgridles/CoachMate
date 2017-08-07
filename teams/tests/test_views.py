@@ -282,7 +282,7 @@ class TestSwimmerListView(TestCase):
                 },
                 follow=True
             )
-            
+
             swimmers = [
                 '<Swimmer: Abel>',
                 '<Swimmer: Alkislar>',
@@ -439,7 +439,7 @@ class TestSwimmerListView(TestCase):
             )
             self.assertQuerysetEqual(team.swimmer_set.all(), [])
             self.assertEqual(response.status_code, 200)
-            self.assertContains(response, 'Error: File must be in ZIP format')
+            self.assertContains(response, 'ERROR: File must be in ZIP format')
 
 
 # Swimmer Detail
@@ -491,6 +491,7 @@ class TestSwimmerDetailView(TestCase):
             {
                 'f_name': 'Dave',
                 'l_name': 'Thornton',
+                'gender': 'M',
                 'edit_swimmer': 'Submit',
             },
             follow=True
@@ -522,6 +523,55 @@ class TestSwimmerDetailView(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Henry Gridley')
+
+    def test_swimmer_form_image_upload(self):
+        """
+        Only .png and .jpg images are valid.
+        """
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/CFILE01.CL2', 'rb') as f:
+            self.client.login(username='user', password='password')
+            swimmer = test.create_swimmer(self.team)
+            swimmer.set_age()
+            response = self.client.post(reverse('teams:swimmerDetail', kwargs={
+                    'abbr': self.team.abbr,
+                    's_id': swimmer.id,
+                }),
+                {
+                    'f_name': 'Henry',
+                    'l_name': 'Gridley',
+                    'gender': 'M',
+                    'picture': f,
+                    'edit_swimmer': 'Submit',
+                },
+                follow=True
+            )
+
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(
+                response,
+                'Upload a valid image. The file you uploaded was either not an image or a corrupted image.'
+            )
+
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/background.png', 'rb') as f:
+            self.client.login(username='user', password='password')
+            swimmer = test.create_swimmer(self.team)
+            swimmer.set_age()
+            response = self.client.post(reverse('teams:swimmerDetail', kwargs={
+                    'abbr': self.team.abbr,
+                    's_id': swimmer.id,
+                }),
+                {
+                    'f_name': 'Henry',
+                    'l_name': 'Gridley',
+                    'gender': 'M',
+                    'picture': f,
+                    'edit_swimmer': 'Submit',
+                },
+                follow=True
+            )
+            swimmer.refresh_from_db()
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(swimmer.picture.name[0:10], 'background')
 
 
 # Write practices
@@ -1043,7 +1093,7 @@ class TestCreateTrainingView(TestCase):
             {
                 'team': team.id,
                 'form-0-focus': 'warmup',
-                'form-0-multiplier': 1,
+                'form-0-multiplier': '40%',
                 'form-TOTAL_FORMS': 1,
                 'form-INITIAL_FORMS': 0,
                 'submit': 'Submit',
@@ -1052,9 +1102,11 @@ class TestCreateTrainingView(TestCase):
         )
         training_model = TrainingModel.objects.all()
         multiplier_set = training_model[0].trainingmultiplier_set.all()
+        multiplier = multiplier_set[0]
         self.assertEqual(response.status_code, 200)
         self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
         self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
+        self.assertEqual(multiplier.multiplier, '0.4')
 
     def test_create_training_edit_form(self):
         """
@@ -1068,7 +1120,7 @@ class TestCreateTrainingView(TestCase):
             {
                 'team': team.id,
                 'form-0-focus': 'warmup',
-                'form-0-multiplier': 1,
+                'form-0-multiplier': '0.4',
                 'form-TOTAL_FORMS': 1,
                 'form-INITIAL_FORMS': 0,
                 'submit': 'Submit',
@@ -1077,9 +1129,11 @@ class TestCreateTrainingView(TestCase):
         )
         training_model = TrainingModel.objects.all()
         multiplier_set = training_model[0].trainingmultiplier_set.all()
+        multiplier = multiplier_set[0]
         self.assertEqual(response.status_code, 200)
         self.assertQuerysetEqual(training_model, ['<TrainingModel: NUSC>'])
         self.assertQuerysetEqual(multiplier_set, ['<TrainingMultiplier: warmup>'])
+        self.assertEqual(multiplier.multiplier, '0.4')
 
         response = self.client.post(reverse('teams:createTraining', kwargs={
                 't_id': training_model[0].id,

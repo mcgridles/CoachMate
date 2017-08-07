@@ -116,7 +116,7 @@ def swimmerDetail(request, abbr, s_id):
 
     if request.method == 'POST':
         if 'edit_swimmer' in request.POST:
-            swimmer_form = SwimmerForm(request.POST, instance=swimmer, team=team)
+            swimmer_form = SwimmerForm(request.POST, request.FILES, instance=swimmer, team=team)
             if swimmer_form.is_valid():
                 swimmer_form.save()
                 event_form = EventForm(swimmer=swimmer)

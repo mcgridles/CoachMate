@@ -49,6 +49,7 @@ class SwimmerForm(forms.ModelForm):
             'gender': 'M/F',
             'birth_date': 'Birth Date',
             'bio': 'Bio',
+            'picture': 'Picture',
         }
 
     def __init__(self, *args, **kwargs):
@@ -73,11 +74,13 @@ class SwimmerForm(forms.ModelForm):
             'placeholder': 'Bio',
             'class': 'form-control'
         })
+        self.fields['picture'].widget.attrs.update({
+            'class': 'form-control'
+        })
 
     def save(self):
         swimmer = super(SwimmerForm, self).save(commit=False)
         swimmer.team = self.team # associate team
-        cleaned_data = super(SwimmerForm, self).clean()
         swimmer.set_age() # calculate age
         return swimmer
 
@@ -172,14 +175,14 @@ class SetForm(forms.ModelForm):
         order = cleaned_data.get('order')
         # check for any sets with the same order number
         if Set.objects.filter(practice_id=self.practice).filter(order=order):
-            msg = 'Error: Another set already given order #%d.' % order
+            msg = 'ERROR: Another set already given order #%d.' % order
             self.add_error('order', msg)
 
         group = cleaned_data.get('group')
         swimmers = cleaned_data.get('swimmers')
         # swimmers should be chosen or "Team" should be selected
         if group == 'ind' and not swimmers:
-            msg = 'Error: Select \'Team\' or choose swimmers.'
+            msg = 'ERROR: Select \'Team\' or choose swimmers.'
             self.add_error('group', msg)
         return cleaned_data
 
@@ -276,10 +279,20 @@ class BaseMultiplierFormset(forms.BaseModelFormSet):
                 focus = cleaned_data['focus']
 
                 if focus in used:
-                    msg = 'Error: Each intensity can only be assigned 1 multiplier'
+                    msg = 'ERROR: Each intensity can only be assigned 1 multiplier'
                     form.add_error('focus', msg)
                 else:
                     used.append(focus)
+
+                mult = cleaned_data['multiplier']
+                try:
+                    if mult.endswith('%'):
+                        float(mult[:-1])
+                    else:
+                        float(mult)
+                except ValueError:
+                    msg = '%s is not a valid percent' % mult
+                    self.add_error('multiplier', msg)
             except KeyError:
                 return
 
@@ -289,6 +302,16 @@ class BaseMultiplierFormset(forms.BaseModelFormSet):
             if form.cleaned_data:
                 instance = form.save(commit=False)
                 instance.training_model = training_model
+
+                try:
+                    mult = form.cleaned_data['multiplier']
+                    if mult.endswith('%'):
+                        instance.multiplier = float(mult[:-1])/100
+                    else:
+                        instance.multiplier = float(mult)
+                except KeyError:
+                    return
+
                 instance.save()
 
 MultiplierFormSet = forms.modelformset_factory(
@@ -310,7 +333,7 @@ class UploadZipForm(forms.Form):
     def clean(self):
         cleaned_data = super(UploadZipForm, self).clean()
         file = self.cleaned_data.get('zip_file')
-        if file.name[-4:] != '.zip':
-            msg = 'Error: File must be in ZIP format'
+        if file and file.name[-4:] != '.zip':
+            msg = 'ERROR: File must be in ZIP format'
             self.add_error('zip_file', msg)
         return cleaned_data

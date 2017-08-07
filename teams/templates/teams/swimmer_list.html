@@ -80,9 +80,10 @@
                 {% endif %}
 
                 <!-- Swimmer form -->
-                {% for field in swimmer_form %}
-                  {{ field }}
-                {% endfor %}
+                {{ swimmer_form.f_name }}
+                {{ swimmer_form.l_name }}
+                {{ swimmer_form.gender }}
+                {{ swimmer_form.birth_date }}
 
                 <br>
                 <div class="modal-footer">

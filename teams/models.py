@@ -7,6 +7,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+from teams.validators import valid_pct
+
 # Swimmers & Teams
 
 class Team(models.Model):
@@ -34,7 +36,7 @@ class Swimmer(models.Model):
     birth_date = models.DateField(blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     bio = models.TextField(blank=True)
-    #picture = models.ImageField(null=True, blank=True)
+    picture = models.ImageField(null=True, blank=True)
 
     class Meta:
         ordering = ['l_name', 'f_name']
@@ -263,7 +265,7 @@ class TrainingModel(models.Model):
 class TrainingMultiplier(models.Model):
     training_model = models.ForeignKey(TrainingModel, on_delete=models.CASCADE)
     focus = models.CharField(max_length=15, choices=FOCUS_CHOICE)
-    multiplier = models.FloatField(null=True)
+    multiplier = models.CharField(max_length=5, null=True)
 
     class Meta:
         ordering = ['training_model', 'focus']

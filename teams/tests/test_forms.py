@@ -344,7 +344,7 @@ class TestMultiplierForm(TestCase):
         multiplierInstance.training_model = self.training_model
         multiplierInstance.save()
         self.assertEqual(multiplierInstance.focus, 'warmup')
-        self.assertEqual(multiplierInstance.multiplier, 1)
+        self.assertEqual(multiplierInstance.multiplier, '1')
         self.assertEqual(multiplierInstance.training_model, self.training_model)
 
     def test_multiplier_form_invalid_data(self):

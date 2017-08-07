@@ -186,7 +186,7 @@ def calculate_intervals(setInstance, training_model):
     Calculates intervals for each rep for each swimmer.
     """
     try:
-        multiplier = training_model.trainingmultiplier_set.get(focus=setInstance.focus).multiplier
+        multiplier = float(training_model.trainingmultiplier_set.get(focus=setInstance.focus).multiplier)
     except TrainingMultiplier.DoesNotExist, AttributeError:
         multiplier = None
 
