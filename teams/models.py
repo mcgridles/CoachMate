@@ -106,6 +106,7 @@ class Event(models.Model):
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
     event = models.CharField(max_length=10, choices=EVENT_CHOICE)
     time = models.DurationField()
+    place = models.IntegerField(null=True, blank=True)
     date = models.DateField(null=True)
 
     class Meta:
