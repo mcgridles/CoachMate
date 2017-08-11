@@ -174,7 +174,8 @@ class SetForm(forms.ModelForm):
         cleaned_data = super(SetForm, self).clean()
         order = cleaned_data.get('order')
         # check for any sets with the same order number
-        if Set.objects.filter(practice_id=self.practice).filter(order=order):
+        _set = Set.objects.filter(practice_id=self.practice).filter(order=order)
+        if _set.exists():
             msg = 'ERROR: Another set already given order #%d.' % order
             self.add_error('order', msg)
 
@@ -188,8 +189,9 @@ class SetForm(forms.ModelForm):
 
     def save(self):
         setInstance = super(SetForm, self).save(commit=False)
-        setInstance.practice_id = self.practice # associate practice
-        setInstance.save()
+        if self.practice:
+            setInstance.practice_id = self.practice # associate practice
+            setInstance.save()
         self.save_m2m()
 
         swimmers = Swimmer.objects.filter(team=self.team)
@@ -333,7 +335,7 @@ class UploadZipForm(forms.Form):
     def clean(self):
         cleaned_data = super(UploadZipForm, self).clean()
         file = self.cleaned_data.get('zip_file')
-        if file and file.name[-4:] != '.zip':
+        if file and file.name[-4:].lower() != '.zip':
             msg = 'ERROR: File must be in ZIP format'
             self.add_error('zip_file', msg)
         return cleaned_data
