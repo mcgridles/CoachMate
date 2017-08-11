@@ -47,3 +47,4 @@ Thumbs.db
 .coverage
 /teams/static/teams/img
 /teams/tests/test_files/
+/htmlcov/
