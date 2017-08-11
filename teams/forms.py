@@ -260,7 +260,7 @@ class MultiplierForm(forms.ModelForm):
 
 # Formsets
 
-class BaseRepFormset(forms.BaseFormSet):
+class BaseRepFormset(forms.BaseModelFormSet):
     def save_formset(self, set_id):
         for form in self.forms:
             if form.cleaned_data:
@@ -268,7 +268,12 @@ class BaseRepFormset(forms.BaseFormSet):
                 instance.set_id = set_id
                 instance.save()
 
-RepFormSet = forms.formset_factory(RepForm, formset=BaseRepFormset)
+RepFormSet = forms.modelformset_factory(
+    Rep,
+    form=RepForm,
+    formset=BaseRepFormset,
+    fields=('num', 'distance', 'stroke', 'rest', 'comments')
+)
 
 
 class BaseMultiplierFormset(forms.BaseModelFormSet):

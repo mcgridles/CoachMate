@@ -1069,6 +1069,7 @@ class TestSetDetailView(TestCase):
         """
         self.client.login(username='user', password='password')
         set1 = test.create_set(self.practice)
+        rep1 = test.create_rep(set1)
         response = self.client.post(reverse('teams:setDetail', kwargs={
                 'abbr': self.team.abbr,
                 'set_id': set1.id,
@@ -1077,10 +1078,19 @@ class TestSetDetailView(TestCase):
                 'focus': 'sprint',
                 'repeats': 1,
                 'order': 1,
+                'form-0-num': 4,
+                'form-0-distance': 100,
+                'form-0-stroke': 'free',
+                'form-0-rest': timedelta(seconds=10),
+                'form-TOTAL_FORMS': 0,
+                'form-INITIAL_FORMS': 0,
                 'pace': 'train',
                 'group': 'team',
-            }
+                'submit': 'Submit',
+            },
+            follow=True
         )
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Sprint')
 
 
@@ -1360,3 +1370,24 @@ class TestDeleteModelsViews(TestCase):
         self.client.login(username='user2', password='password')
         response = self.client.get(reverse('teams:showTraining'))
         self.assertEqual(response.context['teams'][0][1].team.name, 'Northeastern University')
+
+    def test_delete_set(self):
+        """
+        Deletes a set.
+        """
+        self.client.login(username='user1', password='password')
+        team = test.create_team(user=self.user1)
+        week = test.create_week()
+        week.populate()
+        practice = test.create_practice(team, week)
+        set1 = test.create_set(practice)
+        rep1 = test.create_rep(set1)
+        response = self.client.get(reverse('teams:deleteSet', kwargs={
+                'abbr': team.abbr,
+                'set_id': set1.id,
+            }),
+            follow=True,
+        )
+        self.assertQuerysetEqual(Set.objects.all(), [])
+        self.assertQuerysetEqual(Rep.objects.all(), [])
+        self.assertEqual(response.status_code, 200)
