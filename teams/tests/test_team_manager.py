@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 from unittest import skip, skipIf, skipUnless
 import os, shutil
+from datetime import date, timedelta
 
 from django.test import TestCase
 
 from teams.TeamManager import TeamManager
-from teams.models import Team
+from teams.models import Team, Event
 import teams.tests.test_setup as test
 
 class TestTeamManager(TestCase):
@@ -110,7 +111,8 @@ class TestTeamManager(TestCase):
         """
         with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster003.zip', 'r') as f:
             tm = TeamManager(team=self.team, zip_file=f)
-            tm.load_roster()
+            msg = tm.load_roster()
+            self.assertEqual(msg[0], ('success', 'Roster imported'))
 
         new_swimmers = []
         for swimmer in self.team.swimmer_set.all():
@@ -123,9 +125,96 @@ class TestTeamManager(TestCase):
         """
         with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster004.zip', 'r') as f:
             tm = TeamManager(team=self.team, zip_file=f)
-            tm.load_roster()
+            msg = tm.load_roster()
+            self.assertEqual(msg[0], ('success', 'Roster imported'))
 
         new_swimmers = []
         for swimmer in self.team.swimmer_set.all():
             new_swimmers.append('<Swimmer: ' + swimmer.l_name + '>')
         self.assertEqual(new_swimmers, self.swimmers)
+
+    def test_team_manager_load_invalid_zip_file(self):
+        """
+        An error message is displayed if the file is not named correctly.
+        """
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/fftlighttest.zip') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_results()
+            self.assertEqual(msg[0], ('error', 'Invalid file'))
+
+    def test_team_manager_roster_upload_error(self):
+        """
+        An error message is displayed if swimmers can't be uploaded, or files can't
+        be found.
+        """
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster003_bad.zip') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_roster()
+            self.assertEqual(msg[0], ('error', 'Couldn\'t import swimmer(s)'))
+
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/fftlighttest-Roster.zip') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_roster()
+            self.assertEqual(msg[0], ('error', 'Couldn\'t find .CL2 or .HY3 file in zip file'))
+
+    def test_team_manager_load_results(self):
+        """
+        Loads meet results from a .HY3 file in the zip file.
+        """
+        swimmer = test.create_swimmer(team=self.team)
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/RED-NE-Results005.zip', 'r') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_results()
+            self.assertEqual(msg[0], ('success', 'Results imported'))
+
+        events = Event.objects.filter(swimmer=swimmer)
+        self.assertEqual(events[0].event, '50 breast')
+        self.assertEqual(events[0].time, timedelta(seconds=35.88))
+        self.assertEqual(events[0].place, 7)
+        self.assertEqual(events[0].date, date(2017,2,4))
+        self.assertEqual(events[1].event, '50 free')
+        self.assertEqual(events[1].time, timedelta(seconds=23.34))
+        self.assertEqual(events[1].place, 1)
+        self.assertEqual(events[1].date, date(2017,2,4))
+
+    def test_team_manager_results_upload_error(self):
+        """
+        An error message is displayed if results can't be uploaded, or files or
+        the meet date can't be found.
+        """
+        swimmer1 = test.create_swimmer(team=self.team)
+        swimmer2 = test.create_swimmer(team=self.team, first='David', last='Thornton')
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/RED-NE-Results005_bad_date.zip', 'r') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_results()
+            self.assertEqual(msg[0], ('error', 'Couldn\'t find meet date'))
+
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/RED-NE-Results005_bad_events.zip', 'r') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_results()
+            self.assertEqual(msg[0], ('error', 'Couldn\'t import event for David Thornton'))
+            self.assertEqual(msg[1], ('error', 'Couldn\'t import event for David Thornton'))
+            self.assertEqual(msg[2], ('error', 'Couldn\'t import event for Henry Gridley'))
+
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/fftlighttest-Results.zip') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_results()
+            self.assertEqual(msg[0], ('error', 'Couldn\'t find .HY3 file in zip file'))
+
+    def test_team_manager_load_roster_and_results(self):
+        """
+        Loads a team roster from a zip file then loads meet results for that team
+        from a different zip file.
+        """
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster003.zip', 'r') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_roster()
+            self.assertEqual(msg[0], ('success', 'Roster imported'))
+
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/RED-NE-Results005.zip', 'r') as f:
+            tm = TeamManager(team=self.team, zip_file=f)
+            msg = tm.load_results()
+            self.assertEqual(msg[0], ('success', 'Results imported'))
+
+        events = Event.objects.all()
+        self.assertEqual(len(events), 98)

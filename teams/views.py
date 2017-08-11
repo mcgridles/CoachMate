@@ -78,15 +78,23 @@ def swimmerList(request, abbr):
                 swimmer_form = SwimmerForm()
                 upload_form = UploadZipForm()
 
-        elif 'upload_roster' in request.POST:
+        elif 'upload' in request.POST:
             upload_form = UploadZipForm(request.POST, request.FILES)
             if upload_form.is_valid():
-                tm = TeamManager(team=team, zip_file=request.FILES['zip_file'])
-                msg = tm.load_roster()
-                if msg[0] == 'success':
-                    messages.success(request, msg[1])
+                zip_file = request.FILES['zip_file']
+                tm = TeamManager(team=team, zip_file=zip_file)
+                if 'Roster' in zip_file.name:
+                    msgs = tm.load_roster()
+                elif 'Results' in zip_file.name:
+                    msgs = tm.load_results()
                 else:
-                    messages.error(request, msg[1])
+                    msgs = ('error', 'Invalid file')
+
+                for message in msgs:
+                    if message[0] == 'success':
+                        messages.success(request, message[1])
+                    else:
+                        messages.error(request, message[1])
                 return redirect('teams:swimmerList', abbr=team.abbr)
             else:
                 team_form = TeamForm(instance=team)
@@ -214,6 +222,37 @@ def writePractice(request, abbr, p_id):
         'practice_form': practice_form,
     }
     return render(request, 'teams/practice_write.html', context)
+
+
+@csrf_protect
+@login_required
+def setDetail(request, abbr, set_id):
+    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
+    _set = get_object_or_404(Set, pk=set_id)
+
+    if request.method == 'POST':
+        set_form = SetForm(data=request.POST, instance=_set, team=team)
+        rep_formset = RepFormSet(request.POST, instance=reps)
+        if set_form.is_valid() and rep_formset.is_valid():
+            # get set form instance
+            setInstance = set_form.save()
+            rep_formset.save_formset(setInstance) # set set_id for each rep
+
+            funct.calculate_intervals(setInstance, training_model)
+
+            return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
+
+    else:
+        set_form = SetForm(instance=_set, team=team)
+        rep_formset = RepFormSet(instance=reps)
+
+    context = {
+        'team': team,
+        'set_form': set_form,
+        'rep_formset': rep_formset,
+    }
+
+    return render(request, 'teams/set_detail.html', context)
 
 
 # Delete a practice

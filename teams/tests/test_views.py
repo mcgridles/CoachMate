@@ -266,7 +266,7 @@ class TestSwimmerListView(TestCase):
             follow=True)
         self.assertContains(response, 'University of Kansas')
 
-    def test_team_roster_upload(self):
+    def test_roster_upload(self):
         """
         Team Manager rosters can be uploaded in a .zip file.
         """
@@ -278,7 +278,7 @@ class TestSwimmerListView(TestCase):
                 }),
                 {
                     'zip_file': f,
-                    'upload_roster': 'Submit'
+                    'upload': 'Submit'
                 },
                 follow=True
             )
@@ -364,36 +364,22 @@ class TestSwimmerListView(TestCase):
                 new_swimmers.append('<Swimmer: ' + swimmer.l_name + '>')
             self.assertEqual(new_swimmers, swimmers)
             self.assertEqual(response.status_code, 200)
-            self.assertContains(response, 'Roster loaded')
+            self.assertContains(response, 'Roster imported')
 
-    def test_team_roster_upload_error(self):
+    def test_roster_upload_error(self):
         """
         An error message is displayed if swimmers can't be uploaded, or files can't
         be found.
         """
         self.client.login(username='user1', password='password')
         team = test.create_team(self.user1)
-        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster003_bad.zip') as f:
-            response = self.client.post(reverse('teams:swimmerList', kwargs={
-                    'abbr': team.abbr
-                }),
-                {
-                    'zip_file': f,
-                    'upload_roster': 'Submit'
-                },
-                follow=True
-            )
-            self.assertQuerysetEqual(team.swimmer_set.all(), [])
-            self.assertEqual(response.status_code, 200)
-            self.assertContains(response, 'Couldn&#39;t load swimmer(s)')
-
         with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/fftlighttest-Roster.zip') as f:
             response = self.client.post(reverse('teams:swimmerList', kwargs={
                     'abbr': team.abbr
                 }),
                 {
                     'zip_file': f,
-                    'upload_roster': 'Submit'
+                    'upload': 'Submit'
                 },
                 follow=True
             )
@@ -401,27 +387,45 @@ class TestSwimmerListView(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, 'Couldn&#39;t find .CL2 or .HY3 file in zip file')
 
-    def test_team_roster_invalid_zip_file(self):
+    def test_roster_and_results_upload(self):
         """
-        An error message is displayed if the file is not named correctly.
+        Loads a team roster from a zip file then loads meet results for that team
+        from a different zip file.
         """
         self.client.login(username='user1', password='password')
         team = test.create_team(self.user1)
-        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/fftlighttest.zip') as f:
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/NUSC-NE-Roster003.zip', 'r') as f:
             response = self.client.post(reverse('teams:swimmerList', kwargs={
                     'abbr': team.abbr
                 }),
                 {
                     'zip_file': f,
-                    'upload_roster': 'Submit'
+                    'upload': 'Submit'
                 },
                 follow=True
             )
-            self.assertQuerysetEqual(team.swimmer_set.all(), [])
             self.assertEqual(response.status_code, 200)
-            self.assertContains(response, 'Invalid file')
+            self.assertContains(response, 'Roster imported')
 
-    def test_team_roster_invalid_file(self):
+        with open('/Users/hgridley/Documents/Code/projects/CoachMate/teams/tests/test_files/RED-NE-Results005.zip', 'r') as f:
+            response = self.client.post(reverse('teams:swimmerList', kwargs={
+                    'abbr': team.abbr
+                }),
+                {
+                    'zip_file': f,
+                    'upload': 'Submit'
+                },
+                follow=True
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Results imported')
+
+        swimmers = Swimmer.objects.all()
+        events = Event.objects.all()
+        self.assertEqual(len(swimmers), 74)
+        self.assertEqual(len(events), 98)
+
+    def test_invalid_file_upload(self):
         """
         An error message is displayed if the file is not named correctly.
         """
@@ -433,7 +437,7 @@ class TestSwimmerListView(TestCase):
                 }),
                 {
                     'zip_file': f,
-                    'upload_roster': 'Submit'
+                    'upload': 'Submit'
                 },
                 follow=True
             )
@@ -1050,17 +1054,38 @@ class TestSetDetailView(TestCase):
         """
         Each set has a page that contains reps, swimmers, and intervals.
         """
-        set1 = test.create_set(self.practice)
         self.client.login(username='user', password='password')
+        set1 = test.create_set(self.practice)
         response = self.client.get(reverse('teams:setDetail', kwargs={
                 'abbr': self.team.abbr,
                 'set_id': set1.id,
             })
         )
+        self.assertContains(response, 'Warmup')
+
+    def test_set_edit_form(self):
+        """
+        Sets can be edited using the edit form.
+        """
+        self.client.login(username='user', password='password')
+        set1 = test.create_set(self.practice)
+        response = self.client.post(reverse('teams:setDetail', kwargs={
+                'abbr': self.team.abbr,
+                'set_id': set1.id,
+            }),
+            {
+                'focus': 'sprint',
+                'repeats': 1,
+                'order': 1,
+                'pace': 'train',
+                'group': 'team',
+            }
+        )
+        self.assertContains(response, 'Sprint')
 
 
 
-# Create training
+# Create training model
 
 class TestCreateTrainingView(TestCase):
     def setUp(self):

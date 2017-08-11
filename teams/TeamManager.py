@@ -1,7 +1,7 @@
 import os, re, zipfile, errno, shutil
-from datetime import date
+from datetime import date, timedelta
 
-from teams.models import Swimmer
+from teams.models import Swimmer, Event
 
 class TeamManager(object):
     """
@@ -11,6 +11,7 @@ class TeamManager(object):
         self.team = kwargs.pop('team')
         self.zip_file = kwargs.pop('zip_file', None)
         user_folder = self.team.user.last_name + '_temp_files/'
+        self.msg = []
 
         self.tmp_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tmp/')
         self.user_folder_path = os.path.join(self.tmp_path, user_folder)
@@ -36,8 +37,9 @@ class TeamManager(object):
         elif 'Results' in os.path.basename(file.name):
             self.zip_extract_dir = os.path.join(self.user_folder_path, 'results/')
         else:
-            message = ('error', 'Invalid file')
-            return message
+            err = ('error', 'Invalid file')
+            self.msg.append(err)
+            return err
 
         try:
             os.makedirs(self.zip_extract_dir)
@@ -56,8 +58,7 @@ class TeamManager(object):
                 os.path.basename(self.zip_file.name[:-4])
             )
 
-        message = ('success', 'File unzipped')
-        return message
+        return None
 
     def load_roster(self, file=None):
         """
@@ -68,9 +69,9 @@ class TeamManager(object):
         if not file:
             file = self.zip_file
         try:
-            msg = self.unzip_file(file)
-            if msg[0] == 'error':
-                return msg
+            m = self.unzip_file(file)
+            if m:
+                return self.msg
         except OSError:
             raise
 
@@ -80,8 +81,7 @@ class TeamManager(object):
                 file_flag = True
                 file = os.path.join(self.zip_extract_dir, file)
                 with open(file, 'r') as f_cl2:
-                    message = self.load_roster_from_file(f_cl2, '.cl2')
-                    return message
+                    self.parse_roster(f_cl2, '.cl2')
 
         if not file_flag:
             # look for .HY3 file if no .CL2 file exists
@@ -90,15 +90,15 @@ class TeamManager(object):
                     file_flag = True
                     file = os.path.join(self.zip_extract_dir, file)
                     with open(os.path.abspath(file), 'r') as f_hy3:
-                        message = self.load_roster_from_file(f_hy3, '.hy3')
-                        return message
+                        self.parse_roster(f_hy3, '.hy3')
 
         if not file_flag:
             # return error message if neither file exists
-            message = ('error', 'Couldn\'t find .CL2 or .HY3 file in zip file')
-            return message
+            self.msg.append(('error', 'Couldn\'t find .CL2 or .HY3 file in zip file'))
 
-    def load_roster_from_file(self, file, ext):
+        return self.msg
+
+    def parse_roster(self, file, ext):
         """
         Uses the .CL2 or .HY3 file to create a roster of swimmers.
         """
@@ -116,72 +116,188 @@ class TeamManager(object):
                 continue
             elif re.search('^Z', line) and ext == '.cl2':
                 break
+            else:
+                line_count += 1
+                # capture regex from line
+                # capture groups: <---><LAST>, <FIRST><---><MONTH><DAY><YEAR><---><GENDER>
+                if ext == '.cl2':
+                    name_capture = "(?P<last>[a-zA-Z]+[-' ]?[a-zA-Z]*), (?P<first>[a-zA-Z]+)"
+                    gender_capture = '([\d]{8}[\d]+)(?P<gender>[MF])'
+                elif ext == '.hy3':
+                    name_capture = "(?P<last>[a-zA-Z]+([-\' ]?[a-zA-Z]+))(\s+)(?P<first>[a-zA-Z]+)"
+                    gender_capture = '([A-Z]+[\d]+)(?P<gender>[MF])'
+                bd_capture = '(?P<month>\d{2})(?P<day>\d{2})(?P<year>\d{4})'
 
-            # capture regex from line
-            # capture groups: <---><LAST>, <FIRST><---><MONTH><DAY><YEAR><---><GENDER>
-            if ext == '.cl2':
-                name_capture = "(?P<last>[a-zA-Z]+[-' ]?[a-zA-Z]*), (?P<first>[a-zA-Z]+)"
-                gender_capture = '([\d]{8}[\d]+)(?P<gender>[MF])'
-            elif ext == '.hy3':
-                name_capture = "(?P<last>[a-zA-Z]+([-\' ]?[a-zA-Z]+))(\s+)(?P<first>[a-zA-Z]+)"
-                gender_capture = '([A-Z]+[\d]+)(?P<gender>[MF])'
-            bd_capture = '(?P<month>\d{2})(?P<day>\d{2})(?P<year>\d{4})'
+                # capture regex
+                swimmer_name = re.search(name_capture, line)
+                swimmer_birth_date = re.search(bd_capture, line)
+                swimmer_gender = re.search(gender_capture, line)
 
-            # capture regex
-            swimmer_name = re.search(
-                name_capture,
-                line
-            )
-            swimmer_birth_date = re.search(
-                bd_capture,
-                line
-            )
-            swimmer_gender = re.search(
-                gender_capture,
-                line
-            )
+                try:
+                    # try required capture groups
+                    first_name = swimmer_name.group('first')
+                    last_name = swimmer_name.group('last')
+                    gender = swimmer_gender.group('gender')
+                except AttributeError:
+                    error_flag = True
+                    self.msg.append(('error', 'Couldn\'t import swimmer(s)'))
+                    continue
 
-            try:
-                # try required capture groups
-                first_name = swimmer_name.group('first')
-                last_name = swimmer_name.group('last')
-                gender = swimmer_gender.group('gender')
-            except AttributeError:
-                error_flag = True
-                message = ('error', 'Couldn\'t load swimmer(s)')
-                continue
+                try:
+                    # birthday may be left out
+                    birth_date = date(
+                        int(swimmer_birth_date.group('year')),
+                        int(swimmer_birth_date.group('month')),
+                        int(swimmer_birth_date.group('day'))
+                    )
+                except AttributeError:
+                    birth_date = None
 
-            try:
-                # birthday may be left out
-                birth_date = date(
-                    int(swimmer_birth_date.group('year')),
-                    int(swimmer_birth_date.group('month')),
-                    int(swimmer_birth_date.group('day'))
-                )
-            except AttributeError:
-                birth_date = None
-
-            # check if swimmer exists
-            new_swimmer = Swimmer.objects.filter(
-                team=self.team).filter(
-                l_name=last_name).filter(
-                f_name=first_name).filter(
-                gender=gender).filter(
-                birth_date=birth_date)
-            if not new_swimmer.exists():
-                # create new swimmer
-                new_swimmer = Swimmer.objects.create(
-                    team=self.team,
-                    f_name=first_name,
-                    l_name=last_name,
-                    gender=gender,
-                    birth_date=birth_date,
-                )
-                new_swimmer.set_age()
-
-            line_count += 1
+                # check if swimmer exists
+                new_swimmer = Swimmer.objects.filter(
+                    team=self.team).filter(
+                    l_name=last_name).filter(
+                    f_name=first_name).filter(
+                    gender=gender).filter(
+                    birth_date=birth_date)
+                if not new_swimmer.exists():
+                    # create new swimmer
+                    new_swimmer = Swimmer.objects.create(
+                        team=self.team,
+                        f_name=first_name,
+                        l_name=last_name,
+                        gender=gender,
+                        birth_date=birth_date,
+                    )
+                    new_swimmer.set_age()
 
         if error_flag is False:
-            message = ('success', 'Roster loaded')
+            self.msg.append(('success', 'Roster imported'))
 
-        return message
+    def load_results(self, file=None):
+        """
+        Opens a .HY3 file and passes them to create a roster of swimmers.
+        """
+        file_flag = False
+
+        if not file:
+            file = self.zip_file
+        try:
+            m = self.unzip_file(file)
+            if m:
+                return self.msg
+        except OSError:
+            raise
+
+        # look for .HY3 file
+        for file in os.listdir(self.zip_extract_dir):
+            if file.endswith('.HY3'):
+                file_flag = True
+                file = os.path.join(self.zip_extract_dir, file)
+                with open(os.path.abspath(file), 'r') as f_hy3:
+                    self.parse_results(f_hy3)
+
+        if not file_flag:
+            # return error message if no .HY3 file exists
+            self.msg.append(('error', 'Couldn\'t find .HY3 file in zip file'))
+
+        return self.msg
+
+    def parse_results(self, file):
+        """
+        Uses the  .HY3 file to create Event objects for swimmers from results.
+        """
+        line_count = 0
+        error_flag = False
+        meet_date = None
+        swimmer = None
+        events = {
+            'A': 'free',
+            'B': 'back',
+            'C': 'breast',
+            'D': 'fly',
+            'E': 'im',
+        }
+
+        for line in file:
+            if line_count == 0:
+                line_count += 1
+                continue
+            elif line_count == 1:
+                line_count += 1
+                date_capture = '(?P<month>\d{2})(?P<day>\d{2})(?P<year>\d{4})'
+                meet_date = re.search(date_capture, line)
+
+                try:
+                    # try required capture groups
+                    month = int(meet_date.group('month'))
+                    day = int(meet_date.group('day'))
+                    year = int(meet_date.group('year'))
+                    meet_date = date(year,month,day)
+
+                except AttributeError:
+                    error_flag = True
+                    self.msg.append(('error', 'Couldn\'t find meet date'))
+                    return
+
+            else:
+                line_count += 1
+
+                name_capture = "(D1[MF][\s]+[\d]+)(?P<last>[a-zA-Z]+([-\' ]?[a-zA-Z]+))(\s+)(?P<first>[a-zA-Z]+)"
+                swimmer_name = re.search(name_capture, line)
+
+                if swimmer_name:
+                    first_name = swimmer_name.group('first')
+                    last_name = swimmer_name.group('last')
+                    s = Swimmer.objects.filter(
+                        team=self.team).filter(
+                        l_name=last_name).filter(
+                        f_name=first_name)
+                    if s.exists():
+                        swimmer = s[0]
+                    else:
+                        swimmer = None
+
+                elif swimmer:
+                    event_capture = "([ABCDE][\d][MF][\s]+[\d]+[a-zA-Z]+[\s]+)(?P<dist>[\d]+)(?P<event>[ABCDE])"
+                    event = re.search(event_capture, line)
+                    if event:
+                        distance = event.group('dist')
+                        event = events[event.group('event')]
+                        event = distance + ' ' + event
+                        nextline = file.next()
+
+                        time_capture = "([ABCDE][\d][MF][\s]+)(?P<time>[\d]+[.][\d]+)(Y[RQ]?[\s]+)(?P<place>[\dX]+)"
+                        time_place = re.search(time_capture, nextline)
+                        try:
+                            time = float(time_place.group('time'))
+                            if time == 0.00:
+                                continue
+                            time = timedelta(seconds=time)
+                            try:
+                                place = int(time_place.group('place'))
+                            except ValueError:
+                                place = None
+
+                            results = Event.objects.filter(
+                                swimmer=swimmer,
+                                event=event,
+                                time=time,
+                                place=place,
+                                date=meet_date,
+                            )
+                            if not results.exists():
+                                result = Event.objects.create(
+                                    swimmer=swimmer,
+                                    event=event,
+                                    time=time,
+                                    place=place,
+                                    date=meet_date,
+                                )
+
+                        except AttributeError:
+                            error_flag = True
+                            self.msg.append(('error', 'Couldn\'t import event for %s %s' % (swimmer.f_name, swimmer.l_name)))
+
+        if error_flag is False:
+            self.msg.append(('success', 'Results imported'))
