@@ -41,14 +41,17 @@ def create_swimmer(team, first='Henry', last='Gridley', gender='M'):
         bio='',
     )
 
-def create_event(swimmer, event='50 free', time=timedelta(seconds=22.32)):
+def create_event(swimmer, event='50 free', time=timedelta(seconds=22.32), place=1, date=date(2017, 1, 1)):
     """
     Create a test event.
     """
     return Event.objects.create(
         swimmer=swimmer,
+        team=swimmer.team,
         event=event,
         time=time,
+        place=place,
+        date=date,
     )
 
 def create_week(monday=date(2017,7,10), present=False):

@@ -10,7 +10,7 @@ from teams.models import Week, Practice, Interval
 import teams.functions as funct
 
 
-class FunctionTests(TestCase):
+class TestFunctions(TestCase):
     def setUp(self):
         self.user = test.create_user('user', 'password')
 
@@ -255,4 +255,63 @@ class FunctionTests(TestCase):
         self.assertEqual(set_zip, [
             (swimmer1, [(rep1, intervals[0])]),
             (swimmer2, [(rep1, intervals[1])]),
+        ])
+
+    def test_get_swimmer_records(self):
+        """
+        Returns a swimmer's top time in each event or None.
+        """
+        team = test.create_team(self.user)
+        swimmer = test.create_swimmer(team)
+        event1 = test.create_event(swimmer, '50 free', timedelta(seconds=22.96))
+        event2 = test.create_event(swimmer, '50 free', timedelta(seconds=22.32))
+        event3 = test.create_event(swimmer, '100 free', timedelta(seconds=49.86))
+        event4 = test.create_event(swimmer, '100 free', timedelta(seconds=50.58))
+        event5 = test.create_event(swimmer, '200 free', timedelta(seconds=124.04))
+
+        records = funct.get_swimmer_records(swimmer)
+        times = []
+        for record in records:
+            if record[1]:
+                times.append(record[1].time.total_seconds())
+            else:
+                times.append(None)
+
+        self.assertEqual(records, [
+            ('50 Freestyle', event2),
+            ('100 Freestyle', event3),
+            ('200 Freestyle', event5),
+            ('500 Freestyle', None),
+            ('1000 Freestyle', None),
+            ('50 Backstroke', None),
+            ('100 Backstroke', None),
+            ('200 Backstroke', None),
+            ('50 Breaststroke', None),
+            ('100 Breaststroke', None),
+            ('200 Breaststroke', None),
+            ('50 Butterfly', None),
+            ('100 Butterfly', None),
+            ('200 Butterfly', None),
+            ('100 IM', None),
+            ('200 IM', None),
+            ('400 IM', None),
+        ])
+        self.assertEqual(times, [
+            22.32,
+            49.86,
+            124.04,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         ])

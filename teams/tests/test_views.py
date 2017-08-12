@@ -109,6 +109,66 @@ class TestTeamListView(TestCase):
         })
 
 
+# Team Records
+
+class TestTeamRecordView(TestCase):
+    def setUp(self):
+        user = test.create_user('user', 'password')
+        self.team = test.create_team(user)
+
+    def tearDown(self):
+        self.team.delete()
+
+    def test_team_records_no_times(self):
+        """
+        Times are blank if there are no events for the given team.
+        """
+        self.client.login(username='user', password='password')
+        response = self.client.get(reverse('teams:teamRecords', kwargs={
+                'abbr': self.team.abbr,
+            })
+        )
+        self.assertContains(response, 'Records')
+        self.assertContains(response, 'Men')
+        self.assertContains(response, 'Women')
+        self.assertContains(response, '--')
+        self.assertNotContains(response, '00:22.32')
+
+    def test_team_records_with_times(self):
+        """
+        The fastest time in each event is shown.
+        """
+        swimmer = test.create_swimmer(self.team)
+        event1 = test.create_event(swimmer, '50 free', timedelta(seconds=22.32))
+        event2 = test.create_event(swimmer, '50 free', timedelta(seconds=22.96))
+        self.client.login(username='user', password='password')
+        response = self.client.get(reverse('teams:teamRecords', kwargs={
+                'abbr': self.team.abbr,
+            })
+        )
+        self.assertContains(response, '--')
+        self.assertContains(response, '00:22.32')
+        self.assertNotContains(response, '00:22.96')
+
+    def test_team_records_with_times(self):
+        """
+        The fastest time in each event is shown for men and women.
+        """
+        swimmer1 = test.create_swimmer(self.team)
+        swimmer2 = test.create_swimmer(self.team, first='Jane', last='Doe', gender='F')
+        event1 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.32))
+        event2 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.96))
+        event3 = test.create_event(swimmer2, '50 free', timedelta(seconds=23.51))
+        self.client.login(username='user', password='password')
+        response = self.client.get(reverse('teams:teamRecords', kwargs={
+                'abbr': self.team.abbr,
+            })
+        )
+        self.assertContains(response, '--')
+        self.assertContains(response, '00:22.32')
+        self.assertContains(response, '00:23.51')
+        self.assertNotContains(response, '00:22.96')
+
 
 # Swimmer list
 
@@ -423,7 +483,7 @@ class TestSwimmerListView(TestCase):
         swimmers = Swimmer.objects.all()
         events = Event.objects.all()
         self.assertEqual(len(swimmers), 74)
-        self.assertEqual(len(events), 98)
+        self.assertEqual(len(events), 113)
 
     def test_invalid_file_upload(self):
         """

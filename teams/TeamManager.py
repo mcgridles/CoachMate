@@ -259,7 +259,7 @@ class TeamManager(object):
                         swimmer = None
 
                 elif swimmer:
-                    event_capture = "([ABCDE][\d][MF][\s]+[\d]+[a-zA-Z]+[\s]+)(?P<dist>[\d]+)(?P<event>[ABCDE])"
+                    event_capture = "([ABCDE][\d][MF][\s]+[\d]+[a-zA-Z]+([\s]+[MF]+)?[\s]+)(?P<dist>[\d]+)(?P<event>[ABCDE])"
                     event = re.search(event_capture, line)
                     if event:
                         distance = event.group('dist')
@@ -289,6 +289,7 @@ class TeamManager(object):
                             if not results.exists():
                                 result = Event.objects.create(
                                     swimmer=swimmer,
+                                    team=swimmer.team,
                                     event=event,
                                     time=time,
                                     place=place,

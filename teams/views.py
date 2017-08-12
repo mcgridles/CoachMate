@@ -13,6 +13,7 @@ from teams.models import *
 from teams.forms import *
 import teams.functions as funct
 from teams.TeamManager import TeamManager
+from teams.graphs import graph_event
 
 @csrf_protect
 @login_required
@@ -148,11 +149,17 @@ def swimmerDetail(request, abbr, s_id):
         swimmer_form = SwimmerForm(instance=swimmer)
         event_form = EventForm(swimmer=swimmer)
 
+    script, div = graph_event(swimmer, '50 free')
+    records = funct.get_swimmer_records(swimmer)
+
     context =  {
         'team': team,
         'swimmer': swimmer,
         'swimmer_form': swimmer_form,
         'event_form': event_form,
+        'script': script,
+        'div': div,
+        'records': records,
     }
 
     return render(request, 'teams/swimmer_detail.html', context)

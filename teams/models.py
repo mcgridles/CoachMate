@@ -55,7 +55,11 @@ class Swimmer(models.Model):
         """
         Return best time in given event.
         """
-        return self.event_set.filter(event=event)[0]
+        times = self.event_set.filter(event=event)
+        if times.exists():
+            return times[0]
+        else:
+            return None
 
     def get_base(self, pace, stroke):
         """
@@ -73,35 +77,36 @@ class Swimmer(models.Model):
 
 # Events
 
+EVENT_CHOICE = (
+    ('50 free', '50 Freestyle'),
+    ('100 free', '100 Freestyle'),
+    ('200 free', '200 Freestyle'),
+    ('500 free', '500 Freestyle'),
+    ('1000 free', '1000 Freestyle'),
+    ('50 back', '50 Backstroke'),
+    ('100 back', '100 Backstroke'),
+    ('200 back', '200 Backstroke'),
+    ('50 breast', '50 Breaststroke'),
+    ('100 breast', '100 Breaststroke'),
+    ('200 breast', '200 Breaststroke'),
+    ('50 fly', '50 Butterfly'),
+    ('100 fly', '100 Butterfly'),
+    ('200 fly', '200 Butterfly'),
+    ('100 im', '100 IM'),
+    ('200 im', '200 IM'),
+    ('400 im', '400 IM'),
+    ('base free', 'Freestyle Base'),
+    ('base back', 'Backstroke Base'),
+    ('base breast', 'Breaststroke Base'),
+    ('base fly', 'Butterfly Base'),
+    ('base IM', 'IM Base'),
+)
+
 # Many-to-one -> many times can be created and associated with one swimmer
 # Makes it easy to sort and query for fastest time
 class Event(models.Model):
-    EVENT_CHOICE = (
-        ('50 free', '50 Freestyle'),
-        ('100 free', '100 Freestyle'),
-        ('200 free', '200 Freestyle'),
-        ('500 free', '500 Freestyle'),
-        ('1000 free', '1000 Freestyle'),
-        ('50 back', '50 Backstroke'),
-        ('100 back', '100 Backstroke'),
-        ('200 back', '200 Backstroke'),
-        ('50 breast', '50 Breaststroke'),
-        ('100 breast', '100 Breaststroke'),
-        ('200 breast', '200 Breaststroke'),
-        ('50 fly', '50 Butterfly'),
-        ('100 fly', '100 Butterfly'),
-        ('200 fly', '200 Butterfly'),
-        ('100 im', '100 IM'),
-        ('200 im', '200 IM'),
-        ('400 im', '400 IM'),
-        ('base free', 'Freestyle Base'),
-        ('base back', 'Backstroke Base'),
-        ('base breast', 'Breaststroke Base'),
-        ('base fly', 'Butterfly Base'),
-        ('base IM', 'IM Base'),
-    )
-
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
     event = models.CharField(max_length=10, choices=EVENT_CHOICE)
     time = models.DurationField()
     place = models.IntegerField(null=True, blank=True)

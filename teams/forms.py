@@ -88,7 +88,7 @@ class SwimmerForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        exclude = ['swimmer']
+        exclude = ['swimmer', 'team']
         labels = {
             'event': 'Event',
             'time': 'Time',
@@ -113,7 +113,8 @@ class EventForm(forms.ModelForm):
 
     def save(self):
         event = super(EventForm, self).save(commit=False)
-        event.swimmer = self.swimmer # associate swimmer
+        event.swimmer = self.swimmer # associate swimmer and team
+        event.team = self.swimmer.team
         event.save()
         return event
 

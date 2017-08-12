@@ -217,4 +217,4 @@ class TestTeamManager(TestCase):
             self.assertEqual(msg[0], ('success', 'Results imported'))
 
         events = Event.objects.all()
-        self.assertEqual(len(events), 98)
+        self.assertEqual(len(events), 113)

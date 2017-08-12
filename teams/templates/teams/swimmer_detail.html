@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 {% extends "teams/base.html" %}
 {% load static from staticfiles %}
+{% load datetime_filter %}
 <html lang="en">
   <head>
     {% block title %}{{ swimmer.f_name }} {{ swimmer.l_name }} - {{ team.abbr }}{% endblock %}
     {% block stylesheets %}
       <link rel="stylesheet" href="{% static 'teams/css/swimmer_detail.css' %}">
+      <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.css" type="text/css" />
     {% endblock %}
   </head>
 
@@ -179,12 +181,39 @@
         </div>
       </div>
 
-      <div class="col-xs-12 col-sm-8">
-        Put charts and data here
+      <div class="col-xs-12 col-sm-8" style="padding-left: 0">
+        <div class="plot">
+          {{ div|safe }}
+        </div>
+
+        <div class="records">
+          <h4>Records</h4>
+          <table id="records" class="table table-striped">
+            <tbody>
+
+              {% for record in records %}
+                <tr>
+                  <td>{{ record.0 }}</td>
+
+                  {% if record.1 == None %}
+                    <td>--</td>
+                  {% else %}
+                    <td>{{ record.1.time|format_record }}</td>
+                  {% endif %}
+
+                </tr>
+              {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
       </div>
     {% endblock %}
 
     {% block scripts %}
+      <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
+
+      {{ script|safe }}
     {% endblock %}
   </body>
 </html>

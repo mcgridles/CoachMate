@@ -221,3 +221,16 @@ def calculate_intervals(setInstance, training_model):
             for interval in intervals:
                 interval.delete()
             interval = Interval.objects.create(swimmer=swimmer, rep=rep, time=time)
+
+def get_swimmer_records(swimmer):
+    """
+    Returns the fastest time in each event for the given swimmer or None if there
+    is no time for the event.
+    """
+    records = []
+    for event in EVENT_CHOICE:
+        if 'base' in event[0]:
+            continue
+        records.append((event[1], swimmer.get_best_time(event[0])))
+
+    return records
