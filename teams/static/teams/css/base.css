@@ -148,3 +148,21 @@ body {
 .modal-footer {
   padding-bottom: 0;
 }
+
+
+/*
+ * Custom classes
+ */
+.header {
+  padding-left: 15px;
+  padding-bottom: 10px;
+}
+
+.nav>li>a:focus {
+    background-color: transparent;
+    color: black;
+}
+
+.team {
+  padding-bottom: 10px;
+}

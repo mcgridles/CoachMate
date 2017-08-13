@@ -289,7 +289,6 @@ class TeamManager(object):
                             if not results.exists():
                                 result = Event.objects.create(
                                     swimmer=swimmer,
-                                    team=swimmer.team,
                                     event=event,
                                     time=time,
                                     place=place,

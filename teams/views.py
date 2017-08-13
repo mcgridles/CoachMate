@@ -53,9 +53,20 @@ def deleteTeam(request, abbr):
 def teamRecords(request, abbr):
     team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
     records = funct.get_team_records(team)
+
+    if request.method == 'POST':
+        record_form = RecordForm(request.POST)
+        if record_form.is_valid():
+            record_form.save()
+            return redirect('teams:teamRecords', abbr=team.abbr)
+
+    else:
+        record_form = RecordForm()
+
     context = {
         'team': team,
         'records': records,
+        'record_form': record_form,
     }
 
     return render(request, 'teams/team_records.html', context)
@@ -92,11 +103,13 @@ def swimmerList(request, abbr):
                 swimmer_form = SwimmerForm()
                 upload_form = UploadZipForm()
 
+        # upload team rosters and meet results
         elif 'upload' in request.POST:
             upload_form = UploadZipForm(request.POST, request.FILES)
             if upload_form.is_valid():
                 zip_file = request.FILES['zip_file']
-                tm = TeamManager(team=team, zip_file=zip_file)
+                tm = TeamManager(team=team, zip_file=zip_file) # team manager object
+                # msgs contains error or success messages
                 if 'Roster' in zip_file.name:
                     msgs = tm.load_roster()
                 elif 'Results' in zip_file.name:
@@ -162,7 +175,7 @@ def swimmerDetail(request, abbr, s_id):
         swimmer_form = SwimmerForm(instance=swimmer)
         event_form = EventForm(swimmer=swimmer)
 
-    script, div = graph_event(swimmer, '50 free')
+    script, div = graph_event(swimmer)
     records = funct.get_swimmer_records(swimmer)
 
     context =  {

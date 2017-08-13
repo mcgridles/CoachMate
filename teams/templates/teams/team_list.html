@@ -13,9 +13,17 @@
     {% block page-title %}Dashboard{% endblock %}
     {% block table-title %}Teams{% endblock %}
 
-    {% block action-buttons %}
-      <!-- Add a team -->
-      {{ block.super }}
+    {% block sidebar %}
+      <ul class="nav nav-sidebar">
+        <li class="header">General</li>
+        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams</a></li>
+        <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Actions</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Team</a></li>
+      </ul>
     {% endblock %}
 
     {% block modal %}

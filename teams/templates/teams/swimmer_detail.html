@@ -14,39 +14,30 @@
   <body>
     {% block sidebar %}
       <ul class="nav nav-sidebar">
-        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Overview <span class="sr-only">(current)</span></a></li>
+        {% if team %}
+          <li class="team"><a href="{% url 'teams:swimmerList' team.abbr %}">{{ team.abbr }}</a></li>
+        {% endif %}
+        <li class="header">General</li>
+        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams</a></li>
+        <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
         <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
-        <li><a href="#">Analytics</a></li>
-        <li><a href="#">Export</a></li>
+        <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
       </ul>
 
       <ul class="nav nav-sidebar">
-        <li><a href="">Nav item</a></li>
-        <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
-        <li><a href="">More navigation</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
-        <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
+        <li class="header">Actions</li>
+        <li><a href="" data-toggle="modal" data-target="#editModal">Edit Swimmer</a></li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Event</a></li>
+        <li><a href="" data-toggle="modal" data-target="#uploadModal">Upload</a></li>
+        <li><a href="{% url 'teams:deleteSwimmer' team.abbr swimmer.id %}">Delete Swimmer</a></li>
+        <li><a href="{% url 'teams:deleteTeam' team.abbr %}">Delete Team</a></li>
       </ul>
     {% endblock %}
 
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}
       {{ swimmer.f_name|title }} {{ swimmer.l_name|title }}
-      <!-- Edit swimmer -->
-      <span data-toggle="modal" data-target="#editModal">
-        <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Edit" data-trigger="hover" data-placement="auto bottom">
-          <span class="glyphicon glyphicon-pencil"></span>
-        </button>
-      </span>
     {% endblock %}
-
-    {% block action-buttons %}{{ block.super }}{% endblock %}
 
     {% block modal %}
       <div id="baseModal" class="modal fade" role="dialog">
@@ -137,9 +128,9 @@
     {% block content %}
       <div class="col-xs-12 col-sm-4" style="padding-left: 0">
         {% if swimmer.picture %}
-          <img src="{{ picture.img.url }}" style="width: 100%">
+          <img src="{{ swimmer.picture.url }}" style="width: 100%">
         {% else %}
-          <img src="{% static 'teams/img/background.png' %}" style="width: 100%">
+          <img src="{% static 'teams/img/blank_profile_pic.png' %}" style="width: 100%">
         {% endif %}
         <div class="table-responsive">
           <table id="swimmer" class="table table-striped">
@@ -182,9 +173,11 @@
       </div>
 
       <div class="col-xs-12 col-sm-8" style="padding-left: 0">
-        <div class="plot">
-          {{ div|safe }}
-        </div>
+        {% if div %}
+          <div class="plot">
+            {{ div|safe }}
+          </div>
+        {% endif %}
 
         <div class="records">
           <h4>Records</h4>
@@ -212,6 +205,7 @@
 
     {% block scripts %}
       <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
+      <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
 
       {{ script|safe }}
     {% endblock %}

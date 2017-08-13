@@ -88,7 +88,7 @@ class SwimmerForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        exclude = ['swimmer', 'team']
+        exclude = ['swimmer']
         labels = {
             'event': 'Event',
             'time': 'Time',
@@ -99,24 +99,62 @@ class EventForm(forms.ModelForm):
         self.swimmer = kwargs.pop('swimmer', None)
         super(EventForm, self).__init__(*args, **kwargs)
         self.fields['event'].widget.attrs.update({
-            'placeholder': 'Event',
+            'placeholder': 'Event*',
             'class': 'form-control'
         })
         self.fields['time'].widget.attrs.update({
-            'placeholder': 'Time',
+            'placeholder': 'Time*',
+            'class': 'form-control'
+        })
+        self.fields['place'].widget.attrs.update({
+            'placeholder': 'Place',
             'class': 'form-control'
         })
         self.fields['date'].widget.attrs.update({
-            'placeholder': 'Date',
+            'placeholder': 'Date*',
             'class': 'form-control'
         })
 
     def save(self):
         event = super(EventForm, self).save(commit=False)
-        event.swimmer = self.swimmer # associate swimmer and team
-        event.team = self.swimmer.team
+        event.swimmer = self.swimmer # associate swimmer
         event.save()
         return event
+
+
+class RecordForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ('swimmer', 'event', 'time', 'place', 'date')
+        labels = {
+            'swimmer': 'Swimmer',
+            'event': 'Event',
+            'time': 'Time',
+            'place': 'Place',
+            'date': 'Date',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(RecordForm, self).__init__(*args, **kwargs)
+        self.fields['swimmer'].widget.attrs.update({
+            'class': 'form-control'
+        })
+        self.fields['event'].widget.attrs.update({
+            'class': 'form-control'
+        })
+        self.fields['time'].widget.attrs.update({
+            'placeholder': 'Time*',
+            'class': 'form-control'
+        })
+        self.fields['place'].widget.attrs.update({
+            'placeholder': 'Place',
+            'class': 'form-control'
+        })
+        self.fields['date'].widget.attrs.update({
+            'placeholder': 'Date*',
+            'class': 'form-control'
+        })
+
 
 class RepForm(forms.ModelForm):
     class Meta:

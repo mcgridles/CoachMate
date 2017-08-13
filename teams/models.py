@@ -25,8 +25,8 @@ class Team(models.Model):
         """
         Return best time in given event.
         """
-        times_men = self.event_set.filter(event=event[0]).filter(swimmer__gender='M')
-        times_women = self.event_set.filter(event=event[0]).filter(swimmer__gender='F')
+        times_men = Event.objects.filter(swimmer__team=self).filter(event=event[0]).filter(swimmer__gender='M')
+        times_women = Event.objects.filter(swimmer__team=self).filter(event=event[0]).filter(swimmer__gender='F')
         result_men = None
         result_women = None
         if times_men.exists():
@@ -56,6 +56,9 @@ class Swimmer(models.Model):
 
     def __str__(self):
         return self.l_name
+
+    def __unicode__(self):
+        return self.f_name + ' ' + self.l_name
 
     def set_age(self):
         """
@@ -121,7 +124,6 @@ EVENT_CHOICE = (
 # Makes it easy to sort and query for fastest time
 class Event(models.Model):
     swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
     event = models.CharField(max_length=10, choices=EVENT_CHOICE)
     time = models.DurationField()
     place = models.IntegerField(null=True, blank=True)

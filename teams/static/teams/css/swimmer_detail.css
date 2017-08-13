@@ -11,9 +11,20 @@
   border-style: solid;
   border-width: 1px;
   border-color: grey;
-  padding: 5px, 10px;
+  padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 35px;
+}
+
+.bk-widget-box {
+  margin-left: 25px;
+}
+
+.bk-widget-form-input {
+  margin-left: 5px;
 }
 
 .records {
-  margin-top: 30px;
+  margin-top: -5px;
 }

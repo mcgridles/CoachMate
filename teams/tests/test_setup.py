@@ -47,7 +47,6 @@ def create_event(swimmer, event='50 free', time=timedelta(seconds=22.32), place=
     """
     return Event.objects.create(
         swimmer=swimmer,
-        team=swimmer.team,
         event=event,
         time=time,
         place=place,
