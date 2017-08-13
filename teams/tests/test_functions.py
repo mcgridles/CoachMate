@@ -296,22 +296,40 @@ class TestFunctions(TestCase):
             ('200 IM', None),
             ('400 IM', None),
         ])
-        self.assertEqual(times, [
-            22.32,
-            49.86,
-            124.04,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
+        self.assertEqual(times, [22.32, 49.86, 124.04, None, None, None, None,
+            None, None, None, None, None, None, None, None, None, None])
+
+    def test_team_records(self):
+        """
+        Returns the team's top time in each event or None for both men and women.
+        """
+        team = test.create_team(self.user)
+        swimmer1 = test.create_swimmer(team)
+        swimmer2 = test.create_swimmer(team, first='Jane', last='Doe', gender='F')
+        event1 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.96))
+        event2 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.32))
+        event3 = test.create_event(swimmer2, '50 free', timedelta(seconds=25.14))
+        event4 = test.create_event(swimmer1, '100 free', timedelta(seconds=49.86))
+        event5 = test.create_event(swimmer2, '100 free', timedelta(seconds=54.85))
+
+        records = funct.get_team_records(team)
+
+        self.assertEqual(records, [
+            ('50 Freestyle', event2, event3),
+            ('100 Freestyle', event4, event5),
+            ('200 Freestyle', None, None),
+            ('500 Freestyle', None, None),
+            ('1000 Freestyle', None, None),
+            ('50 Backstroke', None, None),
+            ('100 Backstroke', None, None),
+            ('200 Backstroke', None, None),
+            ('50 Breaststroke', None, None),
+            ('100 Breaststroke', None, None),
+            ('200 Breaststroke', None, None),
+            ('50 Butterfly', None, None),
+            ('100 Butterfly', None, None),
+            ('200 Butterfly', None, None),
+            ('100 IM', None, None),
+            ('200 IM', None, None),
+            ('400 IM', None, None),
         ])

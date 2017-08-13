@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+{% load static from staticfiles %}
+{% load datetime_filter %}
+<html lang="en">
+  <head>
+    <!-- This needs to be team abbreviation or name -->
+    {% block title %}Swimmers - {{ team.abbr }}{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/team_records.css' %}">
+    {% endblock %}
+  </head>
+
+  <body>
+    {% block sidebar %}
+      <ul class="nav nav-sidebar">
+        <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
+      </ul>
+    {% endblock %}
+    <!-- This needs to be <Team Name> Dashboard -->
+    {% block page-title %}
+      {{ team.name }}
+      <!-- Delete team -->
+      <a href="{% url 'teams:deleteTeam' team.abbr %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Delete" data-trigger="hover" data-placement="auto bottom">
+        <span class="glyphicon glyphicon-remove-circle"></span>
+      </a>
+      <!-- Edit team -->
+      <span data-toggle="modal" data-target="#editModal">
+        <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Edit" data-trigger="hover" data-placement="auto bottom">
+          <span class="glyphicon glyphicon-pencil"></span>
+        </button>
+      </span>
+    {% endblock %}
+    {% block table-title %}Records{% endblock %}
+
+    {% block action-buttons %}{% endblock %}
+
+    {% block modal %}{% endblock %}
+
+    {% block content %}
+      <div class="table-responsive">
+        <table id="swimmers" class="table table-striped">
+          <thead>
+            <tr class="thead">
+              <th>Men</th>
+              <th>Time</th>
+              <th>Event</th>
+              <th>Women</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for record in records %}
+              <tr>
+
+                {% if record.1 == None %}
+                  <td>--</td>
+                  <td>--</td>
+                {% else %}
+                  <td>{{ record.1.swimmer.f_name }} {{ record.1.swimmer.l_name}}</td>
+                  <td>{{ record.1.time|format_record }}</td>
+                {% endif %}
+
+                <td>{{ record.0 }}</td>
+
+                {% if record.2 == None %}
+                  <td>--</td>
+                  <td>--</td>
+                {% else %}
+                  <td>{{ record.2.swimmer.f_name }} {{ record.2.swimmer.l_name}}</td>
+                  <td>{{ record.2.time|format_record }}</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+    {% endblock %}
+  </body>
+</html>

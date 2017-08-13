@@ -21,6 +21,21 @@ class Team(models.Model):
     def __str__(self):
         return self.name
 
+    def get_record(self, event):
+        """
+        Return best time in given event.
+        """
+        times_men = self.event_set.filter(event=event[0]).filter(swimmer__gender='M')
+        times_women = self.event_set.filter(event=event[0]).filter(swimmer__gender='F')
+        result_men = None
+        result_women = None
+        if times_men.exists():
+            result_men = times_men[0]
+        if times_women.exists():
+            result_women = times_women[0]
+
+        return (event[1], result_men, result_women)
+
 class Swimmer(models.Model):
     GENDER_CHOICE = (
         ('M', 'Male'),

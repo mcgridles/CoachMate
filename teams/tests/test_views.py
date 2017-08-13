@@ -111,7 +111,7 @@ class TestTeamListView(TestCase):
 
 # Team Records
 
-class TestTeamRecordView(TestCase):
+class TestTeamRecordsView(TestCase):
     def setUp(self):
         user = test.create_user('user', 'password')
         self.team = test.create_team(user)
@@ -164,6 +164,7 @@ class TestTeamRecordView(TestCase):
                 'abbr': self.team.abbr,
             })
         )
+        #print response
         self.assertContains(response, '--')
         self.assertContains(response, '00:22.32')
         self.assertContains(response, '00:23.51')
@@ -588,6 +589,7 @@ class TestSwimmerDetailView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Henry Gridley')
 
+    @skip('Works but creates unwanted extra image file in /media')
     def test_swimmer_form_image_upload(self):
         """
         Only .png and .jpg images are valid.

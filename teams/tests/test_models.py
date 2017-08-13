@@ -8,6 +8,30 @@ from django.urls import reverse
 import teams.tests.test_setup as test
 from teams.models import Week
 
+class TeamModelTests(TestCase):
+    def setUp(self):
+        self.user = test.create_user(username='user', password='password')
+
+    def tearDown(self):
+        self.user.delete()
+
+    def test_get_record(self):
+        """
+        Returns the fastest time for men and women in the given event.
+        """
+        team = test.create_team(self.user)
+        swimmer1 = test.create_swimmer(team)
+        swimmer2 = test.create_swimmer(team, first='Jane', last='Doe', gender='F')
+        event1 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.32))
+        event2 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.96))
+        event3 = test.create_event(swimmer2, '50 free', timedelta(seconds=23.51))
+
+        records1 = team.get_record(('50 free', '50 Freestyle'))
+        records2 = team.get_record(('100 free', '100 Freestyle'))
+
+        self.assertEqual(records1, ('50 Freestyle', event1, event3))
+        self.assertEqual(records2, ('100 Freestyle', None, None))
+
 class SwimmerModelTests(TestCase):
     def setUp(self):
         self.user = test.create_user(username='user', password='password')

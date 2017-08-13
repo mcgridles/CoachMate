@@ -48,6 +48,19 @@ def deleteTeam(request, abbr):
     return redirect('teams:teamList')
 
 
+# Team records
+@login_required
+def teamRecords(request, abbr):
+    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
+    records = funct.get_team_records(team)
+    context = {
+        'team': team,
+        'records': records,
+    }
+
+    return render(request, 'teams/team_records.html', context)
+
+
 @csrf_protect
 @login_required
 def swimmerList(request, abbr):
@@ -252,7 +265,7 @@ def setDetail(request, abbr, set_id):
             rep_formset.save_formset(setInstance)
 
             if not training_model:
-                messages.error(request, 'No training model - can\'t calculate intervals')
+                messages.error(request, 'No training model - couldn\'t calculate intervals')
             else:
                 funct.calculate_intervals(setInstance, training_model)
 

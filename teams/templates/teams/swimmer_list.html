@@ -14,6 +14,7 @@
     {% block sidebar %}
       <ul class="nav nav-sidebar">
         <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
+        <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
       </ul>
     {% endblock %}
     <!-- This needs to be <Team Name> Dashboard -->
