@@ -44,3 +44,8 @@ Thumbs.db
 /static/
 /media/
 /CoachMate/Settings/local.py
+
+# IntelliJ Files #
+##################
+*.iml
+.idea/

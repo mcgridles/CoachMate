@@ -66,11 +66,6 @@
       </div>
     </nav>
 
-    <!-- This doesn't work - should do smooth scrolling for "Learn More" button -->
-    <script>
-      document.getElementById("scroll").addEventListener("click", doScrolling.bind("#first-featurette", 1000))
-    </script>
-
     <!-- Main jumbotron for a primary marketing message or call to action -->
 
     <!-- Jumbotron background will be image or gallery of images - swimming and product related -->
@@ -117,6 +112,10 @@
             that take hours to make.
           </p>
       </div>
+
+      <script>
+        document.getElementById("scroll").addEventListener("click", function() { doScrolling("#first-featurette", 1000);})
+      </script>
 
       <!-- /END THE FEATURETTES -->
 

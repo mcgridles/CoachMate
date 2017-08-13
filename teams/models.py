@@ -23,27 +23,6 @@ class Swimmer(models.Model):
     age = models.IntegerField()
     bio = models.TextField()
 
-
-# Workout
-
-class Rep(models.Model):
-    set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
-
-    num = models.IntegerField()
-    distance = models.IntegerField()
-    stroke = models.CharField(max_length=10)
-    comments = models.CharField(max_length=100) # switch to TextField?
-
-class Set(models.Model):
-    practice = models.ForeignKey(Practice, on_delete=models.CASCADE)
-    repeats = models.IntegerField()
-
-class Practice(models.Model):
-    week = models.ForeignKey(Week, on_delete=models.CASCADE)
-    weekday = models.CharField(max_length=10)
-    description = models.TextField()
-
-
 # Calendar
 
 # Need to be able to associate practice with a day of the week
@@ -53,6 +32,24 @@ class Week(models.Model):
     start = models.DateField()
     end = models.DateField()
 
+# Workout
+
+class Practice(models.Model):
+    week = models.ForeignKey(Week, on_delete=models.CASCADE)
+    weekday = models.CharField(max_length=10)
+    description = models.TextField()
+
+class Set(models.Model):
+    practice = models.ForeignKey(Practice, on_delete=models.CASCADE)
+    repeats = models.IntegerField()
+
+class Rep(models.Model):
+    set_id = models.ForeignKey(Set, on_delete=models.CASCADE)
+
+    num = models.IntegerField()
+    distance = models.IntegerField()
+    stroke = models.CharField(max_length=10)
+    comments = models.CharField(max_length=100) # switch to TextField?
 
 # Events
 
