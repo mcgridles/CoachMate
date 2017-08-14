@@ -788,7 +788,6 @@ class TestWritePracticeView(TestCase):
                 'form-0-num': 4,
                 'form-0-distance': 100,
                 'form-0-stroke': 'free',
-                'form-0-rest': timedelta(seconds=10),
                 'form-TOTAL_FORMS': 1,
                 'form-INITIAL_FORMS': 0,
                 'group': 'team',

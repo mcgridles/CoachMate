@@ -302,17 +302,14 @@ class MultiplierForm(forms.ModelForm):
 class BaseRepFormset(forms.BaseFormSet):
     def save_formset(self, set_id):
         rest_flag = False
-        print rest_flag
         for form in self.forms:
             if form.cleaned_data:
                 instance = form.save(commit=False)
                 instance.set_id = set_id
                 if instance.rest:
-                    print instance.rest
                     rest_flag = True
                 instance.save()
 
-        print rest_flag
         return rest_flag
 
 RepFormSet = forms.formset_factory(RepForm, formset=BaseRepFormset)

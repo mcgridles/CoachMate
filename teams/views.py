@@ -222,7 +222,7 @@ def writePractice(request, abbr, p_id):
                 # get set form instance
                 setInstance = set_form.save()
                 rest_flag = rep_formset.save_formset(setInstance) # set set_id for each rep
-
+                
                 if rest_flag == False:
                     i = funct.calculate_intervals(setInstance, training_model)
                     if i == False:
