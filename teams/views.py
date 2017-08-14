@@ -221,9 +221,12 @@ def writePractice(request, abbr, p_id):
 
                 # get set form instance
                 setInstance = set_form.save()
-                rep_formset.save_formset(setInstance) # set set_id for each rep
+                rest_flag = rep_formset.save_formset(setInstance) # set set_id for each rep
 
-                funct.calculate_intervals(setInstance, training_model)
+                if rest_flag == False:
+                    i = funct.calculate_intervals(setInstance, training_model)
+                    if i == False:
+                        messages.error(request, 'No training model - Couldn\'t calculate intervals')
 
                 return redirect('teams:writePractice', abbr=team.abbr, p_id=p_id)
 
@@ -255,48 +258,6 @@ def writePractice(request, abbr, p_id):
         'practice_form': practice_form,
     }
     return render(request, 'teams/practice_write.html', context)
-
-
-@csrf_protect
-@login_required
-def setDetail(request, abbr, set_id):
-    team = get_object_or_404(Team, Q(user=request.user), abbr=abbr)
-    _set = get_object_or_404(Set, pk=set_id)
-    rep_set = Rep.objects.filter(set_id=_set)
-    w_id = get_object_or_404(Week, pk=_set.practice_id.week_id.id).id
-
-    try:
-        training_model = TrainingModel.objects.get(team=team)
-    except TrainingModel.DoesNotExist:
-        training_model = None
-
-    if request.method == 'POST':
-        set_form = SetForm(data=request.POST, instance=_set, team=team)
-        rep_formset = RepFormSet(request.POST, queryset=rep_set)
-        if set_form.is_valid() and rep_formset.is_valid():
-            setInstance = set_form.save()
-            rep_formset.save_formset(setInstance)
-
-            if not training_model:
-                messages.error(request, 'No training model - couldn\'t calculate intervals')
-            else:
-                funct.calculate_intervals(setInstance, training_model)
-
-            return redirect('teams:setDetail', abbr=team.abbr, set_id=set_id)
-
-    else:
-        set_form = SetForm(instance=_set, team=team)
-        rep_formset = RepFormSet(queryset=rep_set)
-
-    context = {
-        'team': team,
-        'week': w_id,
-        'set': _set,
-        'set_form': set_form,
-        'rep_formset': rep_formset,
-    }
-
-    return render(request, 'teams/set_detail.html', context)
 
 
 # Delete a set

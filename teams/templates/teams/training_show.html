@@ -12,16 +12,16 @@
   <body>
     {% block sidebar %}
       {{ block.super }}
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Training Models</li>
+        <li class="Training"><a href="{% url 'teams:createTraining' 0 %}">Add Model</a></li>
+        <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
+      </ul>
     {% endblock %}
 
     {% block page-title %}Dashboard{% endblock %}
     {% block table-title %}Training{% endblock %}
-
-    {% block action-buttons %}
-      <a href="{% url 'teams:createTraining' 0 %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Add" data-trigger="hover" data-placement="auto bottom">
-        <span class="glyphicon glyphicon-plus-sign"></span>
-      </a>
-    {% endblock %}
 
     {% block modal %}{% endblock %}
 

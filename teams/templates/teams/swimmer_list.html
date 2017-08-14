@@ -12,23 +12,18 @@
 
   <body>
     {% block sidebar %}
+      {{ block.super }}
+
       <ul class="nav nav-sidebar">
-        {% if team %}
-          <li class="team"><a href="{% url 'teams:swimmerList' team.abbr %}">{{ team.abbr }}</a></li>
-        {% endif %}
-        <li class="header">General</li>
-        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams<span class="sr-only">(current)</span></a></li>
-        <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
-        <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
-        <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
+        <li class="header">Swimmers</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Swimmer</a></li>
+        <li><a href="" data-toggle="modal" data-target="#uploadModal">Upload</a></li>
       </ul>
 
       <ul class="nav nav-sidebar">
-        <li class="header">Actions</li>
-        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Swimmer</a></li>
-        <li><a href="" data-toggle="modal" data-target="#uploadModal">Upload</a></li>
+        <li class="header">Team</li>
         <li><a href="" data-toggle="modal" data-target="#editModal">Edit Team</a></li>
-        <li><a href="{% url 'teams:deleteTeam' team.abbr %}">Delete Team</a></li>
+        <li><a href="" data-toggle="modal" data-target="#deleteModal">Delete Team</a></li>
       </ul>
     {% endblock %}
 
@@ -165,6 +160,31 @@
 
           </div>
 
+        </div>
+      </div>
+
+      <!-- Team delete confirmation -->
+      <div id="deleteModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Confirm Delete
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              Are you sure you want to delete team: {{ team.name }}?
+            </div>
+
+            <div class="modal-footer">
+              <a type="button" class="btn btn-danger" href="{% url 'teams:deleteTeam' team.abbr %}">Delete</a>
+              <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     {% endblock %}

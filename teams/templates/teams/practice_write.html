@@ -13,27 +13,29 @@
   <body>
     {% block sidebar %}
       {{ block.super }}
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Sets</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Set</a></li>
+        <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
+        <li><a href="{% url 'teams:practiceSchedule' team.abbr week %}">Finish</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Practice</li>
+        <li><a href="" data-toggle="modal" data-target="#editModal">Edit Practice</a></li>
+        <li><a href="{% url 'teams:deletePractice' team.abbr practice.id %}">Delete Practice</a></li>
+      </ul>
     {% endblock %}
 
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}
       {{ practice.weekday|title }} Practice
 
-      <!-- Edit current practice -->
-      <span data-toggle="modal" data-target="#editModal">
-        <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Edit" data-trigger="hover" data-placement="auto bottom">
-          <span class="glyphicon glyphicon-pencil"></span>
-        </button>
-      </span>
-    {% endblock %}
-
-    {% block action-buttons %}
-      <!-- Delete current practice -->
-      <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Delete" data-trigger="hover" data-placement="auto bottom">
+      <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-remove-circle"></span>
       </a>
-      <!-- Finish writing practice -->
-      <a href="{% url 'teams:practiceSchedule' team.abbr week %}" type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Finish" data-trigger="hover" data-placement="auto bottom">
+      <a type="button" href="{% url 'teams:practiceSchedule' team.abbr week %}" class="btn btn-md btn-primary pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-ok-circle"></span>
       </a>
     {% endblock %}
@@ -52,7 +54,7 @@
             </div>
 
             <div class="modal-body">
-              <form id="set_form" action="{% url 'teams:writePractice' team.abbr practice.id %}" method="post">
+              <form id="set_form" action="{% url 'teams:writePractice' team.abbr practice.id %}" method="POST">
                 {% csrf_token %}
                 {{ rep_formset.management_form }}
 
@@ -91,6 +93,9 @@
                 <table id="reps" border="0" cellpadding="0" cellspacing="0">
                     <tbody>
                         {% for form in rep_formset.forms %}
+                          {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                          {% endfor %}
                         <tr>
                            <td>{{ form.num }}</td>
                            <td>{{ form.distance }}</td>
@@ -263,18 +268,15 @@
     {% endblock %}
 
     {% block content %}
-      <!-- Open a modal containing info about writing a practice -->
-      <span data-toggle="modal" data-target="#infoModal">
-        <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Info" data-trigger="hover" data-placement="auto bottom">
-          <span class="glyphicon glyphicon-info-sign"></span>
-        </button>
-      </span>
-      <!-- Add a set to the practice -->
-      <span data-toggle="modal" data-target="#baseModal">
-        <button type="button" class="btn btn-primary btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Add" data-trigger="hover" data-placement="auto bottom">
-          <span class="glyphicon glyphicon-plus-sign"></span>
-        </button>
-      </span>
+      {% if messages %}
+        {% for message in messages %}
+          <div {% if message.tags == "error" %} class="alert alert-danger"
+          {% else %} class="alert alert-{{ message.tags }}" {% endif %} style="text-align: center">
+              <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+              <strong>{{ message.tags|title }}!</strong> {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
 
       {% for set in set_list %}
         <!-- Display sets & reps -->

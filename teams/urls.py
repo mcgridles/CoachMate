@@ -17,7 +17,6 @@ urlpatterns = [
     url(r'^(?P<abbr>\w+)/(?P<s_id>\d+)/$', views.swimmerDetail, name='swimmerDetail'),
     url(r'^(?P<abbr>\w+)/schedule/(?P<w_id>\d+)/$', views.practiceSchedule, name='practiceSchedule'),
     url(r'^(?P<abbr>\w+)/practice/(?P<p_id>\d+)/$', views.writePractice, name='writePractice'),
-    url(r'^(?P<abbr>\w+)/practice/set/(?P<set_id>\d+)/$', views.setDetail, name='setDetail'),
     url(r'^(?P<abbr>\w+)/records/$', views.teamRecords, name='teamRecords'),
 
     # Delete models

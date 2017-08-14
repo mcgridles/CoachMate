@@ -94,21 +94,14 @@
               <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
             </ul>
 
-            <ul class="nav nav-sidebar">
-              <li class="header">Dashboard</li>
-              <li><a href="" data-toggle="modal" data-target="#baseModal">Add</a></li>
-              <li><a href="">Nav item</a></li>
-              <li><a href="">Nav item</a></li>
-              <li><a href="">Nav item</a></li>
-            </ul>
-
-            <ul class="nav nav-sidebar">
-              <li class="header">More</li>
-              <li><a href="">Nav item</a></li>
-              <li><a href="">Nav item</a></li>
-              <li><a href="">Nav item</a></li>
-              <li><a href="">Nav item</a></li>
-            </ul>
+            {% if team %}
+              <ul class="nav nav-sidebar">
+                <li class="header">{{ team.abbr }}</li>
+                <li class="team"><a href="{% url 'teams:swimmerList' team.abbr %}">Swimmers</a></li>
+                <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
+                <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
+              </ul>
+            {% endif %}
           {% endblock %}
         </div>
 

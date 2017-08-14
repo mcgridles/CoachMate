@@ -12,19 +12,15 @@
 <body>
   {% block sidebar %}
     {{ block.super }}
+
+    <ul class="nav nav-sidebar">
+      <li class="header">Training Model</li>
+      <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
+    </ul>
   {% endblock %}
 
   {% block page-title %}Training{% endblock %}
-  {% block table-title %}
-    Create Training Model
-    <span data-toggle="modal" data-target="#infoModal">
-      <button type="button" class="btn btn-default btn-md pull-right" style="margin-left: 5px" data-toggle="popover" data-content="Info" data-trigger="hover" data-placement="auto bottom">
-        <span class="glyphicon glyphicon-info-sign"></span>
-      </button>
-    </span>
-  {% endblock %}
-
-  {% block action-buttons %}{% endblock %}
+  {% block table-title %}Create Training Model{% endblock %}
 
   {% block modal %}
     <div id="infoModal" class="modal fade" role="dialog">

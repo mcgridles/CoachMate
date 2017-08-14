@@ -203,7 +203,7 @@ class TestSwimmerListView(TestCase):
         response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
-            ['<Swimmer: Gridley>'],
+            ['<Swimmer: Henry Gridley>'],
         )
         self.assertContains(response, 'Gridley')
 
@@ -214,11 +214,11 @@ class TestSwimmerListView(TestCase):
         self.client.login(username='user1', password='password')
         team = test.create_team(user=self.user1)
         test.create_swimmer(team=team)
-        test.create_swimmer(team=team, last='Pinkes')
+        test.create_swimmer(team=team, first='Samantha', last='Pinkes')
         response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
-            ['<Swimmer: Gridley>', '<Swimmer: Pinkes>'],
+            ['<Swimmer: Henry Gridley>', '<Swimmer: Samantha Pinkes>'],
         )
 
     def test_multiple_users_with_swimmers(self):
@@ -229,11 +229,11 @@ class TestSwimmerListView(TestCase):
         team1 = test.create_team(user=self.user1)
         test.create_swimmer(team=team1)
         team2 = test.create_team(user=self.user2)
-        test.create_swimmer(team=team2, last='Thornton')
+        test.create_swimmer(team=team2, first='David', last='Thornton')
         response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team1.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
-            ['<Swimmer: Gridley>'],
+            ['<Swimmer: Henry Gridley>'],
         )
         self.assertContains(response, 'Northeastern University')
         self.assertContains(response, 'Gridley')
@@ -244,7 +244,7 @@ class TestSwimmerListView(TestCase):
         response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team2.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
-            ['<Swimmer: Thornton>'],
+            ['<Swimmer: David Thornton>'],
         )
         self.assertContains(response, 'Northeastern University')
         self.assertContains(response, 'Thornton')
@@ -805,7 +805,7 @@ class TestWritePracticeView(TestCase):
         self.assertContains(response, '4 x 100 free')
         self.assertQuerysetEqual(
             swimmer_set,
-            ['<Swimmer: Gridley>', '<Swimmer: Thornton>'],
+            ['<Swimmer: Henry Gridley>', '<Swimmer: David Thornton>'],
             ordered=False
         )
 
@@ -1099,64 +1099,6 @@ class TestPracticeScheduleView(TestCase):
         })
 
 
-# Set detail
-
-class TestSetDetailView(TestCase):
-    def setUp(self):
-        user = test.create_user('user', 'password')
-        self.team = test.create_team(user)
-        week = test.create_week()
-        self.practice = test.create_practice(self.team, week)
-
-    def tearDown(self):
-        self.team.delete()
-        self.practice.delete()
-
-    def test_set_detail_page(self):
-        """
-        Each set has a page that contains reps, swimmers, and intervals.
-        """
-        self.client.login(username='user', password='password')
-        set1 = test.create_set(self.practice)
-        response = self.client.get(reverse('teams:setDetail', kwargs={
-                'abbr': self.team.abbr,
-                'set_id': set1.id,
-            })
-        )
-        self.assertContains(response, 'Warmup')
-
-    def test_set_edit_form(self):
-        """
-        Sets can be edited using the edit form.
-        """
-        self.client.login(username='user', password='password')
-        set1 = test.create_set(self.practice)
-        rep1 = test.create_rep(set1)
-        response = self.client.post(reverse('teams:setDetail', kwargs={
-                'abbr': self.team.abbr,
-                'set_id': set1.id,
-            }),
-            {
-                'focus': 'sprint',
-                'repeats': 1,
-                'order': 1,
-                'form-0-num': 4,
-                'form-0-distance': 100,
-                'form-0-stroke': 'free',
-                'form-0-rest': timedelta(seconds=10),
-                'form-TOTAL_FORMS': 0,
-                'form-INITIAL_FORMS': 0,
-                'pace': 'train',
-                'group': 'team',
-                'submit': 'Submit',
-            },
-            follow=True
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Sprint')
-
-
-
 # Create training model
 
 class TestCreateTrainingView(TestCase):
@@ -1352,7 +1294,7 @@ class TestDeleteModelsViews(TestCase):
         response = self.client.get(reverse('teams:swimmerList', kwargs={'abbr': team2.abbr}))
         self.assertQuerysetEqual(
             response.context['swimmer_list'],
-            ['<Swimmer: Gridley>'],
+            ['<Swimmer: Henry Gridley>'],
         )
 
     def test_delete_practice(self):

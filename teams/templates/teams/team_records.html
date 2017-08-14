@@ -13,21 +13,11 @@
 
   <body>
     {% block sidebar %}
-      <ul class="nav nav-sidebar">
-        {% if team %}
-          <li class="team"><a href="{% url 'teams:swimmerList' team.abbr %}">{{ team.abbr }}</a></li>
-        {% endif %}
-        <li class="header">General</li>
-        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams</a></li>
-        <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
-        <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
-        <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
-      </ul>
+      {{ block.super }}
 
       <ul class="nav nav-sidebar">
-        <li class="header">Actions</li>
+        <li class="header">Records</li>
         <li><a href="" data-toggle="modal" data-target="#baseModal">Add Record</a></li>
-        <li><a href="{% url 'teams:deleteTeam' team.abbr %}">Delete Team</a></li>
       </ul>
     {% endblock %}
 

@@ -14,14 +14,10 @@
     {% block table-title %}Teams{% endblock %}
 
     {% block sidebar %}
-      <ul class="nav nav-sidebar">
-        <li class="header">General</li>
-        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams</a></li>
-        <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
-      </ul>
+      {{ block.super }}
 
       <ul class="nav nav-sidebar">
-        <li class="header">Actions</li>
+        <li class="header">Teams</li>
         <li><a href="" data-toggle="modal" data-target="#baseModal">Add Team</a></li>
       </ul>
     {% endblock %}

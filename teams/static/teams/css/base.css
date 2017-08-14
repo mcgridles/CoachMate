@@ -145,10 +145,6 @@ body {
   border-radius: 50%;
 }
 
-.modal-footer {
-  padding-bottom: 0;
-}
-
 
 /*
  * Custom classes
@@ -161,8 +157,4 @@ body {
 .nav>li>a:focus {
     background-color: transparent;
     color: black;
-}
-
-.team {
-  padding-bottom: 10px;
 }

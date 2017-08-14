@@ -12,34 +12,17 @@
 
   <body>
     {% block sidebar %}
-      <ul class="nav nav-sidebar">
-        {% if team %}
-          <li class="team"><a href="{% url 'teams:swimmerList' team.abbr %}">{{ team.abbr }}</a></li>
-        {% endif %}
-        <li class="header">General</li>
-        <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams<span class="sr-only">(current)</span></a></li>
-        <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
-        <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
-        <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
-      </ul>
+      {{ block.super }}
 
       <ul class="nav nav-sidebar">
         <li class="header">Actions</li>
-        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Swimmer</a></li>
-        <li><a href="" data-toggle="modal" data-target="#uploadModal">Upload</a></li>
-        <li><a href="" data-toggle="modal" data-target="#editModal">Edit Team</a></li>
-        <li><a href="{% url 'teams:deleteTeam' team.abbr %}">Delete Team</a></li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Practice</a></li>
       </ul>
     {% endblock %}
 
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}
       Schedule ({{ current.monday|date:"m/d/y" }} - {{ current.sunday|date:"m/d/y" }})
-    {% endblock %}
-
-    {% block action-buttons %}
-      <!-- Add a practice -->
-      {{ block.super }}
     {% endblock %}
 
     {% block modal %}

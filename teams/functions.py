@@ -187,40 +187,47 @@ def calculate_intervals(setInstance, training_model):
     """
     try:
         multiplier = float(training_model.trainingmultiplier_set.get(focus=setInstance.focus).multiplier)
-    except TrainingMultiplier.DoesNotExist, AttributeError:
+    except (AttributeError, TrainingMultiplier.DoesNotExist):
         multiplier = None
 
     reps = []
     swimmers = []
     intervals = []
-    for rep in setInstance.rep_set.all():
-        num_50 = rep.distance / 50 # number of 50s for the distance
-        for swimmer in setInstance.swimmers.all():
-            base = swimmer.get_base(setInstance.pace, rep.stroke) # get base
-            if multiplier and base:
-                # add multiplier to base
-                time = timedelta(seconds=((1 + multiplier) * base.total_seconds()))
-                # multiply base by the number of 50s
-                time = timedelta(seconds=(num_50 * time.total_seconds()))
 
-                if setInstance.pace == 'train':
-                    # training intervals should end in :00 or :05
-                    time = timedelta(seconds=int(time.total_seconds()))
-                    while int(time.total_seconds() % 5):
-                        time += timedelta(seconds=1)
+    if multiplier:
+        for rep in setInstance.rep_set.all():
+            num_50 = rep.distance / 50 # number of 50s for the distance
+            for swimmer in setInstance.swimmers.all():
+                base = swimmer.get_base(setInstance.pace, rep.stroke) # get base
+                if multiplier and base:
+                    # add multiplier to base
+                    time = timedelta(seconds=((1 + multiplier) * base.total_seconds()))
+                    # multiply base by the number of 50s
+                    time = timedelta(seconds=(num_50 * time.total_seconds()))
+
+                    if setInstance.pace == 'train':
+                        # training intervals should end in :00 or :05
+                        time = timedelta(seconds=int(time.total_seconds()))
+                        while int(time.total_seconds() % 5):
+                            time += timedelta(seconds=1)
+                    else:
+                        time = timedelta(seconds=int(time.total_seconds()))
+
                 else:
-                    time = timedelta(seconds=int(time.total_seconds()))
+                    # time is 0 if no multiplier is set
+                    # essentially a flag
+                    time = timedelta(seconds=0)
 
-            else:
-                # time is 0 if no multiplier is set
-                # essentially a flag
-                time = timedelta(seconds=0)
+                # create interval object
+                intervals = Interval.objects.filter(rep=rep).filter(swimmer=swimmer)
+                for interval in intervals:
+                    interval.delete()
+                interval = Interval.objects.create(swimmer=swimmer, rep=rep, time=time)
 
-            # create interval object
-            intervals = Interval.objects.filter(rep=rep).filter(swimmer=swimmer)
-            for interval in intervals:
-                interval.delete()
-            interval = Interval.objects.create(swimmer=swimmer, rep=rep, time=time)
+        return True
+
+    else:
+        return False
 
 
 def get_swimmer_records(swimmer):
