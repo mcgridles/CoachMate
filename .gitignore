@@ -48,3 +48,8 @@ Thumbs.db
 /teams/static/teams/img
 /teams/tests/test_files/
 /htmlcov/
+
+# IntelliJ Files #
+##################
+*.iml
+.idea/

@@ -92,6 +92,7 @@ class Swimmer(models.Model):
         except IndexError:
             return None
 
+# Calendar
 
 # Events
 
