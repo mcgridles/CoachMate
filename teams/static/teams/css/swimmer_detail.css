@@ -1,0 +1,30 @@
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th {
+  vertical-align: middle;
+}
+
+.plot {
+  border-style: solid;
+  border-width: 1px;
+  border-color: grey;
+  padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 35px;
+}
+
+.bk-widget-box {
+  margin-left: 25px;
+}
+
+.bk-widget-form-input {
+  margin-left: 5px;
+}
+
+.records {
+  margin-top: -5px;
+}

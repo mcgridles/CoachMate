@@ -25,6 +25,7 @@
   </head>
 
   <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-default navbar-static-top">
       <div class="container">
         <div class="navbar-header">
@@ -36,11 +37,13 @@
           </button>
           <a class="navbar-brand" href="#">CoachMate</a>
         </div>
+
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="#">Home</a></li>
-            <li><a href="{% url 'teams:dashboard' %}">Teams</a></li>
+            <li><a href="{% url 'teams:teamList' %}">Teams</a></li>
             <li><a href="#contact">Support</a></li>
+
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown<span class="caret"></span></a>
               <ul class="dropdown-menu">
@@ -54,6 +57,8 @@
               </ul>
             </li>
           </ul>
+
+          <!-- Log in & sign up -->
           <div class="nav navbar-nav navbar-right">
             <a class="sign-up btn navbar-btn" href="{% url 'accounts:signup' %}">
               <span class="glyphicon glyphicon-user"></span> Sign Up<span class="sr-only">(current)</span>
@@ -83,7 +88,7 @@
 
     <div class="container marketing">
 
-      <!-- START THE FEATURETTES -->
+      <!-- Featurettes -->
       <div id="first-featurette" class="row featurette">
           <h2 class="featurette-heading">All your teams in one place.</h2>
           <hr class="featurette-divider">
@@ -93,6 +98,7 @@
             and planning simple.
           </p>
       </div>
+
       <div class="row featurette">
           <h2 class="featurette-heading">Write now. <span class="text-muted">Practice later.</span></h2>
           <hr class="featurette-divider">
@@ -102,6 +108,7 @@
             the focus is for each week and what needs some more attention.
           </p>
       </div>
+
       <div class="row featurette">
           <h2 class="featurette-heading">We track data so you don't have to.</span></h2>
           <hr class="featurette-divider">
@@ -119,8 +126,7 @@
 
       <!-- /END THE FEATURETTES -->
 
-
-      <!-- FOOTER -->
+      <!-- Footer -->
       <footer>
         <p class="pull-right"><a href="#">Back to top</a></p>
         <p>&copy; 2017 Henry Gridley · <a href="#">Privacy</a> · <a href="#">Terms</a></p>

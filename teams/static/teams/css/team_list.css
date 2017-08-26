@@ -1,0 +1,22 @@
+/* DataTables */
+#table-search {
+  border-radius: 5px;
+}
+
+/* Team content */
+.empty-team {
+  display: table;
+  height: 200px;
+  width: 100%;
+}
+
+.empty-dialogue {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Table content */
+tr {
+  cursor: pointer;
+}

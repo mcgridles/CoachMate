@@ -1,0 +1,13 @@
+/* Weekday panels */
+.panel-info {
+    cursor: pointer;
+}
+
+.panel-body {
+  padding-top: 0;
+}
+
+/* Set content */
+.reps {
+  padding-left: 2em;
+}

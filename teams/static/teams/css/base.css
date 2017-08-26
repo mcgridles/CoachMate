@@ -47,6 +47,24 @@ body {
   color: black;
 }
 
+.dropdown-header {
+  color: white;
+}
+
+.divider {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dropdown-header {
+    color: #777;
+  }
+
+  .divider {
+    display: list-item;
+  }
+}
+
 
 /*
  * Sidebar
@@ -125,4 +143,18 @@ body {
 .placeholder img {
   display: inline-block;
   border-radius: 50%;
+}
+
+
+/*
+ * Custom classes
+ */
+.header {
+  padding-left: 15px;
+  padding-bottom: 10px;
+}
+
+.nav>li>a:focus {
+    background-color: transparent;
+    color: black;
 }

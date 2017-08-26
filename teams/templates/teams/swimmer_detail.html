@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+{% load static from staticfiles %}
+{% load datetime_filter %}
+<html lang="en">
+  <head>
+    {% block title %}{{ swimmer.f_name }} {{ swimmer.l_name }} - {{ team.abbr }}{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/swimmer_detail.css' %}">
+      <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.css" type="text/css" />
+    {% endblock %}
+  </head>
+
+  <body>
+    {% block sidebar %}
+      {{ block.super }}
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Events</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Event</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Swimmer</li>
+        <li><a href="" data-toggle="modal" data-target="#editModal">Edit Swimmer</a></li>
+        <li><a href="{% url 'teams:deleteSwimmer' team.abbr swimmer.id %}">Delete Swimmer</a></li>
+      </ul>
+    {% endblock %}
+
+    {% block page-title %}{{ team.name }}{% endblock %}
+    {% block table-title %}
+      {{ swimmer.f_name|title }} {{ swimmer.l_name|title }}
+    {% endblock %}
+
+    {% block modal %}
+      <div id="baseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Add Event
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% if event_form.errors %}
+                  {% for field in event_form %}
+                    {% for error in field.errors %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Event form -->
+                {% for field in event_form %}
+                  {{ field }}
+                {% endfor %}
+                <br>
+                <div class="modal-footer">
+                  <button name="add_event" type="submit" class="btn btn-md btn-primary">Finish</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="editModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Edit Swimmer
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}" method="post" enctype="multipart/form-data" class="form-signin">
+                {% csrf_token %}
+                {% if swimmer_form.errors %}
+                  {% for field in swimmer_form %}
+                    {% for error in field.errors %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Swimmer form -->
+                {{ swimmer_form.f_name }}
+                {{ swimmer_form.l_name }}
+                {{ swimmer_form.gender }}
+                {{ swimmer_form.birth_date }}
+                {{ swimmer_form.bio }}
+                {{ swimmer_form.picture }}
+
+                <br>
+                <div class="modal-footer">
+                  <button name="edit_swimmer" type="submit" class="btn btn-md btn-primary">Save</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block content %}
+      <div class="col-xs-12 col-sm-4" style="padding-left: 0">
+        {% if swimmer.picture %}
+          <img src="{{ swimmer.picture.url }}" style="width: 100%">
+        {% else %}
+          <img src="{% static 'teams/img/blank_profile_pic.png' %}" style="width: 100%">
+        {% endif %}
+        <div class="table-responsive">
+          <table id="swimmer" class="table table-striped">
+            <tbody>
+              <tr>
+                <td>Gender</td>
+                <td>{{ swimmer.gender }}</td>
+              </tr>
+              <tr>
+                <td>Birth Date</td>
+                <td vertical-align="middle">
+                  {% if swimmer.birth_date %}
+                    {{ swimmer.birth_date }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </td>
+              <tr>
+                <td>Age</td>
+                <td>
+                  {% if swimmer.age %}
+                    {{ swimmer.age }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td>Bio</td>
+                <td>
+                  {% if swimmer.bio %}
+                    {{ swimmer.bio }}
+                  {% else %}
+
+                  {% endif %}
+                </td>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-xs-12 col-sm-8" style="padding-left: 0">
+        {% if div %}
+          <div class="plot">
+            {{ div|safe }}
+          </div>
+        {% endif %}
+
+        <div class="records">
+          <h4>Records</h4>
+          <table id="records" class="table table-striped">
+            <tbody>
+
+              {% for record in records %}
+                <tr>
+                  <td>{{ record.0 }}</td>
+
+                  {% if record.1 == None %}
+                    <td>--</td>
+                  {% else %}
+                    <td>{{ record.1.time|format_record }}</td>
+                  {% endif %}
+
+                </tr>
+              {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block scripts %}
+      <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
+      <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
+
+      {{ script|safe }}
+    {% endblock %}
+  </body>
+</html>

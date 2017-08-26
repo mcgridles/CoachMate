@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+{% load static from staticfiles %}
+<html lang="en">
+  <head>
+    <!-- This needs to be team abbreviation or name -->
+    {% block title %}Swimmers - {{ team.abbr }}{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/swimmer_list.css' %}">
+    {% endblock %}
+  </head>
+
+  <body>
+    {% block sidebar %}
+      {{ block.super }}
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Swimmers</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Swimmer</a></li>
+        <li><a href="" data-toggle="modal" data-target="#uploadModal">Upload</a></li>
+      </ul>
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Team</li>
+        <li><a href="" data-toggle="modal" data-target="#editModal">Edit Team</a></li>
+        <li><a href="" data-toggle="modal" data-target="#deleteModal">Delete Team</a></li>
+      </ul>
+    {% endblock %}
+
+    <!-- This needs to be <Team Name> Dashboard -->
+    {% block page-title %}{{ team.name }}{% endblock %}
+    {% block table-title %}Swimmers{% endblock %}
+
+    {% block modal %}
+      <div id="baseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Add Swimmer
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:swimmerList' team.abbr %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% if swimmer_form.errors %}
+                  {% for field in swimmer_form %}
+                    {% for error in field.errors %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Swimmer form -->
+                {{ swimmer_form.f_name }}
+                {{ swimmer_form.l_name }}
+                {{ swimmer_form.gender }}
+                {{ swimmer_form.birth_date }}
+
+                <br>
+                <div class="modal-footer">
+                  <button type="submit" name="swimmer_create" class="btn btn-md btn-primary">Finish</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for editing team -->
+      <div id="editModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Edit Team
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:swimmerList' team.abbr %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% if team_form.errors %}
+                  {% for field in team_form %}
+                    {% for error in field.errors %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Team form -->
+                {% for field in team_form %}
+                  {{ field }}
+                {% endfor %}
+
+                <br>
+                <div class="modal-footer">
+                  <button type="submit" name="team_edit" class="btn btn-md btn-primary">Save</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Modal for selecting and uploading TM file -->
+      <div id="uploadModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Upload from Team Manager
+              </h4>
+              <h5 style="margin-bottom: 0;">
+                Roster or Results
+              </h5>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:swimmerList' team.abbr %}" method="post" enctype="multipart/form-data" class="form-signin">
+                {% csrf_token %}
+                {% if upload_form.errors %}
+                  {% for field in upload_form %}
+                    {% for error in field.errors %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Upload form -->
+                {{ upload_form.zip_file }}
+
+                <br>
+                <div class="modal-footer">
+                  <button type="submit" name="upload" class="btn btn-md btn-primary">Upload</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Team delete confirmation -->
+      <div id="deleteModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Confirm Delete
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              Are you sure you want to delete team: {{ team.name }}?
+            </div>
+
+            <div class="modal-footer">
+              <a type="button" class="btn btn-danger" href="{% url 'teams:deleteTeam' team.abbr %}">Delete</a>
+              <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block content %}
+      {% if messages %}
+        {% for message in messages %}
+          <div {% if message.tags == "error" %} class="alert alert-danger"
+          {% else %} class="alert alert-{{ message.tags }}" {% endif %} style="text-align: center">
+              <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+              <strong>{{ message.tags|title }}!</strong> {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if swimmer_list %}
+        <!-- Display swimmers in table -->
+        <div class="table-responsive">
+          <table id="swimmers" class="table table-striped table-hover">
+            <thead>
+              <tr class="thead">
+                <th></th>
+                <th>Last</th>
+                <th>First</th>
+                <th>Age</th>
+                <th>M/F</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for swimmer in swimmer_list %}
+                <tr class="clickable-row" data-href="{% url 'teams:swimmerDetail' team.abbr swimmer.id %}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ swimmer.l_name }}</td>
+                  <td>{{ swimmer.f_name }}</td>
+                  <td>
+                    {% if swimmer.age %}
+                      {{ swimmer.age }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td>{{ swimmer.gender }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      {% else %}
+
+        <!-- Display prompts if no swimmers -->
+        <div id="first-featurette" class="row featurette empty-set">
+            <h2 class="featurette-heading empty-dialogue">
+              No athletes yet<br>
+            </h2>
+        </div>
+
+      {% endif %}
+    {% endblock %}
+
+    {% block scripts %}
+      <!-- Makes table rows clickable -->
+      <script>
+        $(function() {
+          $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+          });
+        });
+      </script>
+      <!-- Create DataTable from swimmer table -->
+      <!-- Need to figure out how to make each entry a link -->
+      <!--
+      <script>
+        $(document).ready( function () {
+          $('#swimmers').DataTable();
+        } );
+      </script>
+      -->
+
+      <!-- Format DataTable search box to fit style -->
+      <!--
+      <script>
+        $(document).ready( function () {
+          var inputs = document.getElementsByTagName("input");
+          for (i=0; i<inputs.length; i++) {
+            if (inputs[i].type == "search") {
+              inputs[i].id += "table-search";
+            }
+          }
+        } );
+      </script>
+      -->
+    {% endblock %}
+  </body>
+</html>

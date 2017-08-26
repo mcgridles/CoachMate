@@ -1,3 +1,5 @@
+// JavaScript functions that scroll to the first featurette when 'Learn More' is clicked
+
 function getElementY(query) {
   return window.pageYOffset + document.querySelector(query).getBoundingClientRect().top
 }

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+{% extends "teams/base.html" %}
+{% load static from staticfiles %}
+{% load datetime_filter %}
+<html lang="en">
+  <head>
+    <!-- This needs to be team abbreviation or name -->
+    {% block title %}Swimmers - {{ team.abbr }}{% endblock %}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{% static 'teams/css/team_records.css' %}">
+    {% endblock %}
+  </head>
+
+  <body>
+    {% block sidebar %}
+      {{ block.super }}
+
+      <ul class="nav nav-sidebar">
+        <li class="header">Records</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Record</a></li>
+      </ul>
+    {% endblock %}
+
+    <!-- This needs to be <Team Name> Dashboard -->
+    {% block page-title %}{{ team.name }}{% endblock %}
+    {% block table-title %}Team Records{% endblock %}
+
+    {% block modal %}
+      <div id="baseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Add Record
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <form action="{% url 'teams:teamRecords' team.abbr %}" method="post" class="form-signin">
+                {% csrf_token %}
+                {% if record_form.errors %}
+                  {% for field in record_form %}
+                    {% for error in field.errors %}
+                      <div class="alert alert-danger" style="text-align: center">
+                          <strong>{{ error|escape }}</strong>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Record form -->
+                {% for field in record_form %}
+                  {{ field }}
+                {% endfor %}
+                <br>
+                <div class="modal-footer">
+                  <button name="add_record" type="submit" class="btn btn-md btn-primary">Finish</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block content %}
+      <div class="table-responsive">
+        <table id="swimmers" class="table table-striped">
+          <thead>
+            <tr class="thead">
+              <th>Men</th>
+              <th>Time</th>
+              <th>record</th>
+              <th>Women</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for record in records %}
+              <tr>
+
+                {% if record.1 == None %}
+                  <td>--</td>
+                  <td>--</td>
+                {% else %}
+                  <td>{{ record.1.swimmer.f_name }} {{ record.1.swimmer.l_name}}</td>
+                  <td>{{ record.1.time|format_record }}</td>
+                {% endif %}
+
+                <td>{{ record.0 }}</td>
+
+                {% if record.2 == None %}
+                  <td>--</td>
+                  <td>--</td>
+                {% else %}
+                  <td>{{ record.2.swimmer.f_name }} {{ record.2.swimmer.l_name}}</td>
+                  <td>{{ record.2.time|format_record }}</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+    {% endblock %}
+  </body>
+</html>

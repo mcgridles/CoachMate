@@ -1,3 +1,4 @@
+/* Navbar */
 .navbar-default {
   background-color: #337ab7;
   border: none;
@@ -43,6 +44,7 @@
   color: #337ab7;
 }
 
+/* Jumbotron display */
 .jumbotron {
   background-color: #333;
 }
@@ -52,6 +54,7 @@
   text-align: center;
 }
 
+/* Site features */
 .featurette-heading {
   margin-top: 50px;
 }
@@ -70,12 +73,14 @@
   max-width: 75%;
 }
 
+/* Footer */
 footer {
   margin-top: 50px;
 }
 
 /* Desktops and large screens */
 @media screen and (min-width: 768px) {
+  /* Navbar */
   .navbar-default .navbar-nav .open .dropdown-menu>li>a {
     color: #333;
   }
@@ -84,11 +89,13 @@ footer {
     color: #777;
   }
 
+  /* Jumbotron */
   .jumbotron {
     padding-top: 200px;
     padding-bottom: 200px;
   }
 
+  /* Features */
   .featurette-heading {
     margin-top: 130px;
   }
@@ -102,6 +109,7 @@ footer {
     margin: 30px auto 0;
   }
 
+  /* Footer */
   footer {
     margin-top: 130px;
   }
