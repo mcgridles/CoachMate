@@ -46,7 +46,6 @@ Thumbs.db
 /CoachMate/settings/local.py
 .coverage
 /teams/static/teams/img
-/teams/tests/test_files/
 /htmlcov/
 
 # IntelliJ Files #

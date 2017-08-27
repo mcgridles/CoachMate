@@ -20,7 +20,7 @@ class HomeViewTest(TestCase):
         """
         response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Learn More')
+        self.assertContains(response, 'Learn more')
 
     def test_homepage_redirect(self):
         """
