@@ -71,7 +71,7 @@
       {% if team_list %}
         <!-- Display team in table -->
         <div class="table-responsive">
-          <table id="teams" class="table table-striped table-hover">
+          <table id="teams" class="hover stripe">
             <thead>
               <tr>
                 <th></th>
@@ -131,27 +131,19 @@
 
       <!-- Create DataTable from team table -->
       <!-- Need to figure out how to make each entry a link -->
-      <!--
       <script>
         $(document).ready( function () {
           $('#teams').DataTable();
         } );
       </script>
-      -->
 
-      <!-- Format DataTable search box to fit style -->
-      <!--
+      <!-- Format info and pagination buttons below table -->
       <script>
-        $(document).ready( function () {
-          var inputs = document.getElementsByTagName("input");
-          for (i=0; i<inputs.length; i++) {
-            if (inputs[i].type == "search") {
-              inputs[i].id += "table-search";
-            }
-          }
-        } );
+        $(document).ready(function() {
+          $('div.col-sm-5').removeClass('col-sm-5').addClass('col-xs-12 col-md-5 info-pag');
+          $('div.col-sm-7').removeClass('col-sm-7').addClass('col-xs-12 col-md-7 info-pag');
+        });
       </script>
-      -->
     {% endblock %}
   </body>
 </html>

@@ -19,6 +19,7 @@
     <link href="{% static 'bootstrap/css/ie10-viewport-bug-workaround.css' %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.css"/>
     <link rel="stylesheet" href="{% static 'teams/css/base.css' %}">
     {% block stylesheets %}{% endblock %}
 
@@ -129,8 +130,10 @@
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 
     <!-- DataTables core JavaScript -->
-    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
-
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.js"></script>
+    <!--
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.bootstrap.js"></script>
+  -->
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{% static 'bootstrap/js/ie10-viewport-bug-workaround.js' %}"></script>
 
