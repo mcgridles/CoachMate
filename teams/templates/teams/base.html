@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
@@ -39,6 +40,7 @@
   <body>
 
     <!-- Nav -->
+
     <nav class="navbar navbar-fixed-top">
       <div class="container-fluid">
 
@@ -53,6 +55,7 @@
         </div>
 
           <!-- Account dropdown -->
+
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile<span class="caret"></span></a>
@@ -85,7 +88,7 @@
 
     <div class="container-fluid">
       <div class="row">
-        <!-- Sidebar -->
+
         <div class="col-sm-3 col-md-2 sidebar">
 
           {% block sidebar %}
@@ -106,16 +109,13 @@
           {% endblock %}
         </div>
 
-        <!-- Main block -->
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">{% block page-title %}Placeholder{% endblock %}</h1>
 
           <h2 class="sub-header">{% block table-title %}Placeholder{% endblock %}</h2>
 
-          <!-- Modal -->
           {% block modal %}{% endblock %}
 
-          <!-- Table/content -->
           {% block content %}{% endblock %}
         </div>
       </div>
@@ -139,6 +139,7 @@
 
     <!-- Additional scripts -->
     <!-- Enable popovers -->
+
     <script>
       $(document).ready(function() {
         $('[data-toggle="popover"]').popover();

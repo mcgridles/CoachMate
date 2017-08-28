@@ -276,7 +276,7 @@ class TrainingForm(forms.ModelForm):
         training_model = super(TrainingForm, self).save(commit=False)
         team_models = TrainingModel.objects.filter(team=training_model.team)
         for model in team_models:
-            model.delete()
+            model.delete() # each team has 1 model at a time
         training_model.save()
         return training_model
 
@@ -305,7 +305,7 @@ class BaseRepFormset(forms.BaseFormSet):
         for form in self.forms:
             if form.cleaned_data:
                 instance = form.save(commit=False)
-                instance.set_id = set_id
+                instance.set_id = set_id # associate each rep with the set
                 if instance.rest:
                     rest_flag = True
                 instance.save()
@@ -331,6 +331,7 @@ class BaseMultiplierFormset(forms.BaseModelFormSet):
                     used.append(focus)
 
                 mult = cleaned_data['multiplier']
+                # check multiplier for valid input (% or #)
                 try:
                     if mult.endswith('%'):
                         float(mult[:-1])
@@ -350,6 +351,7 @@ class BaseMultiplierFormset(forms.BaseModelFormSet):
                 instance.training_model = training_model
 
                 try:
+                    # normalize multiplier input
                     mult = form.cleaned_data['multiplier']
                     if mult.endswith('%'):
                         instance.multiplier = float(mult[:-1])/100
@@ -379,6 +381,7 @@ class UploadZipForm(forms.Form):
     def clean(self):
         cleaned_data = super(UploadZipForm, self).clean()
         file = self.cleaned_data.get('zip_file')
+        # check for correct filetype (.zip)
         if file and file.name[-4:].lower() != '.zip':
             msg = 'ERROR: File must be in ZIP format'
             self.add_error('zip_file', msg)

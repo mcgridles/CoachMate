@@ -3,7 +3,6 @@
 {% load static from staticfiles %}
 <html lang="en">
   <head>
-    <!-- This needs to be team abbreviation or name -->
     {% block title %}Swimmers - {{ team.abbr }}{% endblock %}
     {% block stylesheets %}
       <link rel="stylesheet" href="{% static 'teams/css/swimmer_list.css' %}">
@@ -27,7 +26,6 @@
       </ul>
     {% endblock %}
 
-    <!-- This needs to be <Team Name> Dashboard -->
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}Swimmers{% endblock %}
 
@@ -190,6 +188,8 @@
     {% endblock %}
 
     {% block content %}
+
+      <!-- Error/success messages -->
       {% if messages %}
         {% for message in messages %}
           <div {% if message.tags == "error" %} class="alert alert-danger"
@@ -201,6 +201,7 @@
       {% endif %}
 
       {% if swimmer_list %}
+
         <!-- Display swimmers in table -->
         <div class="table-responsive">
           <table id="swimmers" class="hover stripe">
@@ -246,7 +247,9 @@
     {% endblock %}
 
     {% block scripts %}
+
       <!-- Makes table rows clickable -->
+
       <script>
         $(function() {
           $(".clickable-row").click(function() {
@@ -256,7 +259,7 @@
       </script>
 
       <!-- Create DataTable from swimmer table -->
-      <!-- Need to figure out how to make each entry a link -->
+
       <script>
         $(document).ready( function () {
           $('#swimmers').DataTable();
@@ -264,6 +267,7 @@
       </script>
 
       <!-- Format info and pagination buttons below table -->
+      
       <script>
         $(document).ready(function() {
           $('div.col-sm-5').removeClass('col-sm-5').addClass('col-xs-12 col-md-5 info-pag');

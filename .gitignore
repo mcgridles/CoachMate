@@ -47,6 +47,8 @@ Thumbs.db
 .coverage
 /teams/static/teams/img
 /htmlcov/
+/log/django/*
+/log/tm/*
 
 # IntelliJ Files #
 ##################

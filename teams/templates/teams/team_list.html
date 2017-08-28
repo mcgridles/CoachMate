@@ -69,6 +69,7 @@
 
     {% block content %}
       {% if team_list %}
+
         <!-- Display team in table -->
         <div class="table-responsive">
           <table id="teams" class="hover stripe">
@@ -108,7 +109,9 @@
     {% endblock %}
 
     {% block scripts %}
+
       <!-- Highlights sidebar links according to page -->
+
       <script>
         $(function() {
           var loc = window.location.pathname;
@@ -121,6 +124,7 @@
       </script>
 
       <!-- Makes table rows clickable -->
+
       <script>
         $(function() {
           $(".clickable-row").click(function() {
@@ -130,7 +134,7 @@
       </script>
 
       <!-- Create DataTable from team table -->
-      <!-- Need to figure out how to make each entry a link -->
+
       <script>
         $(document).ready( function () {
           $('#teams').DataTable();
@@ -138,6 +142,7 @@
       </script>
 
       <!-- Format info and pagination buttons below table -->
+      
       <script>
         $(document).ready(function() {
           $('div.col-sm-5').removeClass('col-sm-5').addClass('col-xs-12 col-md-5 info-pag');

@@ -73,8 +73,10 @@
 
     {% block content %}
       <div class="panel-group" id="accordion">
+
         <!-- Loop through each practice and display them on each day -->
         <!-- 'Day' sets panel headings even if there is no practice that day -->
+
         {% for practice, day in practices %}
 
           <div class="panel panel-info">
@@ -91,7 +93,9 @@
 
             <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse">
               <div class="panel-body">
+
                 <!-- Display practice: same format as when writing -->
+
                 {% if practice.0 %}
                   {% for set in practice.1 %}
 
@@ -121,6 +125,7 @@
                         <thead>
                           <tr>
                             <td></td>
+
                             <!-- Reps in each set -->
                             {% for rep in set.0.rep_set.all %}
                               <td>{{ rep.num }}x{{ rep.distance }} {{ rep.stroke }}</td>
@@ -131,7 +136,9 @@
                           {% for swimmer in set.1 %}
                             <tr>
                               <td>{{ swimmer.0.f_name }} {{ swimmer.0.l_name }}</td>
+
                               <!-- List the interval for each rep for each swimmer -->
+
                               {% for rep in swimmer.1 %}
                                 {% if rep.0.rest %}
                                   <td>{{ rep.0.rest|format_duration }} rest</td>
@@ -153,6 +160,7 @@
                   <a href="{% url 'teams:deletePractice' team.abbr practice.0.id %}" type="button" class="btn btn-danger btn-md pull-right follow-link" style="margin-left: 5px">
                     <span class="glyphicon glyphicon-remove-circle"></span>
                   </a>
+
                   <!-- Edit practice -->
                   <a href="{% url 'teams:writePractice' team.abbr practice.0.id %}" type="button" class="btn btn-default btn-md pull-right follow-link" style="margin-left: 5px">
                     <span class="glyphicon glyphicon-pencil"></span>
@@ -173,7 +181,9 @@
     {% endblock %}
 
     {% block scripts %}
+
       <!-- Highlights sidebar links according to page -->
+
       <script>
         $(function() {
           var loc = window.location.pathname;
@@ -186,6 +196,7 @@
       </script>
 
       <!-- Fixes bug where links would collapse panels instead of follow link -->
+      
       <script>
         $('.follow-link').click(function(e) {
           e.stopPropagation();
