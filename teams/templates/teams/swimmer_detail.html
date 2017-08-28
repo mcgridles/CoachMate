@@ -119,6 +119,8 @@
     {% endblock %}
 
     {% block content %}
+
+      <!-- Swimmer info/bio -->
       <div class="col-xs-12 col-sm-4" style="padding-left: 0">
         {% if swimmer.picture %}
           <img src="{{ swimmer.picture.url }}" style="width: 100%">
@@ -166,12 +168,15 @@
       </div>
 
       <div class="col-xs-12 col-sm-8" style="padding-left: 0">
+
+        <!-- Event progress graph -->
         {% if div %}
           <div class="plot">
             {{ div|safe }}
           </div>
         {% endif %}
 
+        <!-- Individual records -->
         <div class="records">
           <h4>Records</h4>
           <table id="records" class="table table-striped">
@@ -200,6 +205,8 @@
       <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
       <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
 
+      <!-- Bokeh graph script -->
+      
       {{ script|safe }}
     {% endblock %}
   </body>

@@ -9,7 +9,9 @@ from bokeh.models.widgets import Select
 from teams.models import Event, EVENT_CHOICE, Swimmer
 
 def date_time_hover_tool():
-    """Generates the HTML for the Bokeh's hover data tool on our graph."""
+    """
+        Generates the HTML for the Bokeh's hover data tool on our graph.
+    """
     hover_html = """
       <div>
         <span class="hover-tooltip">@date</span>

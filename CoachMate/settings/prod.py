@@ -6,11 +6,6 @@ DEBUG=False
 
 ALLOWED_HOSTS += 'www.example.com'
 
-ADMINS = [
-    ('Henry Gridley', os.environ['HENRY_EMAIL']),
-    ('Dave Thornton', os.environ['DAVE_EMAIL']),
-]
-
 DATABASES = {
     'default': dj_database_url.config()
 }

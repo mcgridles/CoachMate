@@ -1,13 +1,19 @@
 import os, re, zipfile, errno, shutil
 from datetime import date, timedelta
+import logging
 
 from teams.models import Swimmer, Event
+
+tmlogger = logging.getLogger('CoachMate.tm')
+tmlogger_roster = logging.getLogger('CoachMate.tm.roster')
+tmlogger_results = logging.getLogger('CoachMate.tm.results')
 
 class TeamManager(object):
     """
     Class to handle all Team Manager related functions.
     """
     def __init__(self, *args, **kwargs):
+        logger.debug('test')
         self.team = kwargs.pop('team')
         self.zip_file = kwargs.pop('zip_file', None)
         user_folder = self.team.user.last_name + '_temp_files/'
@@ -21,6 +27,7 @@ class TeamManager(object):
             os.makedirs(self.user_folder_path)
         except OSError as e:
             if e.errno != errno.EEXIST:
+                tmlogger.exception(e)
                 raise
 
     def __del__(self):
@@ -45,6 +52,7 @@ class TeamManager(object):
             os.makedirs(self.zip_extract_dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
+                tmlogger.exception(e)
                 raise
 
         zip_ref = zipfile.ZipFile(file, 'r')
@@ -72,7 +80,7 @@ class TeamManager(object):
             m = self.unzip_file(file)
             if m:
                 return self.msg
-        except OSError:
+        except OSError as e:
             raise
 
         # try .CL2 file first
@@ -140,6 +148,7 @@ class TeamManager(object):
                     gender = swimmer_gender.group('gender')
                 except AttributeError:
                     error_flag = True
+                    tmlogger_roster.error('Error importing swimmer. Line: ' + line)
                     self.msg.append(('error', 'Couldn\'t import swimmer(s)'))
                     continue
 
@@ -172,6 +181,7 @@ class TeamManager(object):
                     new_swimmer.set_age()
 
         if error_flag is False:
+            tmlogger.debug('Roster imported')
             self.msg.append(('success', 'Roster imported'))
 
     def load_results(self, file=None):
@@ -237,6 +247,7 @@ class TeamManager(object):
 
                 except AttributeError:
                     error_flag = True
+                    tmlogger_results.error('Error capturing meet date. Line: ' + line)
                     self.msg.append(('error', 'Couldn\'t find meet date'))
                     return
 
@@ -297,7 +308,9 @@ class TeamManager(object):
 
                         except AttributeError:
                             error_flag = True
+                            tmlogger_results.error(('Error importing event for %s %s. Line: ' + nextline) % (swimmer.f_name, swimmer.l_name))
                             self.msg.append(('error', 'Couldn\'t import event for %s %s' % (swimmer.f_name, swimmer.l_name)))
 
         if error_flag is False:
+            tmlogger.debug('Results imported')
             self.msg.append(('success', 'Results imported'))

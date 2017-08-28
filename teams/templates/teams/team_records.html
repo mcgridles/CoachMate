@@ -4,7 +4,6 @@
 {% load datetime_filter %}
 <html lang="en">
   <head>
-    <!-- This needs to be team abbreviation or name -->
     {% block title %}Swimmers - {{ team.abbr }}{% endblock %}
     {% block stylesheets %}
       <link rel="stylesheet" href="{% static 'teams/css/team_records.css' %}">
@@ -21,7 +20,6 @@
       </ul>
     {% endblock %}
 
-    <!-- This needs to be <Team Name> Dashboard -->
     {% block page-title %}{{ team.name }}{% endblock %}
     {% block table-title %}Team Records{% endblock %}
 
@@ -68,6 +66,8 @@
     {% endblock %}
 
     {% block content %}
+
+      <!-- Records for men and women -->
       <div class="table-responsive">
         <table id="swimmers" class="table table-striped">
           <thead>

@@ -148,7 +148,9 @@
   {% endblock %}
 
   {% block scripts %}
-    <!-- Allow reps to be added or removed from set form -->
+
+    <!-- Allow multipliers to be added or removed from set form -->
+
     <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
     <script>
       $(function() {
@@ -158,7 +160,8 @@
       })
     </script>
 
-    <!-- Disables 'remove' function when there is only one rep -->
+    <!-- Disables 'remove' function when there is only one multiplier -->
+
     <script>
       $(function() {
         document.getElementsByClassName("remove")[0].style.display = "none";
