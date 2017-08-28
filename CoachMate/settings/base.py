@@ -24,6 +24,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+ADMINS = [
+    ('Henry Gridley', os.environ['HENRY_EMAIL']),
+    ('Dave Thornton', os.environ['DAVE_EMAIL']),
+]
+
+
 # Application definition
 
 PREREQ_APPS = [
@@ -107,6 +113,112 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_URL = '/accounts/login/'
+
+
+# Email & Logging
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+DEFAULT_FROM_EMAIL = os.environ['EMAIL_HOST_USER']
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+
+# /CoachMate/log/django/ & /CoachMate/log/tm/ directories needed
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'tm_format': {
+            'format': '[%(asctime)s] <%(name)s:%(levelname)s> [%(funcName)s:%(lineno)d] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'development_logfile': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR + '/log/django/django_dev.log',
+            'formatter': 'verbose'
+        },
+        'production_logfile': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR + '/log/django/django_prod.log',
+            'maxBytes' : 1024*1024*100, # 100MB
+            'backupCount' : 5,
+            'formatter': 'simple'
+        },
+        'tm_logfile_debug': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR + '/log/tm/tm_debug.log',
+            'formatter': 'tm_format'
+        },
+        'tm_logfile_error': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false','require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR + '/log/tm/tm_error.log',
+            'formatter': 'tm_format'
+        },
+        'mail_admins': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+    },
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console'],
+    },
+    'loggers': {
+        # Custom production logger
+        'CoachMate.prod': {
+            'handlers': ['production_logfile'],
+         },
+        # Development logger
+        'CoachMate.dev': {
+            'handlers': ['development_logfile'],
+         },
+        # TeamManager logger
+        'CoachMate.tm': {
+            'handlers': ['tm_logfile_error', 'tm_logfile_debug', 'mail_admins'],
+        },
+        'django': {
+            'handlers': ['production_logfile'],
+        },
+        'py.warnings': {
+            'handlers': ['development_logfile'],
+        },
+    }
+}
 
 
 # Internationalization
