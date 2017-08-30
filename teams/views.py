@@ -57,7 +57,7 @@ def teamRecords(request, abbr):
     if request.method == 'POST':
         record_form = RecordForm(request.POST)
         if record_form.is_valid():
-            record_form.save()
+            record = record_form.save(team)
             return redirect('teams:teamRecords', abbr=team.abbr)
 
     else:
@@ -162,7 +162,7 @@ def swimmerDetail(request, abbr, s_id):
         elif 'add_event' in request.POST:
             event_form = EventForm(request.POST, swimmer=swimmer)
             if event_form.is_valid():
-                event_form.save()
+                event = event_form.save(team)
                 swimmer_form = SwimmerForm(instance=swimmer)
                 return redirect('teams:swimmerDetail', abbr=team.abbr, s_id=swimmer.id)
             else:
@@ -222,7 +222,7 @@ def writePractice(request, abbr, p_id):
                 # get set form instance
                 setInstance = set_form.save()
                 rest_flag = rep_formset.save_formset(setInstance) # set set_id for each rep
-                
+
                 if rest_flag == False:
                     i = funct.calculate_intervals(setInstance, training_model)
                     if i == False:

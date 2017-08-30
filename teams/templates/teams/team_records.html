@@ -52,9 +52,17 @@
                 {% endif %}
 
                 <!-- Record form -->
-                {% for field in record_form %}
-                  {{ field }}
-                {% endfor %}
+                <strong>Choose swimmer</strong><br>
+                {{ record_form.swimmer }}
+                <strong>or enter details</strong><br>
+                {{ record_form.name }}
+                {{ record_form.gender }}
+
+                <hr>
+                {{ record_form.event }}
+                {{ record_form.time }}
+                {{ record_form.date }}
+
                 <br>
                 <div class="modal-footer">
                   <button name="add_record" type="submit" class="btn btn-md btn-primary">Finish</button>
