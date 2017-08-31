@@ -104,131 +104,134 @@ def graph_event(swimmer):
     ))
     plot.line('x', 'y', source=source)
 
-    try:
-        select = Select(title="Select Event:", value=events[0], options=events)
-    except IndexError:
-        return None, None
-
     # callback modifies data source depending on Select box
-    callback = CustomJS(args=dict(source=source, select=select), code="""
+    callback = CustomJS(args=dict(source=source), code="""
             data = %s;
+            f = cb_obj.value;
 
-            if (select.value == "50 Freestyle") {
+            if (f == "50 Freestyle") {
                 source.data['x'] = data.x_50_free;
                 source.data['y'] = data.y_50_free;
                 source.data['date'] = data.date_50_free;
                 source.data['time'] = data.time_50_free;
-            } else if (select.value == "100 Freestyle") {
+            } else if (f == "100 Freestyle") {
                 source.data['x'] = data.x_100_free;
                 source.data['y'] = data.y_100_free;
                 source.data['date'] = data.date_100_free;
                 source.data['time'] = data.time_100_free;
-            } else if (select.value == "200 Freestyle") {
-                console.log(select.value);
+            } else if (f == "200 Freestyle") {
                 source.data['x'] = data.x_200_free;
                 source.data['y'] = data.y_200_free;
                 source.data['date'] = data.date_200_free;
                 source.data['time'] = data.time_200_free;
-            } else if (select.value == "500 Freestyle") {
+            } else if (f == "500 Freestyle") {
                 source.data['x'] = data.x_500_free;
                 source.data['y'] = data.y_500_free;
                 source.data['date'] = data.date_500_free;
                 source.data['time'] = data.time_500_free;
-            } else if (select.value == "1000 Freestyle") {
+            } else if (f == "1000 Freestyle") {
                 source.data['x'] = data.x_1000_free;
                 source.data['y'] = data.y_1000_free;
                 source.data['date'] = data.date_1000_free;
                 source.data['time'] = data.time_1000_free;
-            } else if (select.value == "50 Backstroke") {
+            } else if (f == "50 Backstroke") {
                 source.data['x'] = data.x_50_back;
                 source.data['y'] = data.y_50_back;
                 source.data['date'] = data.date_50_back;
                 source.data['time'] = data.time_50_back;
-            } else if (select.value == "100 Backstroke") {
+            } else if (f == "100 Backstroke") {
                 source.data['x'] = data.x_100_back;
                 source.data['y'] = data.y_100_back;
                 source.data['date'] = data.date_100_back;
                 source.data['time'] = data.time_100_back;
-            } else if (select.value == "200 Backstroke") {
+            } else if (f == "200 Backstroke") {
                 source.data['x'] = data.x_200_back;
                 source.data['y'] = data.y_200_back;
                 source.data['date'] = data.date_200_back;
                 source.data['time'] = data.time_200_back;
-            } else if (select.value == "50 Breaststroke") {
+            } else if (f == "50 Breaststroke") {
                 source.data['x'] = data.x_50_breast;
                 source.data['y'] = data.y_50_breast;
                 source.data['date'] = data.date_50_breast;
                 source.data['time'] = data.time_50_breast;
-            } else if (select.value == "100 Breaststroke") {
+            } else if (f == "100 Breaststroke") {
                 source.data['x'] = data.x_100_breast;
                 source.data['y'] = data.y_100_breast;
                 source.data['date'] = data.date_100_breast;
                 source.data['time'] = data.time_100_breast;
-            } else if (select.value == "200 Breaststroke") {
+            } else if (f == "200 Breaststroke") {
                 source.data['x'] = data.x_200_breast;
                 source.data['y'] = data.y_200_breast;
                 source.data['date'] = data.date_200_breast;
                 source.data['time'] = data.time_200_breast;
-            } else if (select.value == "50 Butterfly") {
+            } else if (f == "50 Butterfly") {
                 source.data['x'] = data.x_50_fly;
                 source.data['y'] = data.y_50_fly;
                 source.data['date'] = data.date_50_fly;
                 source.data['time'] = data.time_50_fly;
-            } else if (select.value == "100 Butterfly") {
+            } else if (f == "100 Butterfly") {
                 source.data['x'] = data.x_100_fly;
                 source.data['y'] = data.y_100_fly;
                 source.data['date'] = data.date_100_fly;
                 source.data['time'] = data.time_100_fly;
-            } else if (select.value == "200 Butterfly") {
+            } else if (f == "200 Butterfly") {
                 source.data['x'] = data.x_200_fly;
                 source.data['y'] = data.y_200_fly;
                 source.data['date'] = data.date_200_fly;
                 source.data['time'] = data.time_200_fly;
-            } else if (select.value == "100 IM") {
+            } else if (f == "100 IM") {
                 source.data['x'] = data.x_100_im;
                 source.data['y'] = data.y_100_im;
                 source.data['date'] = data.date_100_im;
                 source.data['time'] = data.time_100_im;
-            } else if (select.value == "200 IM") {
+            } else if (f == "200 IM") {
                 source.data['x'] = data.x_200_im;
                 source.data['y'] = data.y_200_im;
                 source.data['date'] = data.date_200_im;
                 source.data['time'] = data.time_200_im;
-            } else if (select.value == "400 IM") {
+            } else if (f == "400 IM") {
                 source.data['x'] = data.x_400_im;
                 source.data['y'] = data.y_400_im;
                 source.data['date'] = data.date_400_im;
                 source.data['time'] = data.time_400_im;
-            } else if (select.value == "Base Freestyle") {
+            } else if (f == "Base Freestyle") {
                 source.data['x'] = data.x_base_free;
                 source.data['y'] = data.y_base_free;
                 source.data['date'] = data.date_base_free;
                 source.data['time'] = data.time_base_free;
-            } else if (select.value == "Base Backstroke") {
+            } else if (f == "Base Backstroke") {
                 source.data['x'] = data.x_base_back;
                 source.data['y'] = data.y_base_back;
                 source.data['date'] = data.date_base_back;
                 source.data['time'] = data.time_base_back;
-            } else if (select.value == "Base Breaststroke") {
+            } else if (f == "Base Breaststroke") {
                 source.data['x'] = data.x_base_breast;
                 source.data['y'] = data.y_base_breast;
                 source.data['date'] = data.date_base_breast;
                 source.data['time'] = data.time_base_breast;
-            } else if (select.value == "Base Butterfly") {
+            } else if (f == "Base Butterfly") {
                 source.data['x'] = data.x_base_fly;
                 source.data['y'] = data.y_base_fly;
                 source.data['date'] = data.date_base_fly;
                 source.data['time'] = data.time_base_fly;
-            } else if (select.value == "Base IM") {
+            } else if (f == "Base IM") {
                 source.data['x'] = data.x_base_im;
                 source.data['y'] = data.y_base_im;
                 source.data['date'] = data.date_base_im;
                 source.data['time'] = data.time_base_im;
             }
 
-            source.change.emit()
+            source.change.emit();
     """ % json.dumps(data_source, cls=DatetimeEncoder))
 
-    select.callback = callback
+    try:
+        select = Select(
+            title="Select Event:",
+            value=events[0],
+            options=events,
+            callback=callback
+        )
+    except IndexError:
+        return None, None
 
     return components(column(select, plot, responsive=True))
