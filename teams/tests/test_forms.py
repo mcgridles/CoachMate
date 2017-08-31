@@ -97,11 +97,12 @@ class TestSwimmerForm(TestCase):
 class TestEventForm(TestCase):
     def setUp(self):
         user = test.create_user('user', 'password')
-        team = test.create_team(user=user)
-        self.swimmer = test.create_swimmer(team)
+        self.team = test.create_team(user=user)
+        self.swimmer = test.create_swimmer(self.team)
 
     def tearDown(self):
         self.swimmer.delete()
+        self.team.delete()
 
     def test_event_form_init(self):
         """
@@ -125,6 +126,9 @@ class TestEventForm(TestCase):
         self.assertEqual(event.time, timedelta(seconds=22.32))
         self.assertEqual(event.date, date(2017,4,9))
         self.assertEqual(event.swimmer, self.swimmer)
+        self.assertEqual(event.team, self.team)
+        self.assertEqual(event.name, self.swimmer.f_name + ' ' + self.swimmer.l_name)
+        self.assertEqual(event.gender, self.swimmer.gender)
 
     def test_event_form_invalid_data(self):
         """
@@ -133,6 +137,56 @@ class TestEventForm(TestCase):
         form = EventForm({}, swimmer=self.swimmer)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
+            'event': ['This field is required.'],
+            'time': ['This field is required.'],
+            'date': ['This field is required.'],
+        })
+
+
+class TestRecordForm(TestCase):
+    def setUp(self):
+        user = test.create_user('user', 'password')
+        self.team = test.create_team(user=user)
+        self.swimmer = test.create_swimmer(self.team)
+
+    def tearDown(self):
+        self.swimmer.delete()
+        self.team.delete()
+
+    def test_record_form_init(self):
+        """
+        RecordForm takes a team as an argument.
+        """
+        RecordForm(team=self.team)
+
+    def test_record_form_valid_data(self):
+        """
+        RecordForm takes a swimmer or name and gender, event, time, and date to validate.
+        """
+        form = RecordForm({
+            'swimmer': self.swimmer.id,
+            'event': '50 free',
+            'time': timedelta(seconds=22.32),
+            'date': date(2017,4,9),
+        }, team=self.team)
+        self.assertTrue(form.is_valid())
+        record = form.save()
+        self.assertEqual(record.event, '50 free')
+        self.assertEqual(record.time, timedelta(seconds=22.32))
+        self.assertEqual(record.date, date(2017,4,9))
+        self.assertEqual(record.swimmer, self.swimmer)
+        self.assertEqual(record.team, self.team)
+        self.assertEqual(record.name, self.swimmer.f_name + ' ' + self.swimmer.l_name)
+        self.assertEqual(record.gender, self.swimmer.gender)
+
+    def test_record_form_invalid_data(self):
+        """
+        An event, time, and date are needed to validate.
+        """
+        form = RecordForm({}, team=self.team)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {
+            'swimmer': ['Please select a swimmer or enter a name and gender.'],
             'event': ['This field is required.'],
             'time': ['This field is required.'],
             'date': ['This field is required.'],

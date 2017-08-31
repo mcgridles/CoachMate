@@ -53,6 +53,25 @@ def create_event(swimmer, event='50 free', time=timedelta(seconds=22.32), place=
         date=date,
     )
 
+def create_record(swimmer=None, team=None, name='Henry Gridley', gender='M', event='50 free', time=timedelta(seconds=22.32), date=date(2017, 1, 1)):
+    """
+    Create a test record.
+    """
+    if swimmer:
+        name = swimmer.f_name + ' ' + swimmer.l_name
+        gender = swimmer.gender
+        team = swimmer.team
+
+    return Event.objects.create(
+        swimmer=swimmer,
+        team=team,
+        name=name,
+        gender=gender,
+        event=event,
+        time=time,
+        date=date,
+    )
+
 def create_week(monday=date(2017,7,10), present=False):
     """
     Create a test week.

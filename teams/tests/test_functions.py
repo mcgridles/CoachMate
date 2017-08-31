@@ -263,11 +263,11 @@ class TestFunctions(TestCase):
         """
         team = test.create_team(self.user)
         swimmer = test.create_swimmer(team)
-        event1 = test.create_event(swimmer, '50 free', timedelta(seconds=22.96))
-        event2 = test.create_event(swimmer, '50 free', timedelta(seconds=22.32))
-        event3 = test.create_event(swimmer, '100 free', timedelta(seconds=49.86))
-        event4 = test.create_event(swimmer, '100 free', timedelta(seconds=50.58))
-        event5 = test.create_event(swimmer, '200 free', timedelta(seconds=124.04))
+        record1 = test.create_record(swimmer=swimmer, event='50 free', time=timedelta(seconds=22.96))
+        record2 = test.create_record(swimmer=swimmer, event='50 free', time=timedelta(seconds=22.32))
+        record3 = test.create_record(swimmer=swimmer, event='100 free', time=timedelta(seconds=49.86))
+        record4 = test.create_record(swimmer=swimmer, event='100 free', time=timedelta(seconds=50.58))
+        record5 = test.create_record(swimmer=swimmer, event='200 free', time=timedelta(seconds=124.04))
 
         records = funct.get_swimmer_records(swimmer)
         times = []
@@ -276,11 +276,10 @@ class TestFunctions(TestCase):
                 times.append(record[1].time.total_seconds())
             else:
                 times.append(None)
-
         self.assertEqual(records, [
-            ('50 Freestyle', event2),
-            ('100 Freestyle', event3),
-            ('200 Freestyle', event5),
+            ('50 Freestyle', record2),
+            ('100 Freestyle', record3),
+            ('200 Freestyle', record5),
             ('500 Freestyle', None),
             ('1000 Freestyle', None),
             ('50 Backstroke', None),
@@ -306,17 +305,17 @@ class TestFunctions(TestCase):
         team = test.create_team(self.user)
         swimmer1 = test.create_swimmer(team)
         swimmer2 = test.create_swimmer(team, first='Jane', last='Doe', gender='F')
-        event1 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.96))
-        event2 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.32))
-        event3 = test.create_event(swimmer2, '50 free', timedelta(seconds=25.14))
-        event4 = test.create_event(swimmer1, '100 free', timedelta(seconds=49.86))
-        event5 = test.create_event(swimmer2, '100 free', timedelta(seconds=54.85))
+        record1 = test.create_record(swimmer=swimmer1, event='50 free', time=timedelta(seconds=22.96))
+        record2 = test.create_record(swimmer=swimmer1, event='50 free', time=timedelta(seconds=22.32))
+        record3 = test.create_record(swimmer=swimmer2, event='50 free', time=timedelta(seconds=25.14))
+        record4 = test.create_record(swimmer=swimmer1, event='100 free', time=timedelta(seconds=49.86))
+        record5 = test.create_record(swimmer=swimmer2, event='100 free', time=timedelta(seconds=54.85))
 
         records = funct.get_team_records(team)
 
         self.assertEqual(records, [
-            ('50 Freestyle', event2, event3),
-            ('100 Freestyle', event4, event5),
+            ('50 Freestyle', record2, record3),
+            ('100 Freestyle', record4, record5),
             ('200 Freestyle', None, None),
             ('500 Freestyle', None, None),
             ('1000 Freestyle', None, None),

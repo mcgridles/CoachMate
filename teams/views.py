@@ -55,13 +55,13 @@ def teamRecords(request, abbr):
     records = funct.get_team_records(team)
 
     if request.method == 'POST':
-        record_form = RecordForm(request.POST)
+        record_form = RecordForm(request.POST, team=team)
         if record_form.is_valid():
-            record = record_form.save(team)
+            record = record_form.save()
             return redirect('teams:teamRecords', abbr=team.abbr)
 
     else:
-        record_form = RecordForm()
+        record_form = RecordForm(team=team)
 
     context = {
         'team': team,
@@ -162,7 +162,7 @@ def swimmerDetail(request, abbr, s_id):
         elif 'add_event' in request.POST:
             event_form = EventForm(request.POST, swimmer=swimmer)
             if event_form.is_valid():
-                event = event_form.save(team)
+                event = event_form.save()
                 swimmer_form = SwimmerForm(instance=swimmer)
                 return redirect('teams:swimmerDetail', abbr=team.abbr, s_id=swimmer.id)
             else:
