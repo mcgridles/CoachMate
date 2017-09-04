@@ -8,7 +8,7 @@ from django.urls import reverse
 import teams.tests.test_setup as test
 from teams.models import Week
 
-class TeamModelTests(TestCase):
+class TestTeamModel(TestCase):
     def setUp(self):
         self.user = test.create_user(username='user', password='password')
 
@@ -25,6 +25,15 @@ class TeamModelTests(TestCase):
         event1 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.32))
         event2 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.96))
         event3 = test.create_event(swimmer2, '50 free', timedelta(seconds=23.51))
+        event1.set_gender()
+        event1.team = team
+        event1.save()
+        event2.set_gender()
+        event2.team = team
+        event2.save()
+        event3.set_gender()
+        event3.team = team
+        event3.save()
 
         records1 = team.get_record(('50 free', '50 Freestyle'))
         records2 = team.get_record(('100 free', '100 Freestyle'))
@@ -32,7 +41,8 @@ class TeamModelTests(TestCase):
         self.assertEqual(records1, ('50 Freestyle', event1, event3))
         self.assertEqual(records2, ('100 Freestyle', None, None))
 
-class SwimmerModelTests(TestCase):
+
+class TestSwimmerModel(TestCase):
     def setUp(self):
         self.user = test.create_user(username='user', password='password')
 
@@ -76,7 +86,36 @@ class SwimmerModelTests(TestCase):
         self.assertEqual(base_race, timedelta(seconds=24.93))
         self.assertEqual(none_race, None)
 
-class WeekModelTests(TestCase):
+class TestEventModel(TestCase):
+    def setUp(self):
+        self.user = test.create_user(username='user', password='password')
+
+    def tearDown(self):
+        self.user.delete()
+
+    def test_set_name(self):
+        """
+        Set event name from swimmer name.
+        """
+        team = test.create_team(self.user)
+        swimmer = test.create_swimmer(team)
+        event = test.create_event(swimmer=swimmer)
+
+        event.set_name()
+        self.assertEqual(event.name, 'Henry Gridley')
+
+    def test_set_gender(self):
+        """
+        Set event gender from swimmer gender.
+        """
+        team = test.create_team(self.user)
+        swimmer = test.create_swimmer(team)
+        event = test.create_event(swimmer=swimmer)
+
+        event.set_gender()
+        self.assertEqual(event.gender, 'M')
+
+class TestWeekModel(TestCase):
     def test_populate(self):
         """
         When given the date for a Monday, the Week object will populate the dates

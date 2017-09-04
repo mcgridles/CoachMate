@@ -118,6 +118,9 @@ class EventForm(forms.ModelForm):
     def save(self):
         event = super(EventForm, self).save(commit=False)
         event.swimmer = self.swimmer # associate swimmer
+        event.set_name()
+        event.set_gender()
+        event.team = self.swimmer.team
         event.save()
         return event
 
@@ -125,18 +128,19 @@ class EventForm(forms.ModelForm):
 class RecordForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ('swimmer', 'event', 'time', 'place', 'date')
-        labels = {
-            'swimmer': 'Swimmer',
-            'event': 'Event',
-            'time': 'Time',
-            'place': 'Place',
-            'date': 'Date',
-        }
+        fields = ('swimmer', 'name', 'gender', 'event', 'time', 'date')
 
     def __init__(self, *args, **kwargs):
+        self.team = kwargs.pop('team')
         super(RecordForm, self).__init__(*args, **kwargs)
         self.fields['swimmer'].widget.attrs.update({
+            'class': 'form-control'
+        })
+        self.fields['name'].widget.attrs.update({
+            'placeholder': 'Name',
+            'class': 'form-control'
+        })
+        self.fields['gender'].widget.attrs.update({
             'class': 'form-control'
         })
         self.fields['event'].widget.attrs.update({
@@ -146,14 +150,30 @@ class RecordForm(forms.ModelForm):
             'placeholder': 'Time*',
             'class': 'form-control'
         })
-        self.fields['place'].widget.attrs.update({
-            'placeholder': 'Place',
-            'class': 'form-control'
-        })
         self.fields['date'].widget.attrs.update({
             'placeholder': 'Date*',
             'class': 'form-control'
         })
+
+    def clean(self):
+        """
+        Check for either a swimmer or a name entered.
+        """
+        cleaned_data = super(RecordForm, self).clean()
+        if not (cleaned_data['swimmer'] or (cleaned_data['name'] and cleaned_data['gender'])):
+            msg = 'Please select a swimmer or enter a name and gender.'
+            self.add_error('swimmer', msg)
+
+        return cleaned_data
+
+    def save(self):
+        record = super(RecordForm, self).save(commit=False)
+        if record.swimmer:
+            record.set_name()
+            record.set_gender()
+        record.team = self.team
+        record.save()
+        return record
 
 
 class RepForm(forms.ModelForm):

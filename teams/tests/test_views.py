@@ -139,8 +139,8 @@ class TestTeamRecordsView(TestCase):
         The fastest time in each event is shown.
         """
         swimmer = test.create_swimmer(self.team)
-        event1 = test.create_event(swimmer, '50 free', timedelta(seconds=22.32))
-        event2 = test.create_event(swimmer, '50 free', timedelta(seconds=22.96))
+        record1 = test.create_record(swimmer=swimmer, event='50 free', time=timedelta(seconds=22.32))
+        record2 = test.create_record(swimmer=swimmer, event='50 free', time=timedelta(seconds=22.96))
         self.client.login(username='user', password='password')
         response = self.client.get(reverse('teams:teamRecords', kwargs={
                 'abbr': self.team.abbr,
@@ -150,25 +150,65 @@ class TestTeamRecordsView(TestCase):
         self.assertContains(response, '00:22.32')
         self.assertNotContains(response, '00:22.96')
 
-    def test_team_records_with_times(self):
+    def test_team_records_with_multiple_times(self):
         """
         The fastest time in each event is shown for men and women.
         """
         swimmer1 = test.create_swimmer(self.team)
         swimmer2 = test.create_swimmer(self.team, first='Jane', last='Doe', gender='F')
-        event1 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.32))
-        event2 = test.create_event(swimmer1, '50 free', timedelta(seconds=22.96))
-        event3 = test.create_event(swimmer2, '50 free', timedelta(seconds=23.51))
+        record1 = test.create_record(swimmer=swimmer1, event='50 free', time=timedelta(seconds=22.32))
+        record2 = test.create_record(swimmer=swimmer1, event='50 free', time=timedelta(seconds=22.96))
+        record3 = test.create_record(swimmer=swimmer2, event='50 free', time=timedelta(seconds=23.51))
         self.client.login(username='user', password='password')
         response = self.client.get(reverse('teams:teamRecords', kwargs={
                 'abbr': self.team.abbr,
             })
         )
-        #print response
         self.assertContains(response, '--')
         self.assertContains(response, '00:22.32')
         self.assertContains(response, '00:23.51')
         self.assertNotContains(response, '00:22.96')
+
+    def test_record_form_name_input(self):
+        """
+        Records can be manually entered for current or old swimmers by entering
+        a name and gender.
+        """
+        self.client.login(username='user', password='password')
+        response = self.client.post(reverse('teams:teamRecords', kwargs={
+                'abbr': self.team.abbr,
+            }),
+            {
+                'name': 'Henry Gridley',
+                'gender': 'M',
+                'event': '50 free',
+                'time': timedelta(seconds=22.32),
+                'date': date(2017,1,1),
+                'add_record': 'Submit',
+            },
+            follow=True)
+        self.assertContains(response, 'Henry Gridley')
+        self.assertContains(response, '00:22.32')
+
+    def test_record_form_swimmer_input(self):
+        """
+        Records can be manually entered for current by choosing a swimmer.
+        """
+        swimmer = test.create_swimmer(team=self.team)
+        self.client.login(username='user', password='password')
+        response = self.client.post(reverse('teams:teamRecords', kwargs={
+                'abbr': self.team.abbr,
+            }),
+            {
+                'swimmer': swimmer.id,
+                'event': '50 free',
+                'time': timedelta(seconds=22.32),
+                'date': date(2017,1,1),
+                'add_record': 'Submit',
+            },
+            follow=True)
+        self.assertContains(response, 'Henry Gridley')
+        self.assertContains(response, '00:22.32')
 
 
 # Swimmer list
@@ -1295,6 +1335,22 @@ class TestDeleteModelsViews(TestCase):
             response.context['swimmer_list'],
             ['<Swimmer: Henry Gridley>'],
         )
+
+    def test_delete_swimmer_with_record(self):
+        """
+        Deleting a swimmer should not delete their record.
+        """
+        team = test.create_team(self.user1)
+        swimmer = test.create_swimmer(team)
+        record = test.create_record(swimmer=swimmer)
+        self.client.login(username='user1', password='password')
+        response = self.client.get(reverse('teams:deleteSwimmer', kwargs={
+                'abbr': team.abbr,
+                's_id': swimmer.id,
+            }),
+            follow=True)
+        new_record = team.get_record(('50 free', '50 Freestyle'))[1]
+        self.assertEqual(new_record, record)
 
     def test_delete_practice(self):
         """

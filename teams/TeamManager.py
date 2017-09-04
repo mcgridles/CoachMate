@@ -304,6 +304,10 @@ class TeamManager(object):
                                     place=place,
                                     date=meet_date,
                                 )
+                                result.set_name()
+                                result.set_gender()
+                                result.team = swimmer.team
+                                result.save()
 
                         except AttributeError:
                             error_flag = True

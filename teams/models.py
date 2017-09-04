@@ -25,8 +25,8 @@ class Team(models.Model):
         """
         Return best time in given event.
         """
-        times_men = Event.objects.filter(swimmer__team=self).filter(event=event[0]).filter(swimmer__gender='M')
-        times_women = Event.objects.filter(swimmer__team=self).filter(event=event[0]).filter(swimmer__gender='F')
+        times_men = Event.objects.filter(team=self).filter(event=event[0]).filter(gender='M')
+        times_women = Event.objects.filter(team=self).filter(event=event[0]).filter(gender='F')
         result_men = None
         result_women = None
         if times_men.exists():
@@ -36,12 +36,11 @@ class Team(models.Model):
 
         return (event[1], result_men, result_women)
 
+GENDER_CHOICE = (
+    ('M', 'Male'),
+    ('F', 'Female'),
+)
 class Swimmer(models.Model):
-    GENDER_CHOICE = (
-        ('M', 'Male'),
-        ('F', 'Female'),
-    )
-
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     f_name = models.CharField(max_length=25)
     l_name = models.CharField(max_length=25)
@@ -124,7 +123,10 @@ EVENT_CHOICE = (
 # Many-to-one -> many times can be created and associated with one swimmer
 # Makes it easy to sort and query for fastest time
 class Event(models.Model):
-    swimmer = models.ForeignKey(Swimmer, on_delete=models.CASCADE)
+    swimmer = models.ForeignKey(Swimmer, on_delete=models.SET_NULL, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICE, null=True, blank=True)
     event = models.CharField(max_length=10, choices=EVENT_CHOICE)
     time = models.DurationField()
     place = models.IntegerField(null=True, blank=True)
@@ -135,6 +137,22 @@ class Event(models.Model):
 
     def __str__(self):
         return self.event
+
+    def set_name(self):
+        if (not self.name) and self.swimmer:
+            self.name = self.swimmer.f_name + ' ' + self.swimmer.l_name
+            self.save()
+            return True
+        else:
+            return False
+
+    def set_gender(self):
+        if (not self.gender) and self.swimmer:
+            self.gender = self.swimmer.gender
+            self.save()
+            return True
+        else:
+            return False
 
 
 # Could add more classes to organize weeks like a calendar or could do it in views
