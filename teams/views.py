@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import logging
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView
@@ -14,6 +15,9 @@ from teams.forms import *
 import teams.functions as funct
 from teams.TeamManager import TeamManager
 from teams.graphs import graph_event
+
+logger = logging.getLogger('CoachMate.prod') # Logger for production logging if necessary
+logger_debug = logging.getLogger('CoachMate.dev') # Logger for debugging
 
 @csrf_protect
 @login_required
@@ -222,7 +226,7 @@ def writePractice(request, abbr, p_id):
                 # get set form instance
                 setInstance = set_form.save()
                 rest_flag = rep_formset.save_formset(setInstance) # set set_id for each rep
-                
+
                 if rest_flag == False:
                     i = funct.calculate_intervals(setInstance, training_model)
                     if i == False:
