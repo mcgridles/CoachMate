@@ -109,6 +109,8 @@ class TeamManager(object):
         """
         Uses the .CL2 or .HY3 file to create a roster of swimmers.
         """
+        allSwimmers = Swimmer.objects.values_list('f_name', 'l_name')
+        newRoster = []
         line_count = 0
         error_flag = False
         for line in file:
@@ -178,6 +180,17 @@ class TeamManager(object):
                         birth_date=birth_date,
                     )
                     new_swimmer.set_age()
+                newRoster.append((first_name, last_name))
+
+        toDelete = []
+        for person in allSwimmers:
+            if person not in newRoster:
+                toDelete.append(person)
+
+        for s in toDelete:
+            Swimmer.objects.filter(
+                f_name=s[0]).filter(
+                l_name=s[1]).delete()
 
         if error_flag is False:
             tmlogger.debug('Roster imported')
