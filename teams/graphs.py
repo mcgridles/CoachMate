@@ -10,16 +10,6 @@ from bokeh.models.widgets import Select
 
 from teams.models import Event, EVENT_CHOICE, Swimmer
 
-class DatetimeEncoder(json.JSONEncoder):
-    """
-    Encodes Python datetime.date objects to make compatible with JSON serialization.
-    """
-    def default(self, obj):
-        try:
-            return super(DatetimeEncoder, obj).default(obj)
-        except TypeError:
-            return str(obj)
-
 def date_time_hover_tool():
     """
     Generates the HTML for the Bokeh's hover data tool on our graph.
