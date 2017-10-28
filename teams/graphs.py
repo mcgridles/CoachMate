@@ -206,7 +206,7 @@ def graph_event(swimmer):
 
     try:
         select = Select(
-            title="Select Event:",
+            title="Event:",
             value=events[0],
             options=events
         )
