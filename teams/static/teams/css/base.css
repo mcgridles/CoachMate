@@ -158,3 +158,51 @@ body {
     background-color: transparent;
     color: black;
 }
+
+/* DataTables */
+.table-responsive {
+  border: none;
+}
+
+.paginate_button {
+  border: 0!important;
+  margin: 0!important;
+  padding: 0!important;
+}
+
+.paginate_button:hover {
+  background: none!important;
+}
+
+@media (max-width: 991px) {
+  .info-pag {
+    padding: 0;
+  }
+
+  .info-pag>div{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 100%;
+  }
+
+  .info-pag>div>ul {
+    display: block;
+    margin: auto!important;
+    width: 70%;
+    text-align: center;
+  }
+}
+
+table.dataTable thead .sorting:after {
+  content: none;
+}
+
+table.dataTable thead .sorting_asc:after {
+  content: none;
+}
+
+table.dataTable thead .sorting_desc:after {
+  content: none;
+}
