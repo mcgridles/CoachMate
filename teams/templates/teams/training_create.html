@@ -12,15 +12,15 @@
 <body>
   {% block sidebar %}
     {{ block.super }}
-
-    <ul class="nav nav-sidebar">
-      <li class="header">Training Model</li>
-      <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
-    </ul>
   {% endblock %}
 
   {% block page-title %}Training{% endblock %}
-  {% block table-title %}Create Training Model{% endblock %}
+  {% block table-title %}
+    Create Training Model
+    <a type="button" href="" data-toggle="modal" data-target="#infoModal" class="btn btn-md btn-default pull-right" style="margin-left: 5px">
+      <span class="glyphicon glyphicon-info-sign"></span>
+    </a>
+  {% endblock %}
 
   {% block modal %}
     <div id="infoModal" class="modal fade" role="dialog">
@@ -148,6 +148,13 @@
   {% endblock %}
 
   {% block scripts %}
+    <!-- Highlights sidebar links according to page -->
+    <script>
+      $(function() {
+        $('.training').addClass('active');
+      });
+    </script>
+
     <!-- Allow reps to be added or removed from set form -->
     <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
     <script>

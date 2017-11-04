@@ -15,14 +15,8 @@
       {{ block.super }}
 
       <ul class="nav nav-sidebar">
-        <li class="header">Sets</li>
-        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Set</a></li>
-        <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
-        <li><a href="{% url 'teams:practiceSchedule' team.abbr week %}">Finish</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
         <li class="header">Practice</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Set</a></li>
         <li><a href="" data-toggle="modal" data-target="#editModal">Edit Practice</a></li>
         <li><a href="{% url 'teams:deletePractice' team.abbr practice.id %}">Delete Practice</a></li>
       </ul>
@@ -34,6 +28,9 @@
 
       <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-remove-circle"></span>
+      </a>
+      <a type="button" href="" data-toggle="modal" data-target="#infoModal" class="btn btn-md btn-default pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-info-sign"></span>
       </a>
       <a type="button" href="{% url 'teams:practiceSchedule' team.abbr week %}" class="btn btn-md btn-primary pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-ok-circle"></span>
@@ -324,6 +321,13 @@
     {% endblock %}
 
     {% block scripts %}
+      <!-- Highlights sidebar links according to page -->
+      <script>
+        $(function() {
+          $('.practice').addClass('active');
+        });
+      </script>
+
       <!-- Allow reps to be added or removed from set form -->
       <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
       <script>

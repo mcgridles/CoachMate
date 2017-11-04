@@ -92,7 +92,7 @@
             <ul class="nav nav-sidebar">
               <li class="header">General</li>
               <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams</a></li>
-              <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
+              <li class="training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
             </ul>
 
             {% if team %}
@@ -100,7 +100,7 @@
                 <li class="header">{{ team.abbr }}</li>
                 <li class="team"><a href="{% url 'teams:swimmerList' team.abbr %}">Swimmers</a></li>
                 <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
-                <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
+                <li class="records"><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
               </ul>
             {% endif %}
           {% endblock %}

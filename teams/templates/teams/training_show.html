@@ -14,16 +14,91 @@
       {{ block.super }}
 
       <ul class="nav nav-sidebar">
-        <li class="header">Training Models</li>
+        <li class="header">Training Model</li>
         <li class="Training"><a href="{% url 'teams:createTraining' 0 %}">Add Model</a></li>
-        <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
       </ul>
     {% endblock %}
 
     {% block page-title %}Dashboard{% endblock %}
-    {% block table-title %}Training{% endblock %}
+    {% block table-title %}
+      Training
+      <a type="button" href="" data-toggle="modal" data-target="#infoModal" class="btn btn-md btn-default pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-info-sign"></span>
+      </a>
+    {% endblock %}
 
-    {% block modal %}{% endblock %}
+    {% block modal %}
+      <div id="infoModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Writing a Practice
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <ol>
+                <li>
+                  Click on the
+                  <button type="button" class="btn btn-primary btn-sm info">
+                    <span class="glyphicon glyphicon-plus-sign"></span> Add
+                  </button>
+                  button to begin adding a set.
+                </li><br>
+                <li>
+                  Use the
+                  <select class="form-control info">
+                    <option>------</option>
+                    <option>Warmup</option>
+                    <option>Technique</option>
+                    <option>Kick</option>
+                    <option>Sprint</option>
+                    <option>Mid Distance</option>
+                    <option>Distance</option>
+                    <option>Race</option>
+                    <option>Cooldown</option>
+                  </select>
+                  dropdown to select the focus of the set.
+                </li><br>
+                <li>
+                  Enter the number of times the set is to be repeated.<br>
+                  <strong>Note:</strong> entering '1' means the set will only be
+                  1x.
+                </li><br>
+                <li>
+                  Enter the order of the set within the practice. '1' is first,
+                  '2' is second, and so on. Only one set can be assigned to a number.
+                </li><br>
+                <li>
+                  Enter each rep within the set. Make sure to either enter the amount
+                  of rest or select whether the interval should be calculated based
+                  on a training pace or 100 pace.
+                </li><br>
+                <li>
+                  Use the 'add' and 'remove' buttons to add and remove reps as needed.
+                </li><br>
+                <li>
+                  When done, click the 'Finish' button to add the set to the practice.
+                </li><br>
+                <li>
+                  Continue adding sets as desired.
+                </li><br>
+              </ol>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    {% endblock %}
 
     {% block content %}
       <div class="panel-group" id="accordion">
@@ -70,6 +145,13 @@
     {% endblock %}
 
     {% block scripts %}
+      <!-- Highlights sidebar links according to page -->
+      <script>
+        $(function() {
+          $('.training').addClass('active');
+        });
+      </script>
+
       <!-- Fixes bug where links would collapse panels instead of follow link -->
       <script>
         $('.follow-link').click(function(e) {
