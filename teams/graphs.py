@@ -62,9 +62,12 @@ def graph_event(swimmer):
             data_source['date_'+e] = date
             data_source['time_'+e] = time
 
+    if not first_event:
+        return None, None
+
     for entry in data_source:
         for i in range(max_len - len(data_source[entry])):
-            data_source[entry].append(data_source[entry][0])
+            data_source[entry].insert(0, data_source[entry][0])
 
     # set initial graph
     data_source['x'] = data_source['x_'+first_event]
