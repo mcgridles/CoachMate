@@ -23,7 +23,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 ADMINS = [
     ('Henry Gridley', os.environ['HENRY_EMAIL']),
     ('Dave Thornton', os.environ['DAVE_EMAIL']),
