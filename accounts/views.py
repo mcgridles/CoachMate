@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
 
 from accounts.forms import SignUpForm, LogInForm
 
@@ -21,7 +22,8 @@ def login(request):
                 return redirect('teams:teamList')
             else:
                 form = LogInForm()
-                return render(request, 'accounts/login.html', {'form': form})
+                messages.error(request, "Incorrect username or password")
+                return redirect('accounts:login')
     else:
         form = LogInForm()
         return render(request, 'accounts/login.html', {'form': form})
@@ -42,6 +44,10 @@ def signup(request):
             user = auth.authenticate(username=username, password=password)
             auth.login(request, user) # log in user
             return redirect('teams:teamList')
+        else:
+            messages.error(request, 'Invalid information. Please try again.')
+            return redirect('accounds:signup')
+
     else:
         form = SignUpForm()
     return render(request, 'accounts/signup.html', {'form': form})
