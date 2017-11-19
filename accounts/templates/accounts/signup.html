@@ -34,6 +34,15 @@
 
   <body>
       <div class="container">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-danger" style="text-align: center">
+                <a href="" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>{{ message.tags|title }}!</strong> {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+        
         <div id="form">
           <form method="post" class="form-signin">
             {% csrf_token %}

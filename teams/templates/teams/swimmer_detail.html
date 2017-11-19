@@ -16,14 +16,10 @@
       {{ block.super }}
 
       <ul class="nav nav-sidebar">
-        <li class="header">Events</li>
-        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Event</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
         <li class="header">Swimmer</li>
         <li><a href="" data-toggle="modal" data-target="#editModal">Edit Swimmer</a></li>
-        <li><a href="{% url 'teams:deleteSwimmer' team.abbr swimmer.id %}">Delete Swimmer</a></li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Event</a></li>
+        <li><a href="" data-toggle="modal" data-target="#deleteModal">Delete Swimmer</a></li>
       </ul>
     {% endblock %}
 
@@ -116,6 +112,31 @@
           </div>
         </div>
       </div>
+
+      <!-- Swimmer delete confirmation -->
+      <div id="deleteModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Confirm Delete
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              Are you sure you want to delete swimmer: {{ swimmer.f_name|title }} {{ swimmer.l_name|title }}?
+            </div>
+
+            <div class="modal-footer">
+              <a type="button" class="btn btn-danger" href="{% url 'teams:deleteSwimmer' team.abbr swimmer.id %}">Delete</a>
+              <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
     {% endblock %}
 
     {% block content %}
@@ -199,6 +220,13 @@
     {% block scripts %}
       <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
       <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
+
+      <!-- Highlights sidebar links according to page -->
+      <script>
+        $(function() {
+          $('.team').addClass('active');
+        });
+      </script>
 
       {{ script|safe }}
     {% endblock %}

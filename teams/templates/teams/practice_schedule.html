@@ -148,6 +148,7 @@
                     </div>
 
                   {% endfor %}
+                  <br>
 
                   <!-- Delete practice -->
                   <a href="{% url 'teams:deletePractice' team.abbr practice.0.id %}" type="button" class="btn btn-danger btn-md pull-right follow-link" style="margin-left: 5px">
@@ -176,12 +177,7 @@
       <!-- Highlights sidebar links according to page -->
       <script>
         $(function() {
-          var loc = window.location.pathname;
-          if(/practice/.test(loc)) {
-            $('.practice').addClass('active');
-          } else {
-            $('.dashboard').addClass('active');
-          }
+          $('.practice').addClass('active');
         });
       </script>
 

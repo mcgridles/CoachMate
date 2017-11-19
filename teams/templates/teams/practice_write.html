@@ -15,16 +15,9 @@
       {{ block.super }}
 
       <ul class="nav nav-sidebar">
-        <li class="header">Sets</li>
-        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Set</a></li>
-        <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
-        <li><a href="{% url 'teams:practiceSchedule' team.abbr week %}">Finish</a></li>
-      </ul>
-
-      <ul class="nav nav-sidebar">
         <li class="header">Practice</li>
+        <li><a href="" data-toggle="modal" data-target="#baseModal">Add Set</a></li>
         <li><a href="" data-toggle="modal" data-target="#editModal">Edit Practice</a></li>
-        <li><a href="{% url 'teams:deletePractice' team.abbr practice.id %}">Delete Practice</a></li>
       </ul>
     {% endblock %}
 
@@ -32,8 +25,11 @@
     {% block table-title %}
       {{ practice.weekday|title }} Practice
 
-      <a href="{% url 'teams:deletePractice' team.abbr practice.id %}" type="button" class="btn btn-danger pull-right" style="margin-left: 5px">
+      <a href="" data-toggle="modal" data-target="#deleteModal" type="button" class="btn btn-danger pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-remove-circle"></span>
+      </a>
+      <a type="button" href="" data-toggle="modal" data-target="#infoModal" class="btn btn-md btn-default pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-info-sign"></span>
       </a>
       <a type="button" href="{% url 'teams:practiceSchedule' team.abbr week %}" class="btn btn-md btn-primary pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-ok-circle"></span>
@@ -232,7 +228,7 @@
                   dropdown to select the focus of the set.
                 </li><br>
                 <li>
-                  Enter the number of times the set is to be repeated.<br>
+                  Enter the number of times the set is to be repeated.<br><br>
                   <strong>Note:</strong> entering '1' means the set will only be
                   1x.
                 </li><br>
@@ -263,6 +259,31 @@
 
           </div>
 
+        </div>
+      </div>
+
+      <!-- Practice delete confirmation -->
+      <div id="deleteModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Confirm Delete
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              Are you sure you want to delete the practice?
+            </div>
+
+            <div class="modal-footer">
+              <a type="button" class="btn btn-danger" href="{% url 'teams:deletePractice' team.abbr practice.id %}">Delete</a>
+              <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     {% endblock %}
@@ -324,6 +345,13 @@
     {% endblock %}
 
     {% block scripts %}
+      <!-- Highlights sidebar links according to page -->
+      <script>
+        $(function() {
+          $('.practice').addClass('active');
+        });
+      </script>
+
       <!-- Allow reps to be added or removed from set form -->
       <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
       <script>
