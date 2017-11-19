@@ -55,6 +55,7 @@ def settings(request):
     if request.method == 'POST':
         form = SettingsForm(request.POST)
         if form.is_valid():
+            #requires old password + new password and confirmation to change
             old_passwd = form.cleaned_data['old_passwd']
             new_passwd1 = form.cleaned_data['new_passwd1']
             new_passwd2 = form.cleaned_data['new_passwd2']
@@ -64,7 +65,7 @@ def settings(request):
                 if new_passwd1 == new_passwd2:
                     user.set_password(new_passwd1)
                     user.save()
-                    auth.login(request, user) # log in user
+                    auth.login(request, user) # log in user for redirect
                     messages.success(request, 'Password changed')
                 else:
                     messages.error(request, 'Passwords do not match')
