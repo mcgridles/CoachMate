@@ -34,7 +34,17 @@
 
   <body>
       <div class="container">
+
         <form action="{% url 'accounts:login' %}" method="post" class="form-signin">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-danger" style="text-align: center">
+                <a href="" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>{{ message.tags|title }}!</strong> {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
           {% csrf_token %}
           <!-- Log in form -->
           <h2 class="form-signin-heading">Please log in</h2>

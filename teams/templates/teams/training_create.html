@@ -12,15 +12,15 @@
 <body>
   {% block sidebar %}
     {{ block.super }}
-
-    <ul class="nav nav-sidebar">
-      <li class="header">Training Model</li>
-      <li><a href="" data-toggle="modal" data-target="#infoModal">Info</a></li>
-    </ul>
   {% endblock %}
 
   {% block page-title %}Training{% endblock %}
-  {% block table-title %}Create Training Model{% endblock %}
+  {% block table-title %}
+    Create Training Model
+    <a type="button" href="" data-toggle="modal" data-target="#infoModal" class="btn btn-md btn-default pull-right" style="margin-left: 5px">
+      <span class="glyphicon glyphicon-info-sign"></span>
+    </a>
+  {% endblock %}
 
   {% block modal %}
     <div id="infoModal" class="modal fade" role="dialog">
@@ -38,11 +38,7 @@
           <div class="modal-body">
             <ol>
               <li>
-                Click on the
-                <button type="button" class="btn btn-primary btn-sm info">
-                  <span class="glyphicon glyphicon-plus-sign"></span> Add
-                </button>
-                button to begin adding a set.
+                Select a team
               </li><br>
               <li>
                 Use the
@@ -57,30 +53,19 @@
                   <option>Race</option>
                   <option>Cooldown</option>
                 </select>
-                dropdown to select the focus of the set.
+                dropdown to select the focus.
               </li><br>
               <li>
-                Enter the number of times the set is to be repeated.<br>
-                <strong>Note:</strong> entering '1' means the set will only be
-                1x.
+                Enter a percentage. This is the percentage of the base pace that is
+                added or subtracted from the base pace.<br><br>
+
+                <strong>Note:</strong> If 0.07 or 7% is entered, 7% will be added
+                to the base time to calculate intervals. If -0.07 or -7% is entered,
+                7% will be subtracted.
               </li><br>
               <li>
-                Enter the order of the set within the practice. '1' is first,
-                '2' is second, and so on. Only one set can be assigned to a number.
-              </li><br>
-              <li>
-                Enter each rep within the set. Make sure to either enter the amount
-                of rest or select whether the interval should be calculated based
-                on a training pace or 100 pace.
-              </li><br>
-              <li>
-                Use the 'add' and 'remove' buttons to add and remove reps as needed.
-              </li><br>
-              <li>
-                When done, click the 'Finish' button to add the set to the practice.
-              </li><br>
-              <li>
-                Continue adding sets as desired.
+                Click "Add" to modify more than one focus. There can only be one
+                per focus.
               </li><br>
             </ol>
 
@@ -91,6 +76,31 @@
 
         </div>
 
+      </div>
+    </div>
+
+    <!-- Training model edit cancel confirmation -->
+    <div id="cancelModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">
+              Cancel
+            </h4>
+          </div>
+
+          <div class="modal-body">
+            Are you sure you want to cancel? Any changes will be lost.
+          </div>
+
+          <div class="modal-footer">
+            <a type="button" class="btn btn-danger" href="{% url 'teams:showTraining' %}">Continue</a>
+            <button class="btn btn-default" data-dismiss="modal">Go back</button>
+          </div>
+        </div>
       </div>
     </div>
   {% endblock %}
@@ -138,7 +148,7 @@
         </table>
       </div>
 
-      <a href="{% url 'teams:showTraining' %}" type="button" class="btn btn-danger pull-right" style="margin-left: 5px">
+      <a href="" data-toggle="modal" data-target="#cancelModal" type="button" class="btn btn-danger pull-right" style="margin-left: 5px">
         <span class="glyphicon glyphicon-remove-circle"></span>
       </a>
       <button type="submit" class="btn btn-md btn-primary pull-right" style="margin-left: 5px">
@@ -148,6 +158,13 @@
   {% endblock %}
 
   {% block scripts %}
+    <!-- Highlights sidebar links according to page -->
+    <script>
+      $(function() {
+        $('.training').addClass('active');
+      });
+    </script>
+
     <!-- Allow reps to be added or removed from set form -->
     <script type="text/javascript" src="{% static 'django-dynamic-formset/src/jquery.formset.js' %}"></script>
     <script>

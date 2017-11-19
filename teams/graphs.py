@@ -50,7 +50,7 @@ def graph_event(swimmer):
                 x.append(d)
                 y.append(t)
                 date.append(d.strftime('%m/%d/%y')) # date to string for hover
-                time.append('{:d}:{:.2f}'.format(int(t)/60, t)) # time to string for hover
+                time.append('{:d}:{:.2f}'.format(int(t)/60, t%60)) # time to string for hover
 
                 result_len += 1
 
@@ -223,7 +223,7 @@ def graph_event(swimmer):
     # format datetime.timedelta objects to MM:ss.mm
     plot.yaxis.formatter = FuncTickFormatter(code=
         """
-        return Math.floor(tick/60) + ":" + tick.toFixed(2)
+        return Math.floor(tick/60) + ":" + (tick%60).toFixed(2)
         """
     )
     plot.line('x', 'y', source=source)
