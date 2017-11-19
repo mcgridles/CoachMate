@@ -100,8 +100,7 @@
       <!-- Display prompts if no teams -->
         <div id="first-featurette" class="row featurette empty-team">
           <h2 class="featurette-heading empty-dialogue">
-            No teams yet.<br>
-            Add a team to get started.
+            No teams yet
           </h2>
         </div>
       {% endif %}
@@ -111,12 +110,7 @@
       <!-- Highlights sidebar links according to page -->
       <script>
         $(function() {
-          var loc = window.location.pathname;
-          if(/report/.test(loc)) {
-            $('.report').addClass('active');
-          } else {
-            $('.dashboard').addClass('active');
-          }
+          $('.dashboard').addClass('active');
         });
       </script>
 

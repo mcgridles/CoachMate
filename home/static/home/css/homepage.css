@@ -47,10 +47,16 @@
 /* Jumbotron display */
 .jumbotron {
   background-color: #333;
+  background-image: url("../img/chuttersnap-210450.jpg");
 }
 
 .jumbotron .container {
-  color: white;
+  color: black;
+  text-align: center;
+}
+
+.jumbotron .container h1 {
+  color: black;
   text-align: center;
 }
 

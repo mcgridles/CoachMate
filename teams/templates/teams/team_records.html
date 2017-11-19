@@ -116,5 +116,15 @@
         </table>
       </div>
     {% endblock %}
+
+    {% block scripts %}
+      <!-- Highlights sidebar links according to page -->
+      <script>
+        $(function() {
+          $('.records').addClass('active');
+        });
+      </script>
+    {% endblock %}
+    
   </body>
 </html>
