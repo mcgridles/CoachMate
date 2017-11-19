@@ -4,7 +4,7 @@ from unittest import skip, skipIf, skipUnless
 from django.test import TestCase
 from django.urls import reverse
 
-from accounts.forms import LogInForm, SignUpForm
+from accounts.forms import LogInForm, SignUpForm, SettingsForm
 
 class TestLogInForm(TestCase):
     def test_log_in_form_valid_data(self):
@@ -77,4 +77,32 @@ class TestSignUpForm(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
             'email': ['Enter a valid email address.'],
+        })
+
+
+class TestSettingsForm(TestCase):
+    def test_settings_form_valid_data(self):
+        """
+        Original password, a new password, and a matching password confirmation
+        confirmation are required for validation.
+        """
+        form = SettingsForm({
+            'old_passwd': 'test12345',
+            'new_passwd1': 'XAGEasdh!ad',
+            'new_passwd2': 'XAGEasdh!ad',
+        })
+        self.assertTrue(form.is_valid())
+
+    def test_settings_form_invalid_data(self):
+        """
+        Original password, a new password, and a matching password confirmation
+        confirmation are required for validation.
+        """
+        form = SettingsForm({
+            'old_passwd': 'test12345',
+            'new_passwd1': 'XAGEasdh!ad',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {
+            'new_passwd2': ['This field is required.'],
         })

@@ -44,13 +44,13 @@
         {% endif %}
         
         <div id="form">
-          <form method="post" class="form-signin">
+          <form action="{% url 'accounts:signup' %}" method="post" class="form-signin">
             {% csrf_token %}
             <!-- Sign up form -->
             <h2 class="form-signin-heading">Sign Up</h2>
             {% for field in form %}
               {{ field }}
-              {% for erro in field.errors %}
+              {% for error in field.errors %}
                 <p style="color: red">{{ error }}</p>
               {% endfor %}
             {% endfor %}

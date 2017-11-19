@@ -328,7 +328,7 @@ class TestSwimmerListView(TestCase):
             follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Gridley')
-        self.assertEqual(response.context['swimmer_list'].get(l_name='Gridley').age, 20)
+        self.assertEqual(response.context['swimmer_list'].get(l_name='Gridley').age, 21)
 
     def test_swimmer_form_errors(self):
         """

@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>{% block title %}{% endblock %}</title>
+    <title>Settings</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
@@ -19,16 +19,11 @@
     <link href="{% static 'bootstrap/css/ie10-viewport-bug-workaround.css' %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.css"/>
-    <link rel="stylesheet" href="{% static 'teams/css/base.css' %}">
-    {% block stylesheets %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'accounts/css/settings.css' %}">
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <script src="{% static 'bootstrap/js/ie-emulation-modes-warning.js' %}"></script>
-
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -58,7 +53,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile<span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li class="dropdown-header">{{ user.first_name }} {{ user.last_name }}</li>
-                <li><a href="{% url 'accounts:settings' %}">Account</a></li>
+                <li><a href="#">Account</a></li>
                 <li><a href="#">Settings</a></li>
                 <li><a href="#">Help</a></li>
                 <li role="separator" class="divider"></li>
@@ -94,7 +89,7 @@
             <ul class="nav nav-sidebar">
               <li class="header">General</li>
               <li class="dashboard"><a href="{% url 'teams:teamList' %}">Teams</a></li>
-              <li class="training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
+              <li class="Training"><a href="{% url 'teams:showTraining' %}">Training</a></li>
             </ul>
 
             {% if team %}
@@ -102,7 +97,7 @@
                 <li class="header">{{ team.abbr }}</li>
                 <li class="team"><a href="{% url 'teams:swimmerList' team.abbr %}">Swimmers</a></li>
                 <li class="practice"><a href="{% url 'teams:practiceSchedule' team.abbr 0 %}">Practice</a></li>
-                <li class="records"><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
+                <li><a href="{% url 'teams:teamRecords' team.abbr %}">Records</a></li>
               </ul>
             {% endif %}
           {% endblock %}
@@ -110,15 +105,42 @@
 
         <!-- Main block -->
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">{% block page-title %}Placeholder{% endblock %}</h1>
+          <h1 class="page-header">
+            {% block page-title %}
+              {{ user.first_name }} {{ user.last_name }}
+            {% endblock %}
+          </h1>
 
-          <h2 class="sub-header">{% block table-title %}Placeholder{% endblock %}</h2>
+          <h2>{% block table-title %}Change Password{% endblock %}</h2>
 
-          <!-- Modal -->
-          {% block modal %}{% endblock %}
+          <!-- Messages -->
+          {% if messages %}
+            <br>
+            {% for message in messages %}
+              <div {% if message.tags == "error" %} class="alert alert-danger"
+              {% else %} class="alert alert-{{ message.tags }}" {% endif %} style="text-align: center">
+                    <a href="" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>{{ message.tags|title }}!</strong> {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
 
-          <!-- Table/content -->
-          {% block content %}{% endblock %}
+          <!-- Form -->
+            <div id="form">
+              <form action="{% url 'accounts:settings' %}" method="post" class="form-signin">
+                {% csrf_token %}
+                <!-- Password change form -->
+                {% for field in form %}
+                  {{ field }}
+                  {% for error in field.errors %}
+                    <p style="color: red">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}
+                <br>
+                <button class="btn btn-lg btn-primary pull-right" type="submit">Save</button>
+              </form>
+            </div>
+
         </div>
       </div>
     </div>
@@ -131,21 +153,11 @@
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 
-    <!-- DataTables core JavaScript -->
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.js"></script>
     <!--
     <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.bootstrap.js"></script>
-  -->
+    -->
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{% static 'bootstrap/js/ie10-viewport-bug-workaround.js' %}"></script>
 
-    <!-- Additional scripts -->
-    <!-- Enable popovers -->
-    <script>
-      $(document).ready(function() {
-        $('[data-toggle="popover"]').popover();
-      });
-    </script>
-    {% block scripts %}{% endblock %}
   </body>
 </html>
