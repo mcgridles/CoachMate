@@ -213,7 +213,7 @@ class TeamManager(object):
 
         # look for .HY3 file
         for file in os.listdir(self.zip_extract_dir):
-            if file.endswith('.HY3'):
+            if file.endswith('.HY3') or file.endswith('.hy3'):
                 file_flag = True
                 file = os.path.join(self.zip_extract_dir, file)
                 with open(os.path.abspath(file), 'r') as f_hy3:
@@ -290,7 +290,7 @@ class TeamManager(object):
                         event = distance + ' ' + event
                         nextline = file.next()
 
-                        time_capture = "([ABCDE][\d][MF][\s]+)(?P<time>[\d]+[.][\d]+)(Y[RQ]?[\s]+)(?P<place>[\dX]+)"
+                        time_capture = "([ABCDE][\d][MFT][\s]+)(?P<time>[\d]+[.][\d]+)([Y ][RQ]?[\s]+)(?P<place>[\dX]+)"
                         time_place = re.search(time_capture, nextline)
                         try:
                             time = float(time_place.group('time'))
