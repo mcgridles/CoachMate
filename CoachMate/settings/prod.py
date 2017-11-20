@@ -8,7 +8,9 @@ DEBUG=True
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-ALLOWED_HOSTS += 'coachmate.herokuapp.com'
+ALLOWED_HOSTS = [
+    'coachmate.herokuapp.com'
+]
 
 DATABASES = {
     'default': dj_database_url.config()
