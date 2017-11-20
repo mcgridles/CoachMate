@@ -17,7 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.conf.urls.static import static
 
-import settings
+from .settings import base, dev, prod
 from home.views import home
 
 urlpatterns = [
@@ -27,6 +27,6 @@ urlpatterns = [
     url(r'^teams/', include('teams.urls')),
 ]
 
-if settings.dev.DEBUG:
-    urlpatterns += static(settings.dev.STATIC_URL, document_root=settings.dev.STATIC_ROOT)
-    urlpatterns += static(settings.dev.MEDIA_URL, document_root=settings.dev.MEDIA_ROOT)
+if base.DEBUG:
+    urlpatterns += static(dev.STATIC_URL, document_root=dev.STATIC_ROOT)
+    urlpatterns += static(dev.MEDIA_URL, document_root=dev.MEDIA_ROOT)

@@ -13,7 +13,7 @@
     <title>Sign Up</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link href="{% static 'bootstrap/css/ie10-viewport-bug-workaround.css' %}" rel="stylesheet">
@@ -42,7 +42,7 @@
             </div>
           {% endfor %}
         {% endif %}
-        
+
         <div id="form">
           <form action="{% url 'accounts:signup' %}" method="post" class="form-signin">
             {% csrf_token %}

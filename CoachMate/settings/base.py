@@ -8,7 +8,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-from local import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -22,7 +21,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 ADMINS = [
     ('Henry Gridley', os.environ['HENRY_EMAIL']),
@@ -39,6 +37,8 @@ PREREQ_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
+    'corsheaders',
 ]
 
 PROJECT_APPS = [
@@ -50,6 +50,7 @@ PROJECT_APPS = [
 INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -124,7 +125,7 @@ EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 DEFAULT_FROM_EMAIL = os.environ['EMAIL_HOST_USER']
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-
+"""
 # /CoachMate/log/django/ & /CoachMate/log/tm/ directories needed
 LOGGING = {
     'version': 1,
@@ -219,7 +220,7 @@ LOGGING = {
         },
     }
 }
-
+"""
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/

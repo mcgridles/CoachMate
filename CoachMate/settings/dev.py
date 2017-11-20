@@ -1,16 +1,18 @@
 # Development Settings
 
-from base import *
+from .base import *
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+SECRET_KEY = os.environ['SECRET_KEY']
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': DATABASE_INFO['NAME'],
-        'USER': DATABASE_INFO['USER'],
-        'PASSWORD': DATABASE_INFO['PASSWORD'],
+        'NAME': os.environ['LOCAL_DATABASE_NAME'],
+        'USER': os.environ['LOCAL_DATABASE_USER'],
+        'PASSWORD': os.environ['LOCAL_DATABASE_PASSWORD'],
         'HOST': 'localhost',
         'PORT': '5432',
     }
