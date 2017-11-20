@@ -43,7 +43,7 @@ def teamList(request):
         'team_list': team_list,
     }
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/team_list.html', context)
     else:
         return render(request, 'teams/team_list.min.html', context)
@@ -78,7 +78,7 @@ def teamRecords(request, abbr):
         'record_form': record_form,
     }
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/team_records.html', context)
     else:
         return render(request, 'teams/team_records.min.html', context)
@@ -152,7 +152,7 @@ def swimmerList(request, abbr):
         'upload_form': upload_form,
     }
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/swimmer_list.html', context)
     else:
         return render(request, 'teams/swimmer_list.min.html', context)
@@ -204,7 +204,7 @@ def swimmerDetail(request, abbr, s_id):
         'records': records,
     }
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/swimmer_detail.html', context)
     else:
         return render(request, 'teams/swimmer_detail.min.html', context)
@@ -277,7 +277,7 @@ def writePractice(request, abbr, p_id):
         'practice_form': practice_form,
     }
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/practice_write.html', context)
     else:
         return render(request, 'teams/practice_write.min.html', context)
@@ -334,7 +334,7 @@ def practiceSchedule(request, abbr, w_id):
     }
     context.update(weeks) # include 'weeks' dict in context
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/practice_schedule.html', context)
     else:
         return render(request, 'teams/practice_schedule.min.html', context)
@@ -368,7 +368,7 @@ def createTraining(request, t_id):
         'multiplier_formset': multiplier_formset,
     }
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/training_create.html', context)
     else:
         return render(request, 'teams/training_create.min.html', context)
@@ -400,7 +400,7 @@ def showTraining(request):
         'teams': teams,
     }
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'teams/training_show.html', context)
     else:
         return render(request, 'teams/training_show.min.html', context)
