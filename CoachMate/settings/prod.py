@@ -1,7 +1,7 @@
 # Production Settings
 import os
 
-from base import *
+from settings.base import *
 import dj_database_url
 
 DEBUG=True
