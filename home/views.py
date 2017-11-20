@@ -9,4 +9,7 @@ def home(request):
     if request.user.is_authenticated():
         return redirect('teams:teamList')
     else:
-        return render(request, 'home/homepage.html', {})
+        if DEBUG:
+            return render(request, 'home/homepage.html', {})
+        else:
+            return render(request, 'home/homepage.min.html', {})

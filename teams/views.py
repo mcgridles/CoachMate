@@ -15,6 +15,7 @@ from teams.forms import *
 import teams.functions as funct
 from teams.TeamManager import TeamManager
 from teams.graphs import graph_event
+from CoachMate.settings.base import DEBUG
 
 logger = logging.getLogger('CoachMate.prod') # Logger for production logging if necessary
 logger_debug = logging.getLogger('CoachMate.dev') # Logger for debugging
@@ -41,7 +42,11 @@ def teamList(request):
         'team_form': team_form,
         'team_list': team_list,
     }
-    return render(request, 'teams/team_list.html', context)
+
+    if DEBUG:
+        return render(request, 'teams/team_list.html', context)
+    else:
+        return render(request, 'teams/team_list.min.html', context)
 
 
 # Delete a team
@@ -73,7 +78,10 @@ def teamRecords(request, abbr):
         'record_form': record_form,
     }
 
-    return render(request, 'teams/team_records.html', context)
+    if DEBUG:
+        return render(request, 'teams/team_records.html', context)
+    else:
+        return render(request, 'teams/team_records.min.html', context)
 
 
 @csrf_protect
@@ -143,7 +151,11 @@ def swimmerList(request, abbr):
         'swimmer_form': swimmer_form,
         'upload_form': upload_form,
     }
-    return render(request, 'teams/swimmer_list.html', context)
+
+    if DEBUG:
+        return render(request, 'teams/swimmer_list.html', context)
+    else:
+        return render(request, 'teams/swimmer_list.min.html', context)
 
 
 # Individual swimmer pages
@@ -192,7 +204,10 @@ def swimmerDetail(request, abbr, s_id):
         'records': records,
     }
 
-    return render(request, 'teams/swimmer_detail.html', context)
+    if DEBUG:
+        return render(request, 'teams/swimmer_detail.html', context)
+    else:
+        return render(request, 'teams/swimmer_detail.min.html', context)
 
 
 # Delete a swimmer
@@ -261,7 +276,12 @@ def writePractice(request, abbr, p_id):
         'rep_formset': rep_formset,
         'practice_form': practice_form,
     }
-    return render(request, 'teams/practice_write.html', context)
+
+    if DEBUG:
+        return render(request, 'teams/practice_write.html', context)
+    else:
+        return render(request, 'teams/practice_write.min.html', context)
+
 
 
 # Delete a set
@@ -314,7 +334,10 @@ def practiceSchedule(request, abbr, w_id):
     }
     context.update(weeks) # include 'weeks' dict in context
 
-    return render(request, 'teams/practice_schedule.html', context)
+    if DEBUG:
+        return render(request, 'teams/practice_schedule.html', context)
+    else:
+        return render(request, 'teams/practice_schedule.min.html', context)
 
 
 @csrf_protect
@@ -345,7 +368,10 @@ def createTraining(request, t_id):
         'multiplier_formset': multiplier_formset,
     }
 
-    return render(request, 'teams/training_create.html', context)
+    if DEBUG:
+        return render(request, 'teams/training_create.html', context)
+    else:
+        return render(request, 'teams/training_create.min.html', context)
 
 
 @login_required
@@ -373,4 +399,8 @@ def showTraining(request):
     context = {
         'teams': teams,
     }
-    return render(request, 'teams/training_show.html', context)
+
+    if DEBUG:
+        return render(request, 'teams/training_show.html', context)
+    else:
+        return render(request, 'teams/training_show.min.html', context)
