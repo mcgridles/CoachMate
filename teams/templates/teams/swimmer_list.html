@@ -25,7 +25,13 @@
 
     <!-- This needs to be <Team Name> Dashboard -->
     {% block page-title %}{{ team.name }}{% endblock %}
-    {% block table-title %}Swimmers{% endblock %}
+    {% block table-title %}
+      Swimmers
+
+      <a type="button" href="" data-toggle="modal" data-target="#infoModal" class="btn btn-md btn-default pull-right" style="margin-left: 5px">
+        <span class="glyphicon glyphicon-info-sign"></span>
+      </a>
+    {% endblock %}
 
     {% block modal %}
       <div id="baseModal" class="modal fade" role="dialog">
@@ -181,6 +187,61 @@
               <button class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Modal containing workflow information -->
+      <div id="infoModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">
+                Using CoachMate
+              </h4>
+            </div>
+
+            <div class="modal-body">
+              <ul>
+                <li>
+                  Go to <strong>Teams</strong> to access your teams.
+                </li><br>
+                <li>
+                  In <strong>Training</strong> view, you can set up and view a training model for
+                  interval calculations.
+                </li><br>
+                <li>
+                  The <strong>Swimmers</strong> view shows all swimmers from the current team listed.
+                </li><br>
+                <li>
+                  In <strong>Practice</strong> view, you can to create and store practices.
+                </li><br>
+                <li>
+                  The <strong>Records</strong> view shows overall team records for each event.
+                  In this view, you can add old records if needed.
+                </li><br>
+                <li>
+                  Use the <strong>Add Swimmer</strong> function to beginning adding swimmers to your team.
+                </li><br>
+                <li>
+                  <strong>Upload</strong> HYTEK .zip files to import team rosters
+                  or meet results.
+                </li><br>
+                <li>
+                  <strong>Edit</strong> the name, abbreviation, or region of the current team if needed,
+                  or use <strong>Delete</strong> to remove the team and all swimmers, records, and meet results.
+                </li><br>
+              </ul>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </div>
     {% endblock %}
