@@ -27,6 +27,6 @@ urlpatterns = [
     url(r'^teams/', include('teams.urls')),
 ]
 
-if base.DEBUG:
-    urlpatterns += static(dev.STATIC_URL, document_root=dev.STATIC_ROOT)
-    urlpatterns += static(dev.MEDIA_URL, document_root=dev.MEDIA_ROOT)
+#if base.DEBUG:
+#    urlpatterns += static(dev.STATIC_URL, document_root=dev.STATIC_ROOT)
+#    urlpatterns += static(dev.MEDIA_URL, document_root=dev.MEDIA_ROOT)
