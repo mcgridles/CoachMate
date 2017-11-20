@@ -315,7 +315,7 @@ def practiceSchedule(request, abbr, w_id):
     context.update(weeks) # include 'weeks' dict in context
 
     response = render(request, 'teams/practice_schedule.html', context)
-    reponse['Access-Control-Allow-Origin'] = '*'
+    response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
