@@ -53,7 +53,7 @@ def signup(request):
             return redirect('teams:teamList')
         else:
             messages.error(request, 'Invalid information. Please try again.')
-            return redirect('accounds:signup')
+            return redirect('accounts:signup')
 
     else:
         form = SignUpForm()
