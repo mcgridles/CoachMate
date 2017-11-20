@@ -30,7 +30,7 @@ def login(request):
     else:
         form = LogInForm()
 
-        if DEBUG:
+        if DEBUG == True:
             return render(request, 'accounts/login.html', {'form': form})
         else:
             return render(request, 'accounts/login.min.html', {'form': form})
@@ -58,7 +58,7 @@ def signup(request):
     else:
         form = SignUpForm()
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'accounts/signup.html', {'form': form})
     else:
         return render(request, 'accounts/signup.min.html', {'form': form})
@@ -93,7 +93,7 @@ def settings(request):
     else:
         form = SettingsForm()
 
-    if DEBUG:
+    if DEBUG == True:
         return render(request, 'accounts/settings.html', {'form': form, 'user': request.user})
     else:
         return render(request, 'accounts/settings.min.html', {'form': form, 'user': request.user})
