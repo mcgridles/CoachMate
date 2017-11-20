@@ -150,7 +150,13 @@ def get_practices_and_dates(team, weeks):
             sets = []
             swimmers = []
             practice = Practice.objects.filter(team=team).filter(
+                week_id=weeks['current']).filter(weekday=day)
+            if len(practice) > 1:
+                for p in practice.order_by('id')[1:]:
+                    p.delete()
+            practice = Practice.objects.filter(team=team).filter(
                 week_id=weeks['current']).get(weekday=day)
+
             for s in practice.set_set.all():
                 sets.append(s) # Set object
                 # list of (Swimmer, (Rep, Interval)) tuples
