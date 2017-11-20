@@ -156,22 +156,22 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
-        'development_logfile': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR + '/log/django/django_dev.log',
-            'formatter': 'verbose'
-        },
-        'production_logfile': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR + '/log/django/django_prod.log',
-            'maxBytes' : 1024*1024*100, # 100MB
-            'backupCount' : 5,
-            'formatter': 'simple'
-        },
+        #'development_logfile': {
+        #    'level': 'DEBUG',
+        #    'filters': ['require_debug_true'],
+        #    'class': 'logging.FileHandler',
+        #    'filename': BASE_DIR + '/log/django/django_dev.log',
+        #    'formatter': 'verbose'
+        #},
+        #'production_logfile': {
+        #    'level': 'ERROR',
+        #    'filters': ['require_debug_false'],
+        #    'class': 'logging.handlers.RotatingFileHandler',
+        #    'filename': BASE_DIR + '/log/django/django_prod.log',
+        #    'maxBytes' : 1024*1024*100, # 100MB
+        #    'backupCount' : 5,
+        #    'formatter': 'simple'
+        #},
         'tm_logfile_debug': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
@@ -198,13 +198,13 @@ LOGGING = {
     },
     'loggers': {
         # Custom production logger
-        'CoachMate.prod': {
-            'handlers': ['production_logfile'],
-         },
+        #'CoachMate.prod': {
+        #    'handlers': ['production_logfile'],
+        # },
         # Development logger
-        'CoachMate.dev': {
-            'handlers': ['development_logfile'],
-         },
+        #'CoachMate.dev': {
+        #    'handlers': ['development_logfile'],
+        # },
         # TeamManager logger
         'CoachMate.tm': {
             'handlers': ['tm_logfile_error', 'tm_logfile_debug', 'mail_admins'],
