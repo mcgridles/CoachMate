@@ -6,6 +6,7 @@ from .base import *
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+SECRET_KEY = os.environ['SECRET_KEY']
 
 DATABASES = {
     'default': {
