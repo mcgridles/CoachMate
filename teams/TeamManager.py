@@ -131,7 +131,7 @@ class TeamManager(object):
                 # capture groups: <---><LAST>, <FIRST><---><MONTH><DAY><YEAR><---><GENDER>
                 if ext == '.cl2':
                     name_capture = "(?P<last>[a-zA-Z]+[-' ]?[a-zA-Z]*), (?P<first>[a-zA-Z]+)"
-                    gender_capture = '([\d]{8}[\d]+)(?P<gender>[MF])'
+                    gender_capture = '[^a-z^A-Z](?P<gender>[MF])[^a-z^A-Z]'
                 elif ext == '.hy3':
                     name_capture = "(?P<last>[a-zA-Z]+([-\' ]?[a-zA-Z]+))(\s+)(?P<first>[a-zA-Z]+)"
                     gender_capture = '([A-Z]+[\d]+)(?P<gender>[MF])'
