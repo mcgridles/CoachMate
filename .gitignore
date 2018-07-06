@@ -46,6 +46,8 @@ Thumbs.db
 /CoachMate/settings/local.py
 .coverage
 /htmlcov/
+log/
+tmp/
 env_variables
 
 # IntelliJ Files #
