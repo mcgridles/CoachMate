@@ -30,6 +30,6 @@ six==1.10.0
 static3==0.7.0
 tornado==4.5.1
 urllib3==1.22
-waitress==1.4.1
+waitress==1.4.2
 WebOb==1.7.3
 WebTest==2.0.27
