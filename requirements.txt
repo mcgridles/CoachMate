@@ -29,7 +29,7 @@ singledispatch==3.4.0.3
 six==1.10.0
 static3==0.7.0
 tornado==4.5.1
-urllib3==1.22
+urllib3==1.26.5
 waitress==1.4.1
 WebOb==1.7.3
 WebTest==2.0.27
