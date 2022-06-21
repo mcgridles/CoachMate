@@ -17,7 +17,7 @@ gunicorn==19.7.1
 idna==2.5
 Jinja2==2.9.6
 MarkupSafe==1.0
-numpy==1.13.1
+numpy==1.22.0
 olefile==0.44
 Pillow==6.2.0
 psycopg2==2.7.1
